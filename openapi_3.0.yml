@@ -4,28 +4,68 @@ info:
   version: '1.0.0'
 servers:
   - url: https://api.server.test/v1
+tags:
+  - name: Autenticación
+  - name: Usuarios
+  - name: Chatbot
+  - name: Contratos
 paths:
   /login:
     post:
       summary: Iniciar sesión
       operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
       tags: 
         - Autenticación
+
       responses:
         '200':
           description: OK
+  
   /user:
     post:
       summary: Crear un nuevo usuario
       operationId: createUser
       tags: 
         - Usuarios
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
       responses:
         '201':
           description: Usuario creado
+        '400':
+          description: Bad Request
+
+  /user/{id}:
     get:
       summary: Obtener un usuario existente
       operationId: getUser
+      description: Retrieves a specific user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       tags: 
         - Usuarios
       responses:
@@ -34,6 +74,13 @@ paths:
     delete:
       summary: Eliminar un usuario existente
       operationId: deleteUser
+      description: Deletes a specific user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       tags: 
         - Usuarios
       responses:
@@ -42,10 +89,123 @@ paths:
     patch:
       summary: Actualizar un usuario existente
       operationId: updateUser
+      description: Updates a specific user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: false
+          schema:
+            type: string
       tags: 
         - Usuarios
       responses:
         '200':
           description: OK
   
+  /chat:
+    post:
+      summary: Enviar un mensaje al chatbot
+      operationId: sendMessage
+      tags: 
+        - Chatbot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                thread_id:
+                  type: string
+      responses:
+        '200':
+          description: OK
+
+  /contract:
+    post:
+      summary: Subir un nuevo contrato
+      operationId: createContract
+      tags: 
+        - Contratos
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Contrato creado
+    get:
+      summary: Obtener todos los contratos existentes
+      operationId: getAllContracts
+      description: Retrieves all existing contracts
+      tags: 
+        - Contratos
+      responses:
+        '200':
+          description: OK
+  /contract/{id}:
+    get:
+      summary: Obtener un contrato existente
+      operationId: getContract
+      description: Retrieves a specific contract by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      tags: 
+        - Contratos
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Eliminar un contrato existente
+      operationId: deleteContract
+      description: Deletes a specific contract by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      tags: 
+        - Contratos
+      responses:
+        '204':
+          description: No Content
   
+  /conversation/{id}:
+    get:
+      summary: Obtener el historial de una conversación
+      operationId: getConversationHistory
+      description: Retrieves the history of a specific conversation by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      tags: 
+        - Chatbot
+      responses:
+        '200':
+          description: OK
