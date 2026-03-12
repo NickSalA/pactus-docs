@@ -1,0 +1,51 @@
+openapi: '3.0.3'
+info:
+  title: ContractIA
+  version: '1.0.0'
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /login:
+    post:
+      summary: Iniciar sesión
+      operationId: login
+      tags: 
+        - Autenticación
+      responses:
+        '200':
+          description: OK
+  /user:
+    post:
+      summary: Crear un nuevo usuario
+      operationId: createUser
+      tags: 
+        - Usuarios
+      responses:
+        '201':
+          description: Usuario creado
+    get:
+      summary: Obtener un usuario existente
+      operationId: getUser
+      tags: 
+        - Usuarios
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Eliminar un usuario existente
+      operationId: deleteUser
+      tags: 
+        - Usuarios
+      responses:
+        '204':
+          description: No Content
+    patch:
+      summary: Actualizar un usuario existente
+      operationId: updateUser
+      tags: 
+        - Usuarios
+      responses:
+        '200':
+          description: OK
+  
+  
