@@ -1,0 +1,32 @@
+post:
+  summary: Iniciar sesión
+  description: Permite a un usuario iniciar sesión proporcionando email y contraseña.
+  operationId: login
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: 'schemas/schema.yaml#/LoginRequest'
+  tags: 
+    - Autenticación
+
+  responses:
+    '200':
+      description: Login exitoso
+      content:
+        application/json:
+          schema:
+            $ref: 'schemas/schema.yaml#/LoginResponse'
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: 'schemas/error.yaml#/ValidationError'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: 'schemas/error.yaml#/AuthenticationError'

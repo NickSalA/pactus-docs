@@ -1,18 +1,42 @@
 openapi: '3.0.3'
 info:
   title: ContractIA
+  description: API para la gestión de contratos, usuarios y chatbot.
   version: '1.0.0'
+  license:
+    name: Proprietary - All Rights Reserved
+    url: https://github.com/NickSalA/ContractIA/blob/main/LICENSE
+  contact:
+    name: NickSalA
+    url: https://github.com/NickSalA/ContractIA
+    email: contact@example.com
 servers:
   - url: https://api.server.test/v1
 tags:
   - name: Autenticación
+    description: Operaciones relacionadas con la autenticación de usuarios.
   - name: Usuarios
+    description: Operaciones para la gestión de usuarios.
   - name: Chatbot
+    description: Operaciones para interactuar con el chatbot.
   - name: Contratos
+    description: Operaciones para la gestión de contratos.
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
 paths:
   /login:
     post:
       summary: Iniciar sesión
+      description: Permite a un usuario iniciar sesión proporcionando email y contraseña.
       operationId: login
       requestBody:
         required: true
@@ -31,10 +55,15 @@ paths:
       responses:
         '200':
           description: OK
+        '401':
+          description: Unauthorized
+        '400':
+          description: Bad Request
   
   /user:
     post:
       summary: Crear un nuevo usuario
+      description: Permite crear un nuevo usuario proporcionando email, contraseña y rol.
       operationId: createUser
       tags: 
         - Usuarios
@@ -48,6 +77,8 @@ paths:
                 email:
                   type: string
                 password:
+                  type: string
+                role:
                   type: string
       responses:
         '201':

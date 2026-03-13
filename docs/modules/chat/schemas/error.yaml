@@ -1,0 +1,61 @@
+ErrorResponse:
+  type: object
+  properties:
+    code:
+      type: string
+      description: Application-specific error code.
+      example: INVALID_CREDENTIALS
+    message:
+      type: string
+      description: Human-readable error message.
+      example: Email o contraseña inválidos
+    details:
+      type: object
+      description: Optional structured details for debugging or validation.
+      additionalProperties: true
+    traceId:
+      type: string
+      description: Request identifier for tracing logs.
+      example: req-7f9c2a1b
+  required:
+    - code
+    - message
+
+ValidationError:
+  allOf:
+    - $ref: '#/ErrorResponse'
+    - type: object
+      properties:
+        code:
+          example: VALIDATION_ERROR
+        message:
+          example: Uno o más campos no son válidos.
+        type:
+          type: string
+          enum: [validation_error]
+        fieldErrors:
+          type: array
+          description: List of field-specific validation errors.
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: The name of the invalid field.
+                example: email
+              message:
+                type: string
+                description: Validation error message for the field.
+                example: El campo email es obligatorio y debe ser un correo electrónico válido.
+
+AuthenticationError:
+  allOf:
+    - $ref: '#/ErrorResponse'
+    - type: object
+      properties:
+        type:
+          type: string
+          enum: [authentication_error]

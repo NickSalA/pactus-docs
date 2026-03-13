@@ -1,0 +1,66 @@
+openapi: '3.0.3'
+info:
+  title: ContractIA
+  description: API para la gestión de contratos, usuarios y chatbot.
+  version: '1.0.0'
+  license:
+    name: Proprietary - All Rights Reserved
+    url: https://github.com/NickSalA/ContractIA/blob/main/LICENSE
+  contact:
+    name: NickSalA
+    url: https://github.com/NickSalA/ContractIA
+    email: contact@example.com
+servers:
+  - url: https://api/v1
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Application-specific error code.
+          example: INTERNAL_ERROR
+        message:
+          type: string
+          description: Human-readable error message.
+          example: Ha ocurrido un error.
+        details:
+          type: object
+          description: Optional structured details for debugging or validation.
+          additionalProperties: true
+        traceId:
+          type: string
+          description: Request identifier for tracing logs.
+          example: req-7f9c2a1b
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Autenticación
+    description: Operaciones relacionadas con la autenticación de usuarios.
+  - name: Usuarios
+    description: Operaciones para la gestión de usuarios.
+  - name: Chatbot
+    description: Operaciones para interactuar con el chatbot.
+  - name: Contratos
+    description: Operaciones para la gestión de contratos.
+
+paths:
+  /login:
+    $ref: 'modules/login/paths.yaml'
+  /user:
+    $ref: 'modules/user/paths/collection.yaml'
+  /user/{id}:
+    $ref:  'modules/user/paths/item.yaml'

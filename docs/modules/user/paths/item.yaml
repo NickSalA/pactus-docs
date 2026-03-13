@@ -1,0 +1,75 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del usuario
+
+get:
+  summary: Obtener un usuario existente
+  description: Retrieves a specific user by ID
+  operationId: getUser
+  tags: 
+    - Usuarios
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/UserResponse'
+    '404':
+      description: User Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/NotFoundError'
+
+patch:
+  summary: Actualizar un usuario existente
+  operationId: updateUser
+  description: Updates a specific user by ID
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/UserUpdateRequest'
+  tags: 
+    - Usuarios
+  responses:
+    '200':
+      description: Usuario actualizado satisfactoriamente
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/UserResponse'
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/ValidationError'
+    '404':
+      description: User Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/NotFoundError'
+
+delete:
+  summary: Eliminar un usuario existente
+  operationId: deleteUser
+  description: Deletes a specific user by ID
+  tags: 
+    - Usuarios
+  responses:
+    '204':
+      description: Usuario eliminado satisfactoriamente
+    '404':
+      description: User Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/NotFoundError'

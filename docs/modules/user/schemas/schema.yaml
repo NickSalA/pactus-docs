@@ -1,0 +1,79 @@
+UserCreateRequest:
+  type: object
+  properties:
+    email:
+      type: string
+      format: email
+      description: The user's email address.
+      example: jhon.doe@gmail.com
+    password:
+      type: string
+      format: password
+      description: The user's password.
+      example: "securePassword123"
+    role:
+      type: string
+      description: The user's role (e.g., admin, user).
+      example: user
+  required:
+    - email
+    - password
+    - role
+
+UserUpdateRequest:
+  type: object
+  properties:
+    email:
+      type: string
+      format: email
+      description: The user's email address.
+      example: jhon.doe@gmail.com
+    password:
+      type: string
+      format: password
+      description: The user's password.
+      example: "AnotherPassword123"
+
+UserResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+      description: The unique identifier of the user.
+      example: 14
+    email:
+      type: string
+      format: email
+      description: The user's email address.
+      example: jhon.doe@gmail.com
+    role:
+      type: string
+      description: The user's role (e.g., admin, user).
+      example: user
+  required:
+    - id
+    - email
+    - role
+
+UserListResponse:
+  type: array
+  items:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: The unique identifier of the user.
+        example: 14
+      email:
+        type: string
+        format: email
+        description: The user's email address.
+        example: jhon.doe@gmail.com
+      role:
+        type: string
+        description: The user's role (e.g., admin, user).
+        example: user
+    required:
+      - id
+      - email
+      - role

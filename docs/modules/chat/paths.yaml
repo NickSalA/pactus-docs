@@ -1,0 +1,17 @@
+post:
+  summary: Iniciar conversación con el agente RAG
+  tags:
+    - Chat Inteligente
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './schemas.yaml#/ChatRequest'
+  responses:
+    '200':
+      description: Respuesta exitosa del LLM
+      content:
+        application/json:
+          schema:
+            $ref: './schemas.yaml#/ChatResponse'
