@@ -20,7 +20,11 @@ DocumentListResponse:
         type: string
         description: El nombre del archivo subido.
         example: contrato.pdf
-      upload_date:
+      size:
+        type: integer
+        description: El tamaño del archivo en bytes.
+        example: 204800
+      uploaded_at:
         type: string
         format: date-time
         description: La fecha y hora en que se subió el documento.

@@ -18,13 +18,13 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/UserResponse'
+            $ref: '../../users/schemas/schema.yaml#/UserResponse'
     '404':
       description: User Not Found
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/NotFoundError'
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
 
 patch:
   summary: Actualizar un usuario existente
@@ -35,7 +35,7 @@ patch:
     content:
       application/json:
         schema:
-          $ref: '../schemas/schema.yaml#/UserUpdateRequest'
+          $ref: '../../users/schemas/schema.yaml#/UserUpdateRequest'
   tags: 
     - Usuarios
   responses:
@@ -44,19 +44,19 @@ patch:
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/UserResponse'
+            $ref: '../../users/schemas/schema.yaml#/UserResponse'
     '400':
       description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/ValidationError'
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
     '404':
       description: User Not Found
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/NotFoundError'
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
 
 delete:
   summary: Eliminar un usuario existente
@@ -72,4 +72,4 @@ delete:
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/NotFoundError'
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

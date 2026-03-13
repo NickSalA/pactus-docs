@@ -9,20 +9,20 @@ post:
     content:
       application/json:
         schema:
-          $ref: '../schemas/schema.yaml#/UserCreateRequest'
+          $ref: '../../users/schemas/schema.yaml#/UserCreateRequest'
   responses:
     '201':
       description: Usuario creado
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/UserResponse'
+            $ref: '../../users/schemas/schema.yaml#/UserResponse'
     '400':
       description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/ValidationError'
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
 
 get:
   summary: Listar usuarios existentes
@@ -36,7 +36,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/UserListResponse'
+            $ref: '../../users/schemas/schema.yaml#/UserListResponse'
           examples:
             twoUsers:
               summary: Ejemplo con dos usuarios
@@ -53,4 +53,4 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/NotFoundError'
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

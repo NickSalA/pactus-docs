@@ -20,4 +20,4 @@ delete:
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/NotFoundError'
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

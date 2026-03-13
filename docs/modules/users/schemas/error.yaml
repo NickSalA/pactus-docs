@@ -1,46 +1,46 @@
-ValidationError:
-  allOf:
-    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
-    - type: object
-      properties:
-        code:
-          example: VALIDATION_ERROR
-        message:
-          example: Uno o más campos no son válidos.
-        type:
-          type: string
-          enum: [validation_error]
-        fieldErrors:
-          type: array
-          description: List of field-specific validation errors.
-          items:
-            type: object
-            required:
-              - field
-              - message
-            properties:
-              field:
-                type: string
-                description: The name of the invalid field.
-                example: email
-              message:
-                type: string
-                description: Validation error message for the field.
-                example: El campo email es obligatorio y debe ser un correo electrónico válido.
+# ValidationError:
+#   allOf:
+#     - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+#     - type: object
+#       properties:
+#         code:
+#           example: VALIDATION_ERROR
+#         message:
+#           example: Uno o más campos no son válidos.
+#         type:
+#           type: string
+#           enum: [validation_error]
+#         fieldErrors:
+#           type: array
+#           description: List of field-specific validation errors.
+#           items:
+#             type: object
+#             required:
+#               - field
+#               - message
+#             properties:
+#               field:
+#                 type: string
+#                 description: The name of the invalid field.
+#                 example: email
+#               message:
+#                 type: string
+#                 description: Validation error message for the field.
+#                 example: El campo email es obligatorio y debe ser un correo electrónico válido.
 
-NotFoundError:
-  allOf:
-    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
-    - type: object
-      properties:
-        code:
-          example: NOT_FOUND
-        message:
-          example: El recurso solicitado no fue encontrado.
-        type:
-          type: string
-          enum: [not_found]
-        resourceId:
-          type: string
-          description: The identifier of the resource that was not found.
-          example: user-12345
+# NotFoundError:
+#   allOf:
+#     - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+#     - type: object
+#       properties:
+#         code:
+#           example: NOT_FOUND
+#         message:
+#           example: El recurso solicitado no fue encontrado.
+#         type:
+#           type: string
+#           enum: [not_found]
+#         resourceId:
+#           type: string
+#           description: The identifier of the resource that was not found.
+#           example: user-12345

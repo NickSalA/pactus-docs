@@ -22,46 +22,46 @@ post:
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/ValidationError'
+            $ref: '../../schemas/errors.yaml#/ValidationError'
     '401':
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/AuthenticationError'
+            $ref: '../../schemas/errors.yaml#/AuthenticationError'
     '413':
       description: Payload Too Large
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/PayloadTooLargeError'
+            $ref: '../../schemas/errors.yaml#/PayloadTooLargeError'
     '429':
       description: Too Many Requests
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/TooManyRequestsError'
+            $ref: '../../schemas/errors.yaml#/TooManyRequestsError'
     '500':
       description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/InternalServerError'
+            $ref: '../../schemas/errors.yaml#/InternalServerError'
     '502':
       description: Bad Gateway
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/BadGatewayError'
+            $ref: '../../schemas/errors.yaml#/BadGatewayError'
     '503':
       description: Service Unavailable
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/ServiceUnavailableError'
+            $ref: '../../schemas/errors.yaml#/ServiceUnavailableError'
     '504':
       description: Gateway Timeout
       content:
         application/json:
           schema:
-            $ref: 'schemas/error.yaml#/GatewayTimeoutError'
+            $ref: '../../schemas/errors.yaml#/GatewayTimeoutError'

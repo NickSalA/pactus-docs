@@ -14,30 +14,6 @@ servers:
   - url: https://api/v1
 
 components:
-  schemas:
-    ErrorResponse:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: string
-          description: Application-specific error code.
-          example: INTERNAL_ERROR
-        message:
-          type: string
-          description: Human-readable error message.
-          example: Ha ocurrido un error.
-        details:
-          type: object
-          description: Optional structured details for debugging or validation.
-          additionalProperties: true
-        traceId:
-          type: string
-          description: Request identifier for tracing logs.
-          example: req-7f9c2a1b
-
   securitySchemes:
     BearerAuth:
       type: http
@@ -56,6 +32,8 @@ tags:
     description: Operaciones para interactuar con el chatbot.
   - name: Documentos
     description: Operaciones para la gestión de documentos.
+  - name: Conversaciones
+    description: Operaciones para la gestión de conversaciones.
 
 paths:
   /login:
@@ -70,7 +48,7 @@ paths:
     $ref: 'modules/documents/paths/collection.yaml'
   /documents/{id}:
     $ref: 'modules/documents/paths/item.yaml'
-  # /conversations:
-  #   $ref: modules/conversations/paths/collection.yaml
-  # /conversations/{id}:
-  #   $ref: modules/conversations/paths/item.yaml
+  /conversations:
+    $ref: 'modules/conversations/paths/collection.yaml'
+  /conversations/{id}:
+    $ref: 'modules/conversations/paths/item.yaml'

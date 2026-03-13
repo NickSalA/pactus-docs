@@ -1,0 +1,30 @@
+get:
+  summary: Obtener todas las conversaciones existentes de un usuario
+  description: Devuelve una lista de todas las conversaciones que han sido iniciadas por el usuario autenticado.
+  operationId: getAllConversations
+  tags: 
+    - Conversaciones
+  responses:
+    '200':
+      description: Conversaciones obtenidas satisfactoriamente
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ConversationListResponse'
+          examples:
+            twoConversations:
+              summary: Ejemplo de respuesta exitosa
+              value:
+                - id: 1
+                  title: Conversación sobre contrato de arrendamiento
+                  created_at: '2024-01-01T12:00:00Z'
+                - id: 2
+                  title: Consulta sobre términos de servicio
+                  created_at: '2024-02-15T09:30:00Z'
+
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/AuthenticationError'

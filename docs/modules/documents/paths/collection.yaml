@@ -9,7 +9,7 @@ post:
     content:
       multipart/form-data:
         schema:
-          $ref: '../schemas/schema.yaml#/DocumentCreateRequest'
+          $ref: '../../documents/schemas/schema.yaml#/DocumentCreateRequest'
   responses:
     '201':
       description: Documento subido satisfactoriamente
@@ -18,44 +18,44 @@ post:
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/ValidationError'
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
     '401':
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/AuthenticationError'
+            $ref: '../../../schemas/errors.yaml#/AuthenticationError'
     '413':
       description: Payload Too Large
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/PayloadTooLargeError'
+            $ref: '../../../schemas/errors.yaml#/PayloadTooLargeError'
 
     '500':
       description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/InternalServerError'
+            $ref: '../../../schemas/errors.yaml#/InternalServerError'
     '502':
       description: Bad Gateway
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/BadGatewayError'
+            $ref: '../../../schemas/errors.yaml#/BadGatewayError'
     '503':
       description: Service Unavailable
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/ServiceUnavailableError'
+            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'
     '504':
       description: Gateway Timeout
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/GatewayTimeoutError'
+            $ref: '../../../schemas/errors.yaml#/GatewayTimeoutError'
 
 get:
   summary: Obtener todos los documentos existentes
@@ -69,34 +69,46 @@ get:
       content: 
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/DocumentListResponse'
+            $ref: '../../documents/schemas/schema.yaml#/DocumentListResponse'
+          examples:
+            twoDocuments:
+              summary: Ejemplo con dos documentos
+              value:
+                - id: 1
+                  filename: contrato1.pdf
+                  size: 204800
+                  uploaded_at: '2024-06-01T12:00:00Z'
+                - id: 2
+                  filename: contrato2.pdf
+                  size: 102400
+                  uploaded_at: '2024-06-02T15:30:00Z'
     '401':
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/AuthenticationError'
+            $ref: '../../../schemas/errors.yaml#/AuthenticationError'
     '500':
       description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/InternalServerError'
+            $ref: '../../../schemas/errors.yaml#/InternalServerError'
     '502':
       description: Bad Gateway
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/BadGatewayError'
+            $ref: '../../../schemas/errors.yaml#/BadGatewayError'
     '503':
       description: Service Unavailable
       content:
         application/json:
           schema:
-            $ref: '../schemas/error.yaml#/ServiceUnavailableError'
+            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'
     '504':
       description: Gateway Timeout
       content:
         application/json:
           schema: 
-            $ref: '../schemas/error.yaml#/GatewayTimeoutError'
+            $ref: '../../../schemas/errors.yaml#/GatewayTimeoutError'

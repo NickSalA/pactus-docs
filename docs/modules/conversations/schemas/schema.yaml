@@ -1,47 +1,41 @@
-LoginRequest:
+ConversationResponse:
   type: object
   properties:
-    email:
+    id:
+      type: integer
+      example: 1
+    title:
       type: string
-      format: email
-      description: The user's email address.
-    password:
+      example: Conversación sobre contrato de arrendamiento
+    created_at:
       type: string
-      format: password
-      description: The user's password.
-  required:
-    - email
-    - password
+      format: date-time
+      example: '2024-01-01T12:00:00Z'
+    content:
+      type: array
+      items:
+        type: object
+        properties:
+          sender:
+            type: string
+            enum: [user, bot]
+            example: user
+          message:
+            type: string
+            example: "¿Cuáles son las cláusulas principales del contrato?"
 
-LoginResponse:
-  type: object
-  properties:
-    access_token:
-      type: string
-      description: JWT token for authentication.
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-    token_type:
-      type: string
-      description: The type of the token (e.g., Bearer).
-      example: Bearer
-    user:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: The user's unique identifier.
-          example: 12 # Posibilidad de ser un string dependiendo de la implementación (UUID)
-        email:
-          type: string
-          format: email
-          description: The user's email address.
-          example: jhon.doe@gmail.com
-        role:
-          type: string
-          description: The user's role (e.g., admin, user).
-          example: user
-  required:
-    - access_token
-    - token_type
-    - user
-
+ConversationListResponse:
+  type: array
+  items:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      title:
+        type: string
+        example: Conversación sobre contrato de arrendamiento
+      created_at:
+        type: string
+        format: date-time
+        example: '2024-01-01T12:00:00Z'

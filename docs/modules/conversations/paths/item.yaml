@@ -1,1 +1,27 @@
-delete
+parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID de la conversación
+
+get:
+  summary: Obtener la conversación existente por ID
+  description: Devuelve el historial de mensajes de una conversación específica iniciada por el usuario autenticado.
+  operationId: getConversationHistory
+  tags: 
+    - Conversaciones
+  responses:
+    '200':
+      description: Conversacion obtenida satisfactoriamente
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ConversationResponse'
+    '404':
+      description: Conversation Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
