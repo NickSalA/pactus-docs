@@ -1,47 +1,28 @@
-LoginRequest:
+ChatRequest:
   type: object
-  properties:
-    email:
-      type: string
-      format: email
-      description: The user's email address.
-    password:
-      type: string
-      format: password
-      description: The user's password.
   required:
-    - email
-    - password
+    - message
+  properties:
+    message:
+      type: string
+      description: The user's message to the chatbot.
+      example: "Hola, ¿cómo estás?"
+    thread_id:
+      type: integer
+      description: ID de la conversación.
+      example: 12
 
-LoginResponse:
+ChatResponse:
   type: object
-  properties:
-    access_token:
-      type: string
-      description: JWT token for authentication.
-      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-    token_type:
-      type: string
-      description: The type of the token (e.g., Bearer).
-      example: Bearer
-    user:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: The user's unique identifier.
-          example: 12 # Posibilidad de ser un string dependiendo de la implementación (UUID)
-        email:
-          type: string
-          format: email
-          description: The user's email address.
-          example: jhon.doe@gmail.com
-        role:
-          type: string
-          description: The user's role (e.g., admin, user).
-          example: user
   required:
-    - access_token
-    - token_type
-    - user
-
+    - response
+    - thread_id
+  properties:
+    response:
+      type: string
+      description: The chatbot's response to the user's message.
+      example: "¡Hola! Estoy bien, gracias por preguntar. ¿En qué puedo ayudarte hoy?"
+    thread_id:
+      type: integer
+      description: ID de la conversación.
+      example: 12

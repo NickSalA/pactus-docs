@@ -1,0 +1,102 @@
+post:
+  summary: Subir un nuevo documento
+  description: Permite subir un nuevo documento al sistema para su posterior procesamiento.
+  operationId: createDocument
+  tags: 
+    - Documentos
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../schemas/schema.yaml#/DocumentCreateRequest'
+  responses:
+    '201':
+      description: Documento subido satisfactoriamente
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/ValidationError'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/AuthenticationError'
+    '413':
+      description: Payload Too Large
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/PayloadTooLargeError'
+
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/InternalServerError'
+    '502':
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/BadGatewayError'
+    '503':
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/ServiceUnavailableError'
+    '504':
+      description: Gateway Timeout
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/GatewayTimeoutError'
+
+get:
+  summary: Obtener todos los documentos existentes
+  description: Devuelve una lista de todos los documentos que han sido subidos al sistema.
+  operationId: getAllDocuments
+  tags: 
+    - Documentos
+  responses:
+    '200':
+      description: OK
+      content: 
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/DocumentListResponse'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/AuthenticationError'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/InternalServerError'
+    '502':
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/BadGatewayError'
+    '503':
+      description: Service Unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/ServiceUnavailableError'
+    '504':
+      description: Gateway Timeout
+      content:
+        application/json:
+          schema: 
+            $ref: '../schemas/error.yaml#/GatewayTimeoutError'

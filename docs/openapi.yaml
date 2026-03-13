@@ -54,13 +54,23 @@ tags:
     description: Operaciones para la gestión de usuarios.
   - name: Chatbot
     description: Operaciones para interactuar con el chatbot.
-  - name: Contratos
-    description: Operaciones para la gestión de contratos.
+  - name: Documentos
+    description: Operaciones para la gestión de documentos.
 
 paths:
   /login:
     $ref: 'modules/login/paths.yaml'
   /user:
-    $ref: 'modules/user/paths/collection.yaml'
+    $ref: 'modules/users/paths/collection.yaml'
   /user/{id}:
-    $ref:  'modules/user/paths/item.yaml'
+    $ref:  'modules/users/paths/item.yaml'
+  /chatbot:
+    $ref: 'modules/chat/paths.yaml'
+  /documents:
+    $ref: 'modules/documents/paths/collection.yaml'
+  /documents/{id}:
+    $ref: 'modules/documents/paths/item.yaml'
+  # /conversations:
+  #   $ref: modules/conversations/paths/collection.yaml
+  # /conversations/{id}:
+  #   $ref: modules/conversations/paths/item.yaml

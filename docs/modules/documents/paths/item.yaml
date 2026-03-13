@@ -1,0 +1,23 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del documento
+
+delete:
+  summary: Eliminar un documento existente
+  operationId: deleteDocument
+  description: Deletes a specific document by ID
+  tags: 
+    - Documentos
+  responses:
+    '204':
+      description: Documento eliminado satisfactoriamente
+    '404':
+      description: Document Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/error.yaml#/NotFoundError'

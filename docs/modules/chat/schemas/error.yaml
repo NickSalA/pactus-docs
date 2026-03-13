@@ -1,29 +1,6 @@
-ErrorResponse:
-  type: object
-  properties:
-    code:
-      type: string
-      description: Application-specific error code.
-      example: INVALID_CREDENTIALS
-    message:
-      type: string
-      description: Human-readable error message.
-      example: Email o contraseña inválidos
-    details:
-      type: object
-      description: Optional structured details for debugging or validation.
-      additionalProperties: true
-    traceId:
-      type: string
-      description: Request identifier for tracing logs.
-      example: req-7f9c2a1b
-  required:
-    - code
-    - message
-
 ValidationError:
   allOf:
-    - $ref: '#/ErrorResponse'
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
     - type: object
       properties:
         code:
@@ -53,9 +30,91 @@ ValidationError:
 
 AuthenticationError:
   allOf:
-    - $ref: '#/ErrorResponse'
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
     - type: object
       properties:
+        code:
+          example: INVALID_CREDENTIALS
+        message:
+          example: Email o contraseña inválidos.
         type:
           type: string
           enum: [authentication_error]
+
+PayloadTooLargeError:
+  allOf:
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+    - type: object
+      properties:
+        code:
+          example: PAYLOAD_TOO_LARGE
+        message:
+          example: El contenido enviado excede el tamaño permitido.
+        type:
+          type: string
+          enum: [payload_too_large]
+
+TooManyRequestsError:
+  allOf:
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+    - type: object
+      properties:
+        code:
+          example: RATE_LIMIT_EXCEEDED
+        message:
+          example: Se excedió el límite de solicitudes.
+        type:
+          type: string
+          enum: [too_many_requests]
+
+InternalServerError:
+  allOf:
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+    - type: object
+      properties:
+        code:
+          example: INTERNAL_SERVER_ERROR
+        message:
+          example: Ocurrió un error interno en el servidor.
+        type:
+          type: string
+          enum: [internal_server_error]
+
+BadGatewayError:
+  allOf:
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+    - type: object
+      properties:
+        code:
+          example: BAD_GATEWAY
+        message:
+          example: Falló la comunicación con el proveedor externo.
+        type:
+          type: string
+          enum: [bad_gateway]
+
+ServiceUnavailableError:
+  allOf:
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+    - type: object
+      properties:
+        code:
+          example: SERVICE_UNAVAILABLE
+        message:
+          example: El servicio no está disponible temporalmente.
+        type:
+          type: string
+          enum: [service_unavailable]
+
+GatewayTimeoutError:
+  allOf:
+    - $ref: '../../../openapi.yaml#/components/schemas/ErrorResponse'
+    - type: object
+      properties:
+        code:
+          example: GATEWAY_TIMEOUT
+        message:
+          example: El proveedor externo tardó demasiado en responder.
+        type:
+          type: string
+          enum: [gateway_timeout]
