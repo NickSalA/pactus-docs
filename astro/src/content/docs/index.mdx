@@ -1,40 +1,36 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: Documentación de ContractIA
+description: Documento de Diseño de Software (SDD) para el sistema de análisis de contratos.
+template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: Arquitectura, diseño técnico y contratos de API del sistema basado en IA.
   image:
     file: ../../assets/houston.webp
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Ver Arquitectura Global
+      link: /arquitectura/example/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+    - text: Ir al Repositorio
+      link: https://github.com/NickSalA/ContractIA
       icon: external
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## Secciones del SDD
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="Arquitectura y Stack" icon="setting">
+		Justificación técnica del stack, diagramas de infraestructura (Vercel + Railway) y flujo de datos del sistema.
 	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
+	<Card title="Frontend (Next.js)" icon="laptop">
+		Jerarquía de componentes, gestión de estado con **Zustand**, tipado TypeScript y manejo de subida asíncrona.
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="Backend (FastAPI)" icon="server">
+		Contratos de API REST, seguridad con CORS y JWT, y gestión de variables de entorno con Azure Key Vault.
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="Agente IA y Datos" icon="magnifier">
+		Pipeline de ingesta RAG, base vectorial en Qdrant Cloud y orquestación del agente con LangGraph.
 	</Card>
 </CardGrid>
