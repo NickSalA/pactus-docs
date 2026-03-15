@@ -3,9 +3,10 @@ title: Vision Global
 description: Vista general de la arquitectura de ContractIA y flujo principal de procesamiento.
 ---
 
-## Flujo End-to-End
+## Diagrama de la Arquitectura
 
 ```mermaid
+%%{init: { 'theme': 'neutral', 'themeVariables': { 'primaryColor': '#4f46e5', 'primaryTextColor': '#fff', 'lineColor': '#64748b', 'tertiaryColor': '#f1f5f9'}}}%%
 graph TD
     User((Usuario/Notario)) -- Carga Contrato --> FE[Frontend: Next.js]
     FE -- Request --> BE[Backend: FastAPI]
