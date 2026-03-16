@@ -11,22 +11,34 @@ A continuación, se detalla la justificación técnica de cada componente de la 
 
 ## Entorno Frontend (Vercel)
 
-* **Next.js (React + TypeScript):** Se eligió como framework principal por su robustez en el renderizado y su tipado estricto con TypeScript. Al desplegarse en **Vercel**, se garantiza una entrega de contenido (CDN) ultrarrápida y una integración nativa de CI/CD, ideal para que el Notario experimente una interfaz ágil sin tiempos de carga innecesarios.
-* **Tailwind CSS:** Permite construir la interfaz del chat y el visor de documentos de forma modular y rápida, manteniendo un peso ligero en el cliente.
+* **Next.js:** Se eligió como framework principal por su madurez en el ecosistema React. Su despliegue en **Vercel** es la decisión estratégica óptima, ya que esta plataforma ofrece la mejor integración nativa del mercado con Next.js, garantizando rendimiento, optimización de assets y CI/CD sin configuraciones adicionales.
 
 ## Entorno Backend (Railway)
 
-* **FastAPI:** El procesamiento de PDFs y las llamadas a los modelos de IA generan bloqueos de I/O. FastAPI, al ser asíncrono (`async/await`), maneja múltiples peticiones simultáneas de forma eficiente. **Railway** se seleccionó como proveedor de nube por su facilidad para desplegar contenedores Docker y gestionar variables de entorno (Key Vault) de manera segura.
-* **LangGraph:** Para orquestar al agente inteligente, LangGraph supera a las cadenas tradicionales al permitir flujos cíclicos. Esto le da al sistema la capacidad de razonar, consultar la herramienta de conocimiento varias veces si es necesario, y mantener el estado de la conversación en cada nodo.
-* **SQLModel:** (Integrado en FastAPI) Unifica la validación de datos de Pydantic con los modelos de base de datos de SQLAlchemy, reduciendo drásticamente el código repetitivo al interactuar con PostgreSQL.
+* **FastAPI:** Se consolidó como la elección principal por ser uno de los frameworks más robustos, rápidos y modernos para el desarrollo de backends en Python, ideal para orquestar la concurrencia de llamadas a la IA.
+* **SQLModel:** Es la opción definitiva para la capa de datos al haber sido construida específicamente para el ecosistema de FastAPI. Actualmente ofrece la mejor integración posible para manejar bases de datos, unificando la validación de Pydantic con el poder de SQLAlchemy sin fricciones.
+* **LangGraph:** Se prefirió por encima del enfoque tradicional de *Agent with tools* debido a su manejo avanzado y estructurado de la memoria. Permite un control total de la persistencia del estado mediante integraciones directas como `PostgresSaver` y `PostgresStore`, guardando los hilos de conversación de forma segura en la base de datos relacional.
 
 ## Pipeline de Inteligencia Artificial
 
-* **LlamaIndex y LlamaParse:** LlamaParse es crítico en este proyecto por su capacidad única de interpretar la estructura compleja de un contrato legal (tablas, cláusulas, firmas) y convertirlo a un Markdown limpio, algo en lo que los parsers tradicionales fallan.
-* **Voyage AI (Embedding Model):** Actúa como el puente matemático indispensable del sistema. Convierte el Markdown estructurado por LlamaParse en representaciones vectoriales de alta calidad (embeddings) capturando la semántica legal antes de enviarlos a la base de datos.
-* **Gemini (LLM):** Seleccionado como el motor de razonamiento del Agente Inteligente por su extensa ventana de contexto, permitiéndole analizar múltiples cláusulas recuperadas de los contratos sin perder el hilo conductor, y generando respuestas rápidas al usuario.
+* **LlamaParse:** Es una pieza crítica para la ingesta de contratos. Se seleccionó por ser, indiscutiblemente, uno de los mejores parseadores de documentos complejos del mercado que no exige un costo inicial, permitiendo extraer tablas y jerarquías legales con alta fidelidad.
+* **Voyage AI:** Tras una evaluación técnica comparativa frente a `text-embedding-3-small` de OpenAI, Voyage AI fue elegido por ofrecer la mejor relación costo-rendimiento para generar los embeddings del texto legal, optimizando el presupuesto sin perder capacidad de recuperación.
+* **Gemini 2.5 Flash y Flash-Lite:** Siguiendo la misma directriz de optimización, estos modelos de lenguaje se integraron por su inmejorable balance de costos bajos y ventanas de contexto masivas, requisito indispensable para el análisis de contratos extensos.
 
 ## Capa de Persistencia
 
-* **PostgreSQL:** Desplegado como base de datos relacional para gestionar los usuarios, las sesiones de autenticación y los metadatos de los contratos. Es la fuente de verdad transaccional.
-* **Qdrant Cloud:** Base de datos vectorial specializada. Recibe los embeddings generados por Voyage AI y permite búsquedas de similitud ultrarrápidas, filtrando por los metadatos específicos del contrato que el Notario está consultando en ese momento.
+* **PostgreSQL:** Desplegado como base de datos relacional central. Es la tecnología que mejor se integra actualmente con los ecosistemas de IA, ofreciendo la fiabilidad necesaria para almacenar la gestión de usuarios, metadatos y los *checkpoints* de LangGraph.
+* **Qdrant Cloud:** Seleccionada por ser la base de datos vectorial más robusta y eficiente para entornos de producción, encargada de almacenar los vectores de Voyage AI y ejecutar las búsquedas semánticas de las cláusulas a alta velocidad.
+
+### Alternativas Evaluadas y Descartadas
+
+Para garantizar la viabilidad técnica y económica del proyecto, se evaluaron las siguientes alternativas antes de consolidar el stack final:
+
+| Componente | Tecnología Seleccionada | Alternativa Descartada | Razón Principal del Descarte |
+| :--- | :--- | :--- | :--- |
+| **Extracción de Texto** | **LlamaParse** | Google Document AI | Aunque Document AI es sumamente potente para el parseado, LlamaParse ofrece resultados de altísimo nivel en la retención de jerarquías y tablas complejas, pero con una integración nativa al ecosistema RAG y sin exigir costos iniciales para arrancar el proyecto. |
+| **Base de Datos Vectorial** | **Qdrant Cloud** | ChromaDB | ChromaDB es excelente para pruebas y prototipado local, pero Qdrant es indiscutiblemente la base de datos vectorial más robusta, rápida y escalable para un entorno de producción, con un filtrado por metadatos superior. |
+| **Motor de Razonamiento (LLM)** | **Gemini 2.5 Flash / Lite** | GPT-4.1 Mini (OpenAI) | Se optó por Gemini por ofrecer la mejor relación de costos frente al tamaño masivo de su ventana de contexto. En el ámbito legal, es un requisito estricto poder inyectar contratos enteros en el prompt sin disparar el presupuesto. |
+| **Orquestación IA** | **LangGraph** | LangChain (Agents) | El enfoque tradicional de agentes carece de control granular sobre el estado (memoria). LangGraph permite implementar flujos cíclicos complejos con persistencia nativa sólida en la base relacional usando herramientas como `PostgresSaver` y `PostgresStore`. |
+| **Modelos de Embedding** | **Voyage AI** | OpenAI `text-embedding-3-small` | Voyage AI demostró una relación costo-rendimiento superior para las métricas de recuperación (Retrieval) requeridas, optimizando el presupuesto sin perder capacidad semántica frente al estándar de OpenAI. |
+| **ORM / Base de Datos** | **SQLModel** | SQLAlchemy puro | Requería duplicar la lógica de modelos (escribir esquemas Pydantic y modelos SQLAlchemy por separado), aumentando drásticamente la fricción y el tiempo de desarrollo en FastAPI. |
