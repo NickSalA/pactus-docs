@@ -1,5 +1,5 @@
 ---
-title: Example Guide
+title: Jerarquía de Vistas y Componentes
 description: A guide in my new Starlight docs site.
 ---
 

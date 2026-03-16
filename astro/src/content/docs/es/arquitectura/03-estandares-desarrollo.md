@@ -30,22 +30,25 @@ El proyecto se dividirá en tres capas principales:
 
 ```text
 /
+├── pyproject.toml
+├── tests/
 └── src/
-    ├── core/                 # Configuraciones globales y variables de entorno
-    ├── shared/               # Utilidades compartidas y helpers genéricos
-    └── modules/
-    │   └── users/
-    │       ├── domain/           # Entidades y Modelos (Pydantic / SQLModel base)
-    │       │   ├── models/           
-    │       │   └── interfaces/       
-    │       ├── application/      # Lógica de Negocio y Casos de Uso
-    │       │   ├── use_cases/        
-    │       │   └── agent/        # Orquestación de LangGraph (Nodos, Grafo)
-    │       ├── infrastructure/   # Adaptadores Externos
-    │       │   ├── database/     # Configuración de PostgreSQL y Qdrant
-    │       │   └── services/     # Clientes de IA (Gemini, LlamaParse, Voyage AI)
-    │       └─── api/              # Routers de FastAPI y Dependencias
-    └── main.py           # Punto de entrada de FastAPI
+    └── contractai_backend/
+        ├── core/                 # Configuraciones globales y variables de entorno
+        ├── shared/               # Utilidades compartidas y helpers genéricos
+        └── modules/
+        │   └── users/
+        │       ├── domain/           # Entidades y Modelos (Pydantic / SQLModel base)
+        │       │   ├── models/           
+        │       │   └── interfaces/       
+        │       ├── application/      # Lógica de Negocio y Casos de Uso
+        │       │   ├── use_cases/        
+        │       │   └── agent/        # Orquestación de LangGraph (Nodos, Grafo)
+        │       ├── infrastructure/   # Adaptadores Externos
+        │       │   ├── database/     # Configuración de PostgreSQL y Qdrant
+        │       │   └── services/     # Clientes de IA (Gemini, LlamaParse, Voyage AI)
+        │       └─── api/              # Routers de FastAPI y Dependencias
+        └── main.py           # Punto de entrada de FastAPI
 ```
 
 ### Frontend: Patrón de Separación de Lógica (Next.js)
@@ -69,8 +72,10 @@ src/
 
 ## Estándares de Código (Clean Code)
 
-Para mantener la uniformidad en el repositorio, se utilizará **Pylint** como linter principal en el backend y se aplicarán las siguientes convenciones:
+Para mantener la uniformidad, el rendimiento y la reproducibilidad en el repositorio, el backend adopta las herramientas más modernas del ecosistema Python:
 
+* **Gestión de Dependencias y Build:** Se utiliza **`uv`** (y su sistema `uv_build`) como gestor de paquetes ultrarrápido. Toda la configuración del proyecto, dependencias y scripts de ejecución vivirán centralizados en el archivo estándar `pyproject.toml`.
+* **Linter y Formateador:** Se descarta Pylint en favor de **Ruff**. Al estar escrito en Rust, centraliza el análisis estático, el formateo de código y el ordenamiento de importaciones de manera casi instantánea, incluyendo las reglas estrictas de Pylint (`PL`) y manejo de errores (`E`, `F`).
 * **Idioma:** El idioma predeterminado del código fuente es el **Inglés** (variables, funciones, clases).
 * **Convenciones de Nomenclatura:**
   * `PascalCase`: Obligatorio para Clases.
@@ -93,7 +98,7 @@ Se adopta la convención de **Conventional Commits**, para los prefijos vinculad
 
 Posteriormente, para el asunto del commit se adopta la convención de **Git Commit Guidelines** para el mensaje del commit:
 
-* Usa el imperativo (_create_, no _created_).
+* Usa el imperativo (*create*, no *created*).
 * Empieza con minúscula.
 * No tiene punto final.
 
