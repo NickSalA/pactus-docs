@@ -9,13 +9,13 @@ El sistema ContractIA está diseñado como una plataforma integral de análisis 
 
 A continuación se presenta el flujo de datos desde la interacción del usuario hasta la persistencia y el procesamiento de IA:
 
-![Diagrama de arquitectura de ContractIA](../../../assets/arquitectura/01-vision-global/arquitectura-global.svg)
+![Diagrama de arquitectura de ContractIA](../../../../assets/arquitectura/01-vision-global/arquitectura-global.svg)
 
 ## Descripción de los Flujos de Trabajo
 
 La arquitectura se articula a través de tres flujos operativos principales, diferenciados por su propósito y las tecnologías involucradas:
 
-### A. Flujo de Ingesta y Procesamiento (Naranja)
+### Flujo de Ingesta y Procesamiento (Naranja)
 
 Este flujo transforma documentos no estructurados en datos procesables para la IA:
 
@@ -23,7 +23,7 @@ Este flujo transforma documentos no estructurados en datos procesables para la I
 2. **Parsing Legal:** El módulo de **Procesamiento Documental (LlamaIndex)** delega a **LlamaParse** la conversión del PDF a Markdown, preservando la estructura de tablas y cláusulas.
 3. **Persistencia Dual:** Los **Metadatos** del archivo se registran en **PostgreSQL**, mientras que el contenido se fragmenta y se almacena como **Vectores** en **Qdrant** para habilitar la búsqueda semántica.
 
-### B. Flujo Conversacional y RAG (Azul)
+### Flujo Conversacional y RAG (Azul)
 
 Permite la interacción en lenguaje natural sobre el contenido de los contratos:
 
@@ -31,7 +31,7 @@ Permite la interacción en lenguaje natural sobre el contenido de los contratos:
 2. **Orquestación:** El **Flujo Conversacional (LangGraph)** gestiona el estado de la charla y decide cuándo recuperar información.
 3. **Recuperación y Generación:** Se realiza un *Context Retrieval* desde **Qdrant** y se envía, junto al historial de **PostgreSQL**, a los modelos **Gemini** para generar una respuesta fundamentada.
 
-### C. Flujo de Acceso y Seguridad (Verde)
+### Flujo de Acceso y Seguridad (Verde)
 
 Garantiza la integridad y privacidad de la información legal:
 

@@ -7,6 +7,10 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'ContractIA',
+			defaultLocale: 'es',
+			locales: {
+				es: { label: 'Español'},
+			},
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/NickSalA/ContractIA' }],
 			sidebar: [
 				{
