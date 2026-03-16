@@ -80,7 +80,7 @@ Para mantener la uniformidad en el repositorio, se utilizará **Pylint** como li
 
 ## Estándares de Commits y Versionado Semántico
 
-Se adopta la convención de **Conventional Commits**, vinculada directamente a la evolución de la versión del software:
+Se adopta la convención de **Conventional Commits**, para los prefijos vinculada directamente a la evolución de la versión del software:
 
 * `fix:` Aumenta la versión en `0.0.1` (Corrección de bugs).
 * `feat:` Aumenta la versión en `0.1.0` (Nueva funcionalidad).
@@ -90,6 +90,12 @@ Se adopta la convención de **Conventional Commits**, vinculada directamente a l
 * `refactor:` Refactorización del código (mejora interna sin agregar/quitar funcionalidad).
 * `chore:` Tareas relacionadas a CI/CD, dependencias o mantenimiento.
 * `test:` Alteraciones o adición de pruebas.
+
+Posteriormente, para el asunto del commit se adopta la convención de **Git Commit Guidelines** para el mensaje del commit:
+
+* Usa el imperativo (_create_, no _created_).
+* Empieza con minúscula.
+* No tiene punto final.
 
 ## Estándar de Reporte de Logs
 
