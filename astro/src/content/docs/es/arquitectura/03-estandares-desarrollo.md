@@ -85,7 +85,12 @@ Para mantener la uniformidad, el rendimiento y la reproducibilidad en el reposit
 
 ## Estándares de Commits y Versionado Semántico
 
-Se adopta la convención de **Conventional Commits**, para los prefijos vinculada directamente a la evolución de la versión del software:
+Para garantizar un historial limpio y automatizar el versionado, el proyecto adopta la convención de **Conventional Commits** complementada con las **Git Commit Guidelines**, utilizando **Commitizen** como herramienta principal para orquestar este flujo.
+
+### Reglas de Nomenclatura
+
+**1. Prefijos Permitidos:**
+Los prefijos definen la intención del cambio y están vinculados directamente a la evolución de la versión del software:
 
 * `fix:` Aumenta la versión en `0.0.1` (Corrección de bugs).
 * `feat:` Aumenta la versión en `0.1.0` (Nueva funcionalidad).
@@ -94,13 +99,23 @@ Se adopta la convención de **Conventional Commits**, para los prefijos vinculad
 * `docs:` Cambios en la documentación (ej. actualización del SDD).
 * `refactor:` Refactorización del código (mejora interna sin agregar/quitar funcionalidad).
 * `chore:` Tareas relacionadas a CI/CD, dependencias o mantenimiento.
+* `ci:` Cambios en la configuración de integración y despliegue continuo (GitHub Actions, Railway).
 * `test:` Alteraciones o adición de pruebas.
 
-Posteriormente, para el asunto del commit se adopta la convención de **Git Commit Guidelines** para el mensaje del commit:
+**2. Asunto del Commit:**
+Posteriormente al prefijo, el mensaje descriptivo del commit debe seguir estrictamente estas pautas:
 
-* Usa el imperativo (*create*, no *created*).
+* Usa el imperativo (*create*, *add*, *fix*; no *created*, *added*, *fixed*).
 * Empieza con minúscula.
 * No tiene punto final.
+
+### Automatización con Commitizen
+
+Para eliminar el error humano y aplicar las reglas anteriores sin fricción, el flujo de control de versiones se apoya en **Commitizen**:
+
+* **Asistente de Commits (`cz commit`):** En lugar de redactar los mensajes manualmente, los desarrolladores utilizan este comando interactivo que los guía paso a paso para elegir el prefijo correcto e ingresar el asunto bajo el estándar requerido.
+* **Cálculo Inteligente de Versiones (`cz bump`):** La herramienta escanea el historial de prefijos y calcula automáticamente el salto de versión semántica (SemVer), actualizando directamente el archivo `pyproject.toml`.
+* **Generación de Changelog:** Con cada salto de versión, Commitizen genera y actualiza automáticamente el archivo `CHANGELOG.md`, agrupando las mejoras y correcciones por categorías para proveer un registro claro de las novedades sin tener que inspeccionar el código.
 
 ## Estándar de Reporte de Logs
 
