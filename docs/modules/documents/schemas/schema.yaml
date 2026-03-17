@@ -83,6 +83,10 @@ DocumentResponse:
       type: integer
       description: El número de licencias asociadas al documento.
       example: 5
+    state:
+      type: string
+      description: El estado actual del documento (e.g., activo, vencido).
+      example: activo
     # filename:
     #   type: string
     #   description: El nombre del archivo subido.
@@ -100,6 +104,7 @@ DocumentResponse:
     - end_date
     - value
     - licenses
+    - state
 
 DocumentListResponse:
   type: array
@@ -141,6 +146,10 @@ DocumentListResponse:
         type: integer
         description: El número de licencias asociadas al documento.
         example: 5
+      state:
+        type: string
+        description: El estado actual del documento (e.g., activo, vencido).
+        example: activo
       # filename:
       #   type: string
       #   description: El nombre del archivo subido.
@@ -158,3 +167,4 @@ DocumentListResponse:
       - end_date
       - value
       - licenses
+      - state
