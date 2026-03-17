@@ -13,6 +13,10 @@ post:
   responses:
     '201':
       description: Documento subido satisfactoriamente
+      content:
+        application/json:
+          schema:
+            $ref: '../../documents/schemas/schema.yaml#/DocumentResponse'
     '400':
       description: Bad Request
       content:

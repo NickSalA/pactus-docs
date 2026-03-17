@@ -7,6 +7,32 @@ DocumentCreateRequest:
   required:
     - file
 
+DocumentResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+      description: El identificador único del documento.
+      example: 1
+    filename:
+      type: string
+      description: El nombre del archivo subido.
+      example: contrato.pdf
+    size:
+      type: integer
+      description: El tamaño del archivo en bytes.
+      example: 204800
+    uploaded_at:
+      type: string
+      format: date-time
+      description: La fecha y hora en que se subió el documento.
+      example: 2024-06-01T12:00:00Z
+  required:
+    - id
+    - filename
+    - size
+    - uploaded_at
+
 DocumentListResponse:
   type: array
   items:
@@ -29,3 +55,8 @@ DocumentListResponse:
         format: date-time
         description: La fecha y hora en que se subió el documento.
         example: 2024-06-01T12:00:00Z
+    required:
+      - id
+      - filename
+      - size
+      - uploaded_at
