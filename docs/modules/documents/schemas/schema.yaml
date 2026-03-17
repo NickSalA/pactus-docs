@@ -4,8 +4,46 @@ DocumentCreateRequest:
     file:
       type: string
       format: binary
+    name:
+      type: string
+      description: El nombre del documento.
+      example: Plataforma Corporativa Pro
+    client:
+      type: string
+      description: El nombre del cliente asociado al documento.
+      example: Acme Corp
+    type:
+      type: string
+      description: El tipo de documento (e.g., contrato, factura).
+      example: Servicios
+    start_date:
+      type: string
+      format: date
+      description: La fecha de inicio del contrato o documento.
+      example: 2024-01-01
+    end_date:
+      type: string
+      format: date
+      description: La fecha de finalización del contrato o documento.
+      example: 2024-12-31
+    value:
+      type: number
+      format: float
+      description: El valor monetario asociado al documento.
+      example: 10000.00
+    licenses:
+      type: integer
+      description: El número de licencias asociadas al documento.
+      example: 5
   required:
     - file
+    - name
+    - client
+    - type
+    - start_date
+    - end_date
+    - value
+    - licenses
 
 DocumentResponse:
   type: object
