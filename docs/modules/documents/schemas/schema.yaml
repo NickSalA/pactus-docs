@@ -52,24 +52,54 @@ DocumentResponse:
       type: integer
       description: El identificador único del documento.
       example: 1
-    filename:
+    name:
       type: string
-      description: El nombre del archivo subido.
-      example: contrato.pdf
-    size:
+      description: El nombre del documento.
+      example: Plataforma Corporativa Pro
+    client:
+      type: string
+      description: El nombre del cliente asociado al documento.
+      example: Acme Corp
+    type:
+      type: string
+      description: El tipo de documento (e.g., contrato, factura).
+      example: Servicios
+    start_date:
+      type: string
+      format: date
+      description: La fecha de inicio del contrato o documento.
+      example: 2024-01-01
+    end_date:
+      type: string
+      format: date
+      description: La fecha de finalización del contrato o documento.
+      example: 2024-12-31
+    value:
+      type: number
+      format: float
+      description: El valor monetario asociado al documento.
+      example: 10000.00
+    licenses:
       type: integer
-      description: El tamaño del archivo en bytes.
-      example: 204800
-    uploaded_at:
-      type: string
-      format: date-time
-      description: La fecha y hora en que se subió el documento.
-      example: 2024-06-01T12:00:00Z
+      description: El número de licencias asociadas al documento.
+      example: 5
+    # filename:
+    #   type: string
+    #   description: El nombre del archivo subido.
+    #   example: contrato.pdf
+    # size:
+    #   type: integer
+    #   description: El tamaño del archivo en bytes.
+    #   example: 204800
   required:
     - id
-    - filename
-    - size
-    - uploaded_at
+    - name
+    - client
+    - type
+    - start_date
+    - end_date
+    - value
+    - licenses
 
 DocumentListResponse:
   type: array
@@ -80,21 +110,51 @@ DocumentListResponse:
         type: integer
         description: El identificador único del documento.
         example: 1
-      filename:
+      name:
         type: string
-        description: El nombre del archivo subido.
-        example: contrato.pdf
-      size:
+        description: El nombre del documento.
+        example: Plataforma Corporativa Pro
+      client:
+        type: string
+        description: El nombre del cliente asociado al documento.
+        example: Acme Corp
+      type:
+        type: string
+        description: El tipo de documento (e.g., contrato, factura).
+        example: Servicios
+      start_date:
+        type: string
+        format: date
+        description: La fecha de inicio del contrato o documento.
+        example: 2024-01-01
+      end_date:
+        type: string
+        format: date
+        description: La fecha de finalización del contrato o documento.
+        example: 2024-12-31
+      value:
+        type: number
+        format: float
+        description: El valor monetario asociado al documento.
+        example: 10000.00
+      licenses:
         type: integer
-        description: El tamaño del archivo en bytes.
-        example: 204800
-      uploaded_at:
-        type: string
-        format: date-time
-        description: La fecha y hora en que se subió el documento.
-        example: 2024-06-01T12:00:00Z
+        description: El número de licencias asociadas al documento.
+        example: 5
+      # filename:
+      #   type: string
+      #   description: El nombre del archivo subido.
+      #   example: contrato.pdf
+      # size:
+      #   type: integer
+      #   description: El tamaño del archivo en bytes.
+      #   example: 204800
     required:
       - id
-      - filename
-      - size
-      - uploaded_at
+      - name
+      - client
+      - type
+      - start_date
+      - end_date
+      - value
+      - licenses
