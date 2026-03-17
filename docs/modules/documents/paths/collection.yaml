@@ -79,13 +79,23 @@ get:
               summary: Ejemplo con dos documentos
               value:
                 - id: 1
-                  filename: contrato1.pdf
-                  size: 204800
-                  uploaded_at: '2024-06-01T12:00:00Z'
+                  name: Contrato de arrendamiento
+                  client: Acme Corp
+                  type: SOPORTE
+                  start_date: '2024-01-01'
+                  end_date: '2025-01-01'
+                  licenses: 5
+                  value: 10000
+                  state: ACTIVO
                 - id: 2
-                  filename: contrato2.pdf
-                  size: 102400
-                  uploaded_at: '2024-06-02T15:30:00Z'
+                  name: Factura de servicios
+                  client: Beta LLC
+                  type: SERVICIOS
+                  start_date: '2024-02-01'
+                  end_date: '2024-02-28'
+                  value: 2000
+                  licenses: 0
+                  state: EXPIRADO
     '401':
       description: Unauthorized
       content:

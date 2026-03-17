@@ -1,3 +1,17 @@
+components:
+  schemas:
+    DocumentType:
+      type: string
+      enum: [SERVICIOS, LICENCIAS, SOPORTE]
+      description: El tipo de documento (e.g., servicios, licencias).
+      example: SERVICIOS
+
+    DocumentState:
+      type: string
+      enum: [ACTIVO, POR_VENCER, EXPIRADO]
+      description: El estado actual del documento (e.g., activo, expirado).
+      example: ACTIVO
+
 DocumentCreateRequest:
   type: object
   properties:
@@ -13,9 +27,7 @@ DocumentCreateRequest:
       description: El nombre del cliente asociado al documento.
       example: Acme Corp
     type:
-      type: string
-      description: El tipo de documento (e.g., contrato, factura).
-      example: Servicios
+      $ref: '#/components/schemas/DocumentType'
     start_date:
       type: string
       format: date
@@ -61,9 +73,7 @@ DocumentResponse:
       description: El nombre del cliente asociado al documento.
       example: Acme Corp
     type:
-      type: string
-      description: El tipo de documento (e.g., contrato, factura).
-      example: Servicios
+      $ref: '#/components/schemas/DocumentType'
     start_date:
       type: string
       format: date
@@ -84,9 +94,7 @@ DocumentResponse:
       description: El número de licencias asociadas al documento.
       example: 5
     state:
-      type: string
-      description: El estado actual del documento (e.g., activo, vencido).
-      example: activo
+      $ref: '#/components/schemas/DocumentState'
     # filename:
     #   type: string
     #   description: El nombre del archivo subido.
@@ -124,9 +132,7 @@ DocumentListResponse:
         description: El nombre del cliente asociado al documento.
         example: Acme Corp
       type:
-        type: string
-        description: El tipo de documento (e.g., contrato, factura).
-        example: Servicios
+        $ref: '#/components/schemas/DocumentType'
       start_date:
         type: string
         format: date
@@ -147,9 +153,7 @@ DocumentListResponse:
         description: El número de licencias asociadas al documento.
         example: 5
       state:
-        type: string
-        description: El estado actual del documento (e.g., activo, vencido).
-        example: activo
+        $ref: '#/components/schemas/DocumentState'
       # filename:
       #   type: string
       #   description: El nombre del archivo subido.
