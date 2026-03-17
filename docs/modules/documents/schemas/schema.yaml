@@ -43,6 +43,10 @@ DocumentCreateRequest:
       format: float
       description: El valor monetario asociado al documento.
       example: 10000.00
+    currency:
+      type: string
+      description: La moneda del valor monetario (e.g., USD, EUR).
+      example: USD
     licenses:
       type: integer
       description: El número de licencias asociadas al documento.
@@ -55,6 +59,7 @@ DocumentCreateRequest:
     - start_date
     - end_date
     - value
+    - currency
     - licenses
 
 DocumentResponse:
@@ -89,6 +94,10 @@ DocumentResponse:
       format: float
       description: El valor monetario asociado al documento.
       example: 10000.00
+    currency:
+      type: string
+      description: La moneda del valor monetario (e.g., USD, EUR).
+      example: USD
     licenses:
       type: integer
       description: El número de licencias asociadas al documento.
@@ -111,6 +120,7 @@ DocumentResponse:
     - start_date
     - end_date
     - value
+    - currency
     - licenses
     - state
 
@@ -148,6 +158,10 @@ DocumentListResponse:
         format: float
         description: El valor monetario asociado al documento.
         example: 10000.00
+      currency:
+        type: string
+        description: La moneda del valor monetario (e.g., USD, EUR).
+        example: USD
       licenses:
         type: integer
         description: El número de licencias asociadas al documento.
@@ -170,5 +184,6 @@ DocumentListResponse:
       - start_date
       - end_date
       - value
+      - currency
       - licenses
       - state
