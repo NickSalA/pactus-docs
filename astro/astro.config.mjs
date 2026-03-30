@@ -14,6 +14,10 @@ export default defineConfig({
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/NickSalA/ContractIA' }],
 			sidebar: [
 				{
+					label: 'Producto',
+					autogenerate: { directory: 'producto' },
+				},
+				{
 					label: 'Arquitectura',
 					autogenerate: { directory: 'arquitectura' },
 				},

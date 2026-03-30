@@ -7,8 +7,8 @@ hero:
   image:
     file: ../../../assets/logo.png
   actions:
-    - text: Ver Arquitectura Global
-      link: /es/arquitectura/01-vision-global/
+    - text: Introducción al Sistema
+      link: /es/producto/01-definicion/
       icon: right-arrow
     - text: Ir al Repositorio
       link: https://github.com/NickSalA/ContractIA
@@ -21,6 +21,9 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 ## Secciones del SDD
 
 <CardGrid stagger>
+	<Card title="Producto y Alcance" icon="open-book">
+		Definición del sistema, visión del producto y funcionalidades clave como el Agente IA y el Dashboard.
+	</Card>
 	<Card title="Arquitectura y Stack" icon="setting">
 		Justificación técnica del stack, diagramas de infraestructura (Vercel + Railway) y flujo de datos del sistema.
 	</Card>
