@@ -34,6 +34,12 @@ tags:
     description: Operaciones para la gestión de documentos.
   - name: Conversaciones
     description: Operaciones para la gestión de conversaciones.
+  - name: Integraciones
+    description: Operaciones para la integración con servicios de terceros (Google Drive).
+  - name: Notificaciones
+    description: Operaciones para la gestión de alertas y notificaciones.
+  - name: Plantillas
+    description: Operaciones para la gestión y generación de documentos mediante plantillas.
 
 paths:
   /login:
@@ -52,3 +58,17 @@ paths:
     $ref: 'modules/conversations/paths/collection.yaml'
   /conversations/{id}:
     $ref: 'modules/conversations/paths/item.yaml'
+  /integrations/drive/auth-url:
+    $ref: 'modules/integrations/paths/auth-url.yaml'
+  /integrations/drive/callback:
+    $ref: 'modules/integrations/paths/callback.yaml'
+  /integrations/drive/import:
+    $ref: 'modules/integrations/paths/import.yaml'
+  /notifications:
+    $ref: 'modules/notifications/paths.yaml'
+  /templates:
+    $ref: 'modules/templates/paths/collection.yaml'
+  /templates/{template_id}:
+    $ref: 'modules/templates/paths/item.yaml'
+  /templates/{template_id}/generate:
+    $ref: 'modules/templates/paths/generate.yaml'

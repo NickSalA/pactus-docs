@@ -1,0 +1,24 @@
+get:
+  tags:
+    - Integraciones
+  summary: Intercambiar código de Google por tokens.
+  operationId: exchangeDriveCode
+  parameters:
+    - name: code
+      in: query
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Tokens obtenidos con éxito.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/TokenResponse'
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'

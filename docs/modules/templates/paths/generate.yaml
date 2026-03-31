@@ -1,0 +1,32 @@
+parameters:
+  - name: template_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID de la plantilla
+
+post:
+  summary: Generar un contrato a partir de la plantilla.
+  operationId: generateTemplateDocument
+  tags:
+    - Plantillas
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+  responses:
+    '201':
+      description: Documento generado.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/GeneratedDocumentResponse'
+    '404':
+      description: Template Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

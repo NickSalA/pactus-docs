@@ -1,0 +1,16 @@
+NotificationResponse:
+  type: object
+  properties:
+    id:
+      type: string
+    document_id:
+      type: integer
+    type:
+      type: string
+      enum: [INFO, WARNING, CRITICAL]
+    title:
+      type: string
+    description:
+      type: string
+    days_remaining:
+      type: integer

@@ -1,0 +1,58 @@
+AuthURLResponse:
+  type: object
+  properties:
+    url:
+      type: string
+TokenResponse:
+  type: object
+  properties:
+    token:
+      type: string
+    refresh_token:
+      type: string
+      nullable: true
+    token_uri:
+      type: string
+    client_id:
+      type: string
+    client_secret:
+      type: string
+    scopes:
+      type: array
+      items:
+        type: string
+DriveRequest:
+  type: object
+  properties:
+    token:
+      type: object
+ImportRequest:
+  type: object
+  properties:
+    token:
+      type: object
+    files:
+      type: array
+      items:
+        $ref: '#/DriveImportFile'
+DriveImportFile:
+  type: object
+  properties:
+    file_id:
+      type: string
+    document:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+ImportResponse:
+  type: object
+  properties:
+    message:
+      type: string
+    queued_files:
+      type: integer
+    index_name:
+      type: string

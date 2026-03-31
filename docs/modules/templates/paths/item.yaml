@@ -1,0 +1,26 @@
+parameters:
+  - name: template_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID de la plantilla
+
+get:
+  tags:
+    - Plantillas
+  summary: Obtener detalles de una plantilla.
+  operationId: getTemplate
+  responses:
+    '200':
+      description: Detalle de la plantilla.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/TemplateResponse'
+    '404':
+      description: Template Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

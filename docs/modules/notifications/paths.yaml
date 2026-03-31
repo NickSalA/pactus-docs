@@ -1,0 +1,41 @@
+get:
+  tags:
+    - Notificaciones
+  summary: Consultar notificaciones de contratos próximos a vencer.
+  operationId: listNotifications
+  responses:
+    '200':
+      description: Lista de notificaciones obtenida.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: './schemas/schema.yaml#/NotificationResponse'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/errors.yaml#/AuthenticationError'
+post:
+  tags:
+    - Notificaciones
+  summary: Enviar correos de alerta manuales.
+  operationId: sendNotificationAlerts
+  responses:
+    '200':
+      description: Alertas enviadas.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              emails_sent:
+                type: integer
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/errors.yaml#/AuthenticationError'

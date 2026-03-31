@@ -1,0 +1,20 @@
+get:
+  tags:
+    - Plantillas
+  summary: Listar todas las plantillas de la organización.
+  operationId: listTemplates
+  responses:
+    '200':
+      description: Lista de plantillas.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/TemplateResponse'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/AuthenticationError'

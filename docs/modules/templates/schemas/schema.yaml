@@ -1,0 +1,26 @@
+TemplateResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    description:
+      type: string
+      nullable: true
+    content:
+      type: object
+      properties:
+        body_md:
+          type: string
+GeneratedDocumentResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    file_url:
+      type: string
+    client:
+      type: string
