@@ -14,41 +14,34 @@ A nivel de ingeniería, el proyecto se respalda en la redacción de este **SDD (
 
 El sistema se concibe como un **Monolito Modular**, enfocado en la separación estricta de funciones tanto en el servidor como en el cliente.
 
-### Backend: Arquitectura Hexagonal (FastAPI)
+### Backend: Arquitectura Cebolla (Onion Architecture)
 
-El principio fundamental es que la lógica de negocio no debe depender de ningún framework externo, base de datos o API de terceros. La comunicación entre capas se realiza mediante inyección de dependencias.
+El sistema implementa una **Arquitectura Cebolla (Onion Architecture)** modularizada. El principio fundamental es la **Regla de Dependencia**, donde las capas externas pueden depender de las capas internas, pero las internas nunca conocen nada de las externas. Esto garantiza que el núcleo de negocio sea independiente de frameworks, bases de datos o servicios externos.
 
-El proyecto se dividirá en tres capas principales:
+El proyecto se organiza en capas concéntricas que se replican dentro de cada módulo funcional:
 
-* **Domain (Dominio):** Contiene las entidades puras del sistema y las interfaces (contratos). Aquí vivirán los modelos base de Pydantic y las clases de SQLModel que representan los conceptos centrales (Usuario, Contrato, Chat). No importa librerías externas.
-* **Application (Aplicación):** Contiene los casos de uso y la lógica de negocio. Aquí es donde reside la orquestación del agente de LangGraph y los flujos de "Preguntar al Contrato" o "Procesar PDF".
-* **Infrastructure (Infraestructura):** Es la capa más externa. Contiene los adaptadores que conectan la aplicación con el mundo real:
-
-  * **Controladores:** Los *Routers* de FastAPI (`/api/v1/chat`).
-  * **Repositorios:** La conexión real a PostgreSQL y las consultas SQLModel.
-  * **Servicios Externos:** Los clientes para conectarse a LlamaParse, Voyage AI, Qdrant y la API de Gemini.
+* **Domain (Dominio):** El centro de la cebolla. Contiene las entidades puras, interfaces (contratos) y lógica de negocio central. Es código Python puro sin dependencias externas.
+* **Application (Aplicación):** Envuelve al dominio y define los casos de uso. Aquí reside la orquestación (como los flujos de LangGraph) y la lógica de los servicios que coordinan el dominio.
+* **Infrastructure (Infraestructura):** Implementa las interfaces definidas en el dominio. Aquí se encuentran los adaptadores reales para PostgreSQL (SQLModel), Qdrant, y clientes de servicios como Gemini o LlamaParse.
+* **API / Presentation:** La capa más externa. Contiene los *routers* de FastAPI, esquemas de validación de entrada/salida y manejo de peticiones HTTP.
 
 ```text
 /
 ├── pyproject.toml
-├── tests/
-└── src/
-    └── contractai_backend/
-        ├── core/                 # Configuraciones globales y variables de entorno
-        ├── shared/               # Utilidades compartidas y helpers genéricos
-        └── modules/
-        │   └── users/
-        │       ├── domain/           # Entidades y Modelos (Pydantic / SQLModel base)
-        │       │   ├── models/           
-        │       │   └── interfaces/       
-        │       ├── application/      # Lógica de Negocio y Casos de Uso
-        │       │   ├── use_cases/        
-        │       │   └── agent/        # Orquestación de LangGraph (Nodos, Grafo)
-        │       ├── infrastructure/   # Adaptadores Externos
-        │       │   ├── database/     # Configuración de PostgreSQL y Qdrant
-        │       │   └── services/     # Clientes de IA (Gemini, LlamaParse, Voyage AI)
-        │       └─── api/              # Routers de FastAPI y Dependencias
-        └── main.py           # Punto de entrada de FastAPI
+├── src/
+│   └── contractai_backend/
+│       ├── core/                 # Componentes transversales del sistema
+│       │   ├── domain/           # Entidades base y excepciones core
+│       │   ├── application/      # Lógica transversal
+│       │   └── infrastructure/   # Implementaciones base
+│       ├── shared/               # Configuración global, logger y utilidades
+│       └── modules/              # Módulos de negocio aislados
+│           └── <modulo>/         # Ejemplo: chatbot, documents, users
+│               ├── domain/       # Entidades e interfaces del módulo
+│               ├── application/  # Casos de uso y servicios de aplicación
+│               ├── infrastructure/# Adaptadores (DB, clientes externos)
+│               └── api/          # Routers de FastAPI y Schemas
+└── tests/                        # Pruebas unitarias e integración por módulo
 ```
 
 ### Frontend: Patrón de Separación de Lógica (Next.js)
@@ -85,37 +78,29 @@ Para mantener la uniformidad, el rendimiento y la reproducibilidad en el reposit
 
 ## Estándares de Commits y Versionado Semántico
 
-Para garantizar un historial limpio y automatizar el versionado, el proyecto adopta la convención de **Conventional Commits** complementada con las **Git Commit Guidelines**, utilizando **Commitizen** como herramienta principal para orquestar este flujo.
+Para garantizar un historial limpio y facilitar el seguimiento de cambios, el proyecto adopta la convención de **Conventional Commits**. Esto permite estandarizar los mensajes de commit y entender rápidamente el impacto de cada cambio en el sistema.
 
 ### Reglas de Nomenclatura
 
 **1. Prefijos Permitidos:**
-Los prefijos definen la intención del cambio y están vinculados directamente a la evolución de la versión del software:
+Los prefijos definen la intención del cambio y ayudan a determinar la evolución de la versión del software (SemVer):
 
-* `fix:` Aumenta la versión en `0.0.1` (Corrección de bugs).
-* `feat:` Aumenta la versión en `0.1.0` (Nueva funcionalidad).
-* `feat!:` Aumenta la versión a `1.0.0` (Cambio de arquitectura que rompe la compatibilidad).
+* `fix:` Corrección de errores (equivale a un parche).
+* `feat:` Nueva funcionalidad (equivale a una versión minor).
+* `feat!:` Cambio importante que rompe la compatibilidad (equivale a una versión major).
 * `style:` Cambios en el formato o estilo del código (no afecta la lógica).
-* `docs:` Cambios en la documentación (ej. actualización del SDD).
-* `refactor:` Refactorización del código (mejora interna sin agregar/quitar funcionalidad).
-* `chore:` Tareas relacionadas a CI/CD, dependencias o mantenimiento.
-* `ci:` Cambios en la configuración de integración y despliegue continuo (GitHub Actions, Railway).
-* `test:` Alteraciones o adición de pruebas.
+* `docs:` Cambios en la documentación.
+* `refactor:` Mejora interna del código sin cambiar su comportamiento externo.
+* `chore:` Tareas de mantenimiento, dependencias o herramientas de desarrollo.
+* `ci:` Cambios en la configuración de integración y despliegue continuo.
+* `test:` Adición o modificación de pruebas.
 
 **2. Asunto del Commit:**
-Posteriormente al prefijo, el mensaje descriptivo del commit debe seguir estrictamente estas pautas:
+El mensaje debe seguir estas pautas:
 
-* Usa el imperativo (*create*, *add*, *fix*; no *created*, *added*, *fixed*).
+* Usa el imperativo (*add*, *fix*, *remove*).
 * Empieza con minúscula.
 * No tiene punto final.
-
-### Automatización con Commitizen
-
-Para eliminar el error humano y aplicar las reglas anteriores sin fricción, el flujo de control de versiones se apoya en **Commitizen**:
-
-* **Asistente de Commits (`cz commit`):** En lugar de redactar los mensajes manualmente, los desarrolladores utilizan este comando interactivo que los guía paso a paso para elegir el prefijo correcto e ingresar el asunto bajo el estándar requerido.
-* **Cálculo Inteligente de Versiones (`cz bump`):** La herramienta escanea el historial de prefijos y calcula automáticamente el salto de versión semántica (SemVer), actualizando directamente el archivo `pyproject.toml`.
-* **Generación de Changelog:** Con cada salto de versión, Commitizen genera y actualiza automáticamente el archivo `CHANGELOG.md`, agrupando las mejoras y correcciones por categorías para proveer un registro claro de las novedades sin tener que inspeccionar el código.
 
 ## Estándar de Reporte de Logs
 
