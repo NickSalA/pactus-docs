@@ -1,0 +1,19 @@
+OrganizationResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    is_active:
+      type: boolean
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - name
+    - is_active

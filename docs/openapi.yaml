@@ -44,8 +44,6 @@ tags:
 paths:
   /user/me:
     $ref: 'modules/users/paths/me.yaml'
-  /user:
-    $ref: 'modules/users/paths/collection.yaml'
   /user/{id}:
     $ref:  'modules/users/paths/item.yaml'
   /chatbot:
