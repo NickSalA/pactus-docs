@@ -77,3 +77,20 @@ UserListResponse:
       - id
       - email
       - role
+
+CurrentUserResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    email:
+      type: string
+    organization_id:
+      type: integer
+    role:
+      type: string
+  required:
+    - id
+    - email
+    - organization_id
+    - role

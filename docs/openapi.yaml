@@ -42,8 +42,8 @@ tags:
     description: Operaciones para la gestión y generación de documentos mediante plantillas.
 
 paths:
-  /login:
-    $ref: 'modules/login/paths.yaml'
+  /user/me:
+    $ref: 'modules/users/paths/me.yaml'
   /user:
     $ref: 'modules/users/paths/collection.yaml'
   /user/{id}:

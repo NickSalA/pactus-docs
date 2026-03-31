@@ -1,0 +1,17 @@
+get:
+  summary: Obtener perfil del usuario actual
+  description: Retorna la información del usuario autenticado a partir del token Bearer JWT.
+  operationId: getMe
+  tags:
+    - Usuarios
+  security:
+    - BearerAuth: []
+  responses:
+    '200':
+      description: Perfil del usuario obtenido con éxito.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/CurrentUserResponse'
+    '401':
+      description: No autorizado (token inválido o expirado).
