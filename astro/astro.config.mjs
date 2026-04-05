@@ -30,6 +30,10 @@ export default defineConfig({
 					autogenerate: { directory: 'backend' },
 				},
 				{
+					label: 'Base de Datos',
+					autogenerate: { directory: 'base-datos' },
+				},
+				{
 					label: 'IA y Datos',
 					autogenerate: { directory: 'ia' },
 				},
