@@ -16,6 +16,7 @@ El esquema `public` concentra las tablas que modelan el dominio principal de Con
 | `documents_services` | Detalle economico y contractual por documento/servicio | `id` |
 | `conversations` | Historial conversacional visible para la aplicacion | `id` |
 | `document_templates` | Plantillas usadas para generacion documental | `id` |
+| `notification_rules` | Reglas de alerta por organizacion o por contrato | `id` |
 
 ## `public.organizations`
 
@@ -30,6 +31,7 @@ Es la tabla raiz del dominio. Desde aqui se organiza el aislamiento por empresa 
 - `services.organization_id -> organizations.id`
 - `conversations.organization_id -> organizations.id`
 - `document_templates.organization_id -> organizations.id`
+- `notification_rules.organization_id -> organizations.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -74,10 +76,24 @@ Esta tabla conserva el usuario funcional del sistema. Complementa a `auth.users`
 | `email` | `varchar` | Correo del usuario |
 | `full_name` | `varchar` | Nombre mostrado en la aplicacion |
 | `avatar_url` | `text` | Referencia visual del usuario |
-| `role` | `user_role` | Rol de aplicacion: `WORKER`, `ADMIN` |
+| `role` | `user_role` | Rol de aplicacion: `WORKER`, `HR`, `MANAGER`, `ADMIN` |
+| `receives_notifications` | `boolean` | Indica si el usuario recibe alertas de contratos |
 | `is_active` | `boolean` | Estado logico del usuario |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+### Semantica de `user_role`
+
+El enum `user_role` permite distinguir el alcance funcional esperado de cada usuario dentro de la aplicacion.
+
+- `WORKER`: usuario de consulta general. Puede revisar informacion operativa del sistema, pero no carga contratos, no los edita y no tiene acceso a la metadata financiera.
+- `HR`: usuario de recursos humanos. Puede cargar y dar seguimiento a contratos vinculados a trabajadores o personal y tiene acceso a metadata financiera de los trabajadores o personal.
+- `MANAGER`: usuario de gestion contractual. Puede cargar, editar y administrar contratos, ademas de consultar metadata financiera y datos estructurados ampliados.
+- `ADMIN`: usuario con control total. Puede administrar usuarios, configuraciones, facturacion, reglas operativas y supervision general de la plataforma.
+
+### Rol de `receives_notifications`
+
+El campo `receives_notifications` no reemplaza al rol, sino que lo complementa. Su objetivo es indicar si un usuario debe recibir alertas de vencimiento, independientemente del `user_role` que tenga asignado.
 
 ## `public.documents`
 
@@ -95,15 +111,33 @@ Guarda la cabecera del documento y la referencia al archivo asociado. El detalle
 | `organization_id` | `bigint` | Organizacion propietaria |
 | `name` | `varchar` | Nombre del documento |
 | `client` | `varchar` | Cliente asociado |
-| `type` | `document_type` | Tipo documental: `SERVICES`, `LICENSES`, `SUPPORT` |
+| `type` | `document_type` | Tipo documental: `COMPANY`, `LABOR` |
 | `start_date` | `date` | Inicio del periodo contractual |
 | `end_date` | `date` | Fin del periodo contractual |
 | `form_data` | `jsonb` | Estructura flexible con datos complementarios del documento |
-| `state` | `document_state` | Estado documental: `ACTIVE`, `PENDING`, `EXPIRED` |
+| `state` | `document_state` | Estado documental: `DRAFT`, `PENDING_SIGNATURE`, `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `TERMINATED` |
 | `file_path` | `text` | Ruta tecnica del archivo en Storage |
 | `file_name` | `text` | Nombre del archivo asociado |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+### Semantica de `document_type`
+
+El enum `document_type` separa la naturaleza general del contrato dentro del dominio.
+
+- `COMPANY`: contrato corporativo, comercial o institucional.
+- `LABOR`: contrato laboral o asociado a trabajadores y gestion de personal.
+
+### Semantica de `document_state`
+
+El enum `document_state` describe la situacion operativa del contrato dentro de su ciclo de vida.
+
+- `DRAFT`: contrato en preparacion o pendiente de revision.
+- `PENDING_SIGNATURE`: contrato ya preparado para circular, pero aun pendiente de firma.
+- `ACTIVE`: contrato vigente y fuera de la ventana activa de alerta.
+- `EXPIRING_SOON`: contrato vigente que ya entro en una ventana de notificacion definida por las reglas activas.
+- `EXPIRED`: contrato cuya vigencia ya concluyo por fecha.
+- `TERMINATED`: contrato cerrado o finalizado antes de su vencimiento natural.
 
 ### Como se organiza la informacion del documento
 
@@ -209,7 +243,39 @@ Conserva las plantillas base que el sistema utiliza para generar contratos por o
 | `name` | `varchar` | Nombre de la plantilla |
 | `description` | `text` | Descripcion funcional |
 | `content` | `jsonb` | Estructura base para renderizar el contrato |
+| `state` | `document_template_state` | Estado de la plantilla: `DRAFT`, `PUBLISHED`, `ARCHIVED` |
 | `created_at` | `timestamptz` | Fecha de creacion |
+
+## `public.notification_rules`
+
+Define las ventanas de alerta de vencimiento para una organizacion o para un contrato puntual.
+
+**Clave primaria:** `id`
+
+**Claves foraneas:**
+
+- `organization_id -> organizations.id`
+- `document_id -> documents.id` (opcional)
+- `created_by -> users.id` (opcional)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad de la regla |
+| `organization_id` | `bigint` | Organizacion propietaria |
+| `document_id` | `bigint` | Contrato especifico al que aplica la regla; si es `null`, aplica como regla por defecto de la organizacion |
+| `days_before_due` | `integer` | Numero de dias previos al vencimiento que disparan la alerta |
+| `is_active` | `boolean` | Permite activar o desactivar la regla sin eliminarla |
+| `created_by` | `bigint` | Usuario que registro la regla |
+| `created_at` | `timestamptz` | Fecha de creacion |
+| `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+### Resolucion de reglas de alerta
+
+La aplicacion resuelve las alertas con este orden:
+
+- si un contrato tiene reglas activas propias, se usan esas
+- si no tiene, hereda las reglas activas de la organizacion
+- si no existe configuracion, el backend usa un fallback temporal compatible con la version actual
 
 ### Estructura utilizada en `content`
 
@@ -228,8 +294,8 @@ La documentacion OpenAPI y el modelo fisico actual no estan completamente alinea
 
 | Tema | API documentada | Base real en Supabase |
 |------|------------------|-----------------------|
-| Tipo de documento | `SERVICIOS`, `LICENCIAS`, `SOPORTE` | `SERVICES`, `LICENSES`, `SUPPORT` |
-| Estado de documento | `ACTIVO`, `POR_VENCER`, `EXPIRADO` | `ACTIVE`, `PENDING`, `EXPIRED` |
+| Tipo de documento | `Empresa`, `Trabajador` | `COMPANY`, `LABOR` |
+| Estado de documento | `Borrador`, `Pendiente de firma`, `Activo`, `Por vencer`, `Expirado`, `Terminado` | `DRAFT`, `PENDING_SIGNATURE`, `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `TERMINATED` |
 | Valor y moneda | En `DocumentResponse` | En `documents_services` y/o `form_data` |
 | Licencias | Campo expuesto por la API | No existe como columna en `public` |
 | Mensajes de conversacion | `sender` y `message` | `role`, `content`, `timestamp` |

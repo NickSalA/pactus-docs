@@ -58,11 +58,14 @@ Los campos mas importantes para ese objetivo son:
 
 - `organization_id`
 - `role`
+- `receives_notifications`
 - `full_name`
 - `avatar_url`
 - `is_active`
 
 Con esta separacion, el sistema puede autenticar a un usuario con Supabase y, al mismo tiempo, mantener su relacion con una organizacion, su rol y su estado dentro del producto.
+
+El campo `role` define el perfil funcional del usuario dentro de la aplicacion, mientras que `receives_notifications` indica si participa como destinatario de alertas contractuales. Ambos campos se complementan, pero cumplen responsabilidades distintas dentro del modelo.
 
 ## Organizacion de la Seguridad
 
@@ -106,4 +109,5 @@ Con esa base, ContractIA puede:
 - autenticar usuarios con Google sin construir un sistema propio de login
 - asociar cada usuario a una organizacion
 - controlar roles de aplicacion sin depender del esquema interno de Auth
+- decidir si un usuario recibe alertas contractuales con `receives_notifications`
 - mantener una estructura lista para evolucionar el control de acceso en siguientes iteraciones
