@@ -274,5 +274,3 @@ Variables necesarias para la autenticación:
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | API Key pública de Supabase |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Client ID de Google OAuth |
-
-
