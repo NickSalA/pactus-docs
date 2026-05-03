@@ -1,60 +1,60 @@
 ---
 title: Supabase Auth y Seguridad
-description: Como se integra Supabase Auth con el modelo de usuarios del sistema y como se organiza la seguridad en la aplicacion.
+description: Cómo se integra Supabase Auth con el modelo de usuarios del sistema y cuál es el estado actual de la seguridad de acceso.
 ---
 
-ContractIA utiliza **Supabase Auth** como capa de identidad y organiza la seguridad alrededor de dos niveles:
+ContractIA utiliza **Supabase Auth** como capa de identidad y organiza el acceso alrededor de dos niveles:
 
-- autenticacion y sesion con Google OAuth
-- control de acceso sobre las tablas de negocio del sistema
+- autenticación y sesión con Google OAuth
+- control de acceso del dominio desde `public.users`, `organization_id` y la lógica del backend
 
 ## Autenticacion con Supabase Auth
 
-La autenticacion del proyecto se implemento sobre Supabase Auth con **Google** como proveedor principal. Con esta configuracion, Supabase se encarga de la identidad del usuario, la sesion y el ciclo de vida del login.
+La autenticación del proyecto se implementa sobre Supabase Auth con **Google** como proveedor principal. Con esta configuración, Supabase se encarga de la identidad del usuario, la sesión y el ciclo de vida del login.
 
 El flujo implementado es el siguiente:
 
-1. El usuario inicia sesion desde el frontend.
+1. El usuario inicia sesión desde el frontend.
 2. Supabase gestiona el flujo OAuth con Google.
-3. La sesion autenticada queda registrada en el esquema `auth`.
+3. La sesión autenticada queda registrada en el esquema `auth`.
 4. La aplicacion vincula esa identidad con el usuario funcional del sistema.
 5. El frontend reutiliza la sesion para consumir la API protegida del backend.
 
 ## Tablas Principales del Esquema `auth`
 
-Dentro de Supabase Auth, las tablas mas relevantes para esta implementacion son las siguientes:
+Dentro de Supabase Auth, las tablas más relevantes para esta implementación son las siguientes:
 
 | Tabla | Funcion dentro del proyecto |
 |-------|-----------------------------|
 | `auth.users` | Identidad autenticada principal |
-| `auth.identities` | Proveedor de acceso y metadata asociada a la identidad |
-| `auth.sessions` | Sesiones activas o historicas del usuario |
-| `auth.refresh_tokens` | Renovacion de la sesion cuando el token expira |
+| `auth.identities` | Proveedor de acceso y metadata asociada |
+| `auth.sessions` | Sesiones activas o históricas |
+| `auth.refresh_tokens` | Renovación de sesión cuando el token expira |
 
-En la configuracion actual, el proveedor utilizado es `google`, en linea con el flujo de autenticacion documentado en frontend.
+En la configuración actual, el proveedor utilizado es `google`.
 
-## Relacion entre Identidad y Usuario de Negocio
+## Relación entre Identidad y Usuario de Negocio
 
-En el proyecto se separo la identidad autenticada del usuario funcional de la aplicacion.
+El proyecto separa la identidad autenticada del usuario funcional de la aplicación.
 
 | Capa | Tabla | Responsabilidad |
 |------|-------|-----------------|
 | Identidad | `auth.users` | Define quien inicia sesion |
-| Negocio | `public.users` | Define a que organizacion pertenece y que rol tiene dentro del sistema |
+| Negocio | `public.users` | Define a qué organización pertenece y qué rol tiene |
 
-La vinculacion entre ambas capas se hace mediante este campo:
+La vinculación entre ambas capas se hace mediante este campo:
 
 ```text
 public.users.supabase_user_id -> auth.users.id
 ```
 
-Esta relacion es logica y no fisica. La intencion es mantener desacoplado el subsistema de autenticacion del modelo de negocio, sin perder la trazabilidad entre ambos.
+La relación es lógica y no física. La intención es mantener desacoplado el subsistema de autenticación del modelo de negocio, sin perder trazabilidad entre ambos.
 
 ## Rol de `public.users`
 
-La tabla `public.users` complementa lo que Supabase Auth no resuelve por si solo. En ella se conserva el contexto funcional del usuario dentro de ContractIA.
+La tabla `public.users` complementa lo que Supabase Auth no resuelve por sí solo. En ella se conserva el contexto funcional del usuario dentro de ContractIA.
 
-Los campos mas importantes para ese objetivo son:
+Los campos más importantes para ese objetivo son:
 
 - `organization_id`
 - `role`
@@ -63,9 +63,7 @@ Los campos mas importantes para ese objetivo son:
 - `avatar_url`
 - `is_active`
 
-Con esta separacion, el sistema puede autenticar a un usuario con Supabase y, al mismo tiempo, mantener su relacion con una organizacion, su rol y su estado dentro del producto.
-
-El campo `role` define el perfil funcional del usuario dentro de la aplicacion, mientras que `receives_notifications` indica si participa como destinatario de alertas contractuales. Ambos campos se complementan, pero cumplen responsabilidades distintas dentro del modelo.
+Con esta separación, el sistema puede autenticar a un usuario con Supabase y, al mismo tiempo, mantener su relación con una organización, su rol y su estado dentro del producto.
 
 ## Organizacion de la Seguridad
 
@@ -75,39 +73,63 @@ La seguridad del proyecto se apoya en dos capas complementarias.
 
 Supabase Auth resuelve:
 
-- autenticacion con Google
-- emision y renovacion de sesion
+- autenticación con Google
+- emisión y renovación de sesión
 - persistencia de identidad en `auth.*`
 
 ### 2. Capa de negocio
 
 El acceso a los recursos de la aplicacion se organiza a partir de:
 
-- `organization_id` para aislar la informacion por tenant
+- `organization_id` para aislar la información por tenant
 - `role` para distinguir permisos funcionales
 - validaciones y control de acceso en backend
+- generación de URLs firmadas temporales para archivos documentales
 
-Este enfoque permite que la aplicacion no dependa solo del proveedor de autenticacion para decidir que puede hacer un usuario dentro del sistema.
+Este enfoque permite que la aplicación no dependa solo del proveedor de autenticación para decidir qué puede hacer un usuario dentro del sistema.
 
-## Estado de la Configuracion Actual
+## Estado Actual de RLS
 
-En la implementacion actual:
+En la implementación actual, las tablas de negocio del esquema `public` **no tienen Row Level Security habilitado**.
+
+Las tablas afectadas dentro del dominio documentado son:
+
+- `organizations`
+- `users`
+- `documents`
+- `services`
+- `documents_services`
+- `conversations`
+- `document_templates`
+- `template_formats`
+- `document_folders`
+- `notification_rules`
+- `notification_send_logs`
+
+Esto significa que, en esta versión, el aislamiento de negocio depende principalmente de la lógica del backend y de la asociación del usuario con su `organization_id`.
+
+### Implicancia operativa
+
+Mientras no existan políticas RLS, el diseño asume que el acceso a la información del dominio pasa por el backend y no por acceso directo del cliente a las tablas expuestas por Supabase.
+
+## Estado de la Configuración Actual
+
+En la implementación actual:
 
 - el esquema `auth` queda administrado por Supabase
 - las tablas de negocio viven en `public`
-- la vinculacion entre `auth.users` y `public.users` se hace con `supabase_user_id`
-- no se definieron politicas RLS para las tablas de `public`
-
-Esto significa que, en esta version, el aislamiento de negocio se apoya principalmente en la logica del backend y en la asociacion del usuario con su `organization_id`.
+- la vinculación entre `auth.users` y `public.users` se hace con `supabase_user_id`
+- el control de permisos de negocio se resuelve en backend
+- no hay políticas RLS activas para las tablas del dominio documentado
 
 ## Criterio de Diseño
 
-La decision de separar `auth.users` de `public.users` responde a una necesidad concreta del proyecto: mantener una autenticacion moderna y delegada en Supabase, pero conservar en el dominio propio toda la informacion que el producto necesita para operar.
+La decisión de separar `auth.users` de `public.users` responde a una necesidad concreta del proyecto: mantener una autenticación moderna y delegada en Supabase, pero conservar en el dominio propio toda la información que el producto necesita para operar.
 
 Con esa base, ContractIA puede:
 
 - autenticar usuarios con Google sin construir un sistema propio de login
-- asociar cada usuario a una organizacion
-- controlar roles de aplicacion sin depender del esquema interno de Auth
+- asociar cada usuario a una organización
+- controlar roles de aplicación sin depender del esquema interno de Auth
 - decidir si un usuario recibe alertas contractuales con `receives_notifications`
-- mantener una estructura lista para evolucionar el control de acceso en siguientes iteraciones
+- mantener una estructura lista para endurecer el control de acceso con RLS en iteraciones posteriores

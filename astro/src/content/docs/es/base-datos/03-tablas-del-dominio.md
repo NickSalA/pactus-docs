@@ -1,9 +1,9 @@
 ---
 title: Tablas del Dominio
-description: Diccionario de tablas del esquema public con claves, relaciones y campos principales del modelo.
+description: Diccionario actualizado de las tablas del esquema public con columnas, relaciones y notas operativas del modelo.
 ---
 
-El esquema `public` concentra las tablas que modelan el dominio principal de ContractIA. A continuacion se documenta el rol de cada una, sus relaciones y los campos que estructuran el comportamiento del sistema.
+El esquema `public` concentra las tablas que modelan el dominio principal de ContractIA. A continuación se documenta la estructura vigente que utiliza el backend del sistema, con sus relaciones y notas operativas más relevantes.
 
 ## Resumen del Esquema `public`
 
@@ -12,15 +12,20 @@ El esquema `public` concentra las tablas que modelan el dominio principal de Con
 | `organizations` | Organizacion o tenant del sistema | `id` |
 | `users` | Usuario funcional asociado a una organizacion | `id` |
 | `documents` | Cabecera documental y referencia al archivo | `id` |
-| `services` | Catalogo de servicios por organizacion | `id` |
-| `documents_services` | Detalle economico y contractual por documento/servicio | `id` |
+| `services` | Catálogo de servicios por organización | `id` |
+| `documents_services` | Detalle económico y temporal por documento/servicio | `id` |
 | `conversations` | Historial conversacional visible para la aplicacion | `id` |
 | `document_templates` | Plantillas usadas para generacion documental | `id` |
-| `notification_rules` | Reglas de alerta por organizacion o por contrato | `id` |
+| `template_formats` | Catálogo de formatos de plantilla | `id` |
+| `document_folders` | Carpetas documentales por rol | `id` |
+| `notification_rules` | Reglas de alerta por organización o contrato | `id` |
+| `notification_send_logs` | Log diario de correos enviados por organizacion | `id` |
+
+La tabla `public.empresas` ya no forma parte del modelo actual.
 
 ## `public.organizations`
 
-Es la tabla raiz del dominio. Desde aqui se organiza el aislamiento por empresa y se relacionan los principales recursos del sistema.
+Es la tabla raíz del dominio. Desde aquí se organiza el aislamiento por tenant y se relacionan los principales recursos del sistema.
 
 **Clave primaria:** `id`
 
@@ -32,6 +37,8 @@ Es la tabla raiz del dominio. Desde aqui se organiza el aislamiento por empresa 
 - `conversations.organization_id -> organizations.id`
 - `document_templates.organization_id -> organizations.id`
 - `notification_rules.organization_id -> organizations.id`
+- `document_folders.organization_id -> organizations.id`
+- `notification_send_logs.organization_id -> organizations.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -42,13 +49,13 @@ Es la tabla raiz del dominio. Desde aqui se organiza el aislamiento por empresa 
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 | `ruc` | `varchar` | Identificador tributario |
 | `address` | `text` | Direccion legal |
-| `company_type` | `text` | Tipo de empresa |
-| `objeto_social` | `text` | Objeto social |
+| `company_type` | `text` | Tipo o descripcion societaria |
+| `objeto_social` | `text` | Objeto social de la organizacion |
 | `legal_rep_name` | `varchar` | Nombre del representante legal |
 | `legal_rep_dni` | `varchar` | Documento del representante legal |
-| `jurisdiction` | `varchar` | Jurisdiccion de la organizacion |
+| `jurisdiction` | `varchar` | Jurisdiccion principal |
 | `city` | `varchar` | Ciudad principal |
-| `autorizacion_entidad` | `text` | Entidad vinculada a la autorizacion |
+| `autorizacion_entidad` | `text` | Entidad asociada a la autorizacion |
 | `autorizacion_fecha` | `date` | Fecha de autorizacion |
 | `autorizacion_emitida_por` | `text` | Emisor de la autorizacion |
 | `email` | `varchar` | Correo corporativo |
@@ -56,121 +63,116 @@ Es la tabla raiz del dominio. Desde aqui se organiza el aislamiento por empresa 
 
 ## `public.users`
 
-Esta tabla conserva el usuario funcional del sistema. Complementa a `auth.users` con informacion propia del dominio de negocio.
+Conserva el usuario funcional del sistema. Complementa a `auth.users` con informacion propia del dominio de negocio.
 
 **Clave primaria:** `id`
 
-**Claves foraneas:**
+**Claves foráneas:**
 
 - `organization_id -> organizations.id`
 
-**Relacion logica con Auth:**
+**Relación lógica con Auth:**
 
 - `supabase_user_id -> auth.users.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad interna del usuario |
-| `organization_id` | `bigint` | Organizacion a la que pertenece |
-| `supabase_user_id` | `uuid` | Vinculo con la identidad gestionada por Supabase Auth |
+| `organization_id` | `bigint` | Organización a la que pertenece |
+| `supabase_user_id` | `uuid` | Vínculo con la identidad gestionada por Supabase Auth |
 | `email` | `varchar` | Correo del usuario |
-| `full_name` | `varchar` | Nombre mostrado en la aplicacion |
+| `full_name` | `varchar` | Nombre mostrado en la aplicación |
 | `avatar_url` | `text` | Referencia visual del usuario |
-| `role` | `user_role` | Rol de aplicacion: `WORKER`, `HR`, `MANAGER`, `ADMIN` |
-| `receives_notifications` | `boolean` | Indica si el usuario recibe alertas de contratos |
+| `role` | `user_role` | Rol de aplicación: `WORKER`, `HR`, `MANAGER`, `ADMIN` |
 | `is_active` | `boolean` | Estado logico del usuario |
+| `receives_notifications` | `boolean` | Indica si el usuario recibe alertas de vencimiento |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
-### Semantica de `user_role`
+### Semántica de `user_role`
 
-El enum `user_role` permite distinguir el alcance funcional esperado de cada usuario dentro de la aplicacion.
-
-- `WORKER`: usuario de consulta general. Puede revisar informacion operativa del sistema, pero no carga contratos, no los edita y no tiene acceso a la metadata financiera.
-- `HR`: usuario de recursos humanos. Puede cargar y dar seguimiento a contratos vinculados a trabajadores o personal y tiene acceso a metadata financiera de los trabajadores o personal.
-- `MANAGER`: usuario de gestion contractual. Puede cargar, editar y administrar contratos, ademas de consultar metadata financiera y datos estructurados ampliados.
-- `ADMIN`: usuario con control total. Puede administrar usuarios, configuraciones, facturacion, reglas operativas y supervision general de la plataforma.
-
-### Rol de `receives_notifications`
-
-El campo `receives_notifications` no reemplaza al rol, sino que lo complementa. Su objetivo es indicar si un usuario debe recibir alertas de vencimiento, independientemente del `user_role` que tenga asignado.
+- `WORKER`: usuario de consulta general
+- `HR`: usuario de recursos humanos
+- `MANAGER`: usuario de gestión contractual
+- `ADMIN`: usuario con control total de la organización
 
 ## `public.documents`
 
-Guarda la cabecera del documento y la referencia al archivo asociado. El detalle economico no se persiste aqui, sino en `documents_services`.
+Guarda la cabecera del documento y la referencia al archivo asociado. El detalle económico principal se persiste por separado en `documents_services`.
 
 **Clave primaria:** `id`
 
-**Claves foraneas:**
+**Claves foráneas:**
 
 - `organization_id -> organizations.id`
+- `folder_id -> document_folders.id` (opcional)
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad del documento |
-| `organization_id` | `bigint` | Organizacion propietaria |
-| `name` | `varchar` | Nombre del documento |
-| `client` | `varchar` | Cliente asociado |
+| `organization_id` | `bigint` | Organización propietaria |
+| `name` | `varchar` | Nombre del contrato |
+| `client` | `varchar` | Contraparte o cliente asociado |
 | `type` | `document_type` | Tipo documental: `COMPANY`, `LABOR` |
 | `start_date` | `date` | Inicio del periodo contractual |
 | `end_date` | `date` | Fin del periodo contractual |
-| `form_data` | `jsonb` | Estructura flexible con datos complementarios del documento |
-| `state` | `document_state` | Estado documental: `DRAFT`, `PENDING_SIGNATURE`, `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `TERMINATED` |
+| `form_data` | `jsonb` | Datos estructurados extraídos o capturados del contrato |
+| `state` | `document_state` | Estado documental persistido |
 | `file_path` | `text` | Ruta tecnica del archivo en Storage |
-| `file_name` | `text` | Nombre del archivo asociado |
+| `file_name` | `text` | Nombre visible del archivo |
+| `folder_id` | `bigint` | Carpeta asignada al documento |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
-### Semantica de `document_type`
+### Semántica de `document_type`
 
-El enum `document_type` separa la naturaleza general del contrato dentro del dominio.
+- `COMPANY`: contrato corporativo, comercial o institucional
+- `LABOR`: contrato laboral o asociado a gestión de personal
 
-- `COMPANY`: contrato corporativo, comercial o institucional.
-- `LABOR`: contrato laboral o asociado a trabajadores y gestion de personal.
+### Semántica de `document_state`
 
-### Semantica de `document_state`
+- `DRAFT`: contrato en preparación
+- `PENDING_SIGNATURE`: contrato pendiente de firma
+- `ACTIVE`: contrato vigente fuera de ventana de alerta
+- `EXPIRING_SOON`: contrato vigente dentro de una ventana activa de alerta
+- `EXPIRED`: contrato cuya vigencia ya concluyo
+- `TERMINATED`: contrato cerrado antes de su vencimiento natural
 
-El enum `document_state` describe la situacion operativa del contrato dentro de su ciclo de vida.
+### Rol de `form_data`
 
-- `DRAFT`: contrato en preparacion o pendiente de revision.
-- `PENDING_SIGNATURE`: contrato ya preparado para circular, pero aun pendiente de firma.
-- `ACTIVE`: contrato vigente y fuera de la ventana activa de alerta.
-- `EXPIRING_SOON`: contrato vigente que ya entro en una ventana de notificacion definida por las reglas activas.
-- `EXPIRED`: contrato cuya vigencia ya concluyo por fecha.
-- `TERMINATED`: contrato cerrado o finalizado antes de su vencimiento natural.
+`form_data` cumple dos objetivos simultáneos:
 
-### Como se organiza la informacion del documento
+- guardar campos variables del contrato que no justifican una tabla propia
+- conservar claves resumidas que el backend usa para filtros y rankings, como `value` y `currency`
 
-El modelo documental se distribuye en varias piezas:
-
-- la cabecera principal vive en `public.documents`
-- el detalle economico y de servicios vive en `public.documents_services`
-- los datos variables pueden agruparse en `form_data`
-- el archivo se referencia con `file_path` y `file_name`
+Por eso, aunque el detalle económico formal viva en `documents_services`, parte de la metadata económica puede reaparecer resumida en este JSONB.
 
 ## `public.services`
 
-Contiene el catalogo de servicios de cada organizacion. Su objetivo es reutilizar conceptos contractuales sin repetir su definicion en cada documento.
+Contiene el catálogo de servicios de cada organización. Su objetivo es reutilizar conceptos contractuales sin repetir su definición en cada documento.
 
 **Clave primaria:** `id`
 
-**Claves foraneas:**
+**Claves foráneas:**
 
 - `organization_id -> organizations.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad del servicio |
-| `organization_id` | `bigint` | Organizacion propietaria |
+| `organization_id` | `bigint` | Organización propietaria |
 | `name` | `varchar` | Nombre del servicio |
+| `is_active` | `boolean` | Permite desactivar el item del catalogo sin borrarlo |
+| `created_at` | `timestamptz` | Fecha de creación |
+| `updated_at` | `timestamptz` | Fecha de actualizacion |
 
 ## `public.documents_services`
 
-Es la tabla que enlaza documentos y servicios, pero ademas conserva la informacion economica y temporal de cada linea contractual.
+Es la tabla que enlaza documentos y servicios, pero además conserva la información económica y temporal de cada línea contractual.
 
 **Clave primaria:** `id`
 
-**Claves foraneas:**
+**Claves foráneas:**
 
 - `document_id -> documents.id`
 - `service_id -> services.id`
@@ -180,21 +182,25 @@ Es la tabla que enlaza documentos y servicios, pero ademas conserva la informaci
 | `id` | `bigint` | Identidad del registro |
 | `document_id` | `bigint` | Documento asociado |
 | `service_id` | `bigint` | Servicio asociado |
-| `description` | `text` | Descripcion de la linea contractual |
-| `value` | `float8` | Valor monetario |
+| `description` | `text` | Descripción de la línea contractual |
+| `value` | `float8` | Valor monetario de la línea |
 | `currency` | `currency_type` | Moneda utilizada: `PEN`, `USD`, `EUR` |
-| `start_date` | `date` | Inicio del periodo asociado |
-| `end_date` | `date` | Fin del periodo asociado |
+| `start_date` | `date` | Inicio del periodo de la línea |
+| `end_date` | `date` | Fin del periodo de la línea |
 
-Esta tabla permite representar contratos con una o varias lineas de servicio sin duplicar la cabecera documental.
+El backend valida adicionalmente que:
+
+- no se repita el mismo `service_id` dentro del mismo contrato
+- todas las líneas usen la misma moneda
+- las fechas de cada linea queden dentro del rango del documento padre
 
 ## `public.conversations`
 
-Guarda el historial conversacional que la aplicacion muestra al usuario y reutiliza para continuar el chat.
+Guarda el historial conversacional que la aplicación muestra al usuario y reutiliza para continuar el chat visible del producto.
 
 **Clave primaria:** `id`
 
-**Claves foraneas:**
+**Claves foráneas:**
 
 - `organization_id -> organizations.id`
 - `user_id -> users.id`
@@ -204,7 +210,7 @@ Guarda el historial conversacional que la aplicacion muestra al usuario y reutil
 | `id` | `bigint` | Identidad de la conversacion |
 | `organization_id` | `bigint` | Organizacion propietaria |
 | `user_id` | `bigint` | Usuario asociado al hilo |
-| `title` | `varchar` | Titulo mostrado en la interfaz |
+| `title` | `varchar` | Título mostrado en la interfaz |
 | `content` | `jsonb` | Historial de mensajes del hilo |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
@@ -228,54 +234,26 @@ Guarda el historial conversacional que la aplicacion muestra al usuario y reutil
 
 ## `public.document_templates`
 
-Conserva las plantillas base que el sistema utiliza para generar contratos por organizacion.
+Conserva las plantillas base que el sistema utiliza para generar contratos por organización.
 
 **Clave primaria:** `id`
 
-**Claves foraneas:**
+**Claves foráneas:**
 
 - `organization_id -> organizations.id`
+- `template_format_id -> template_formats.id` (opcional)
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad de la plantilla |
-| `organization_id` | `bigint` | Organizacion propietaria |
+| `organization_id` | `bigint` | Organización propietaria |
 | `name` | `varchar` | Nombre de la plantilla |
-| `description` | `text` | Descripcion funcional |
-| `content` | `jsonb` | Estructura base para renderizar el contrato |
+| `description` | `text` | Descripción funcional |
+| `content` | `jsonb` | Estructura base usada para renderizar el contrato |
+| `created_at` | `timestamptz` | Fecha de creacion |
 | `state` | `document_template_state` | Estado de la plantilla: `DRAFT`, `PUBLISHED`, `ARCHIVED` |
-| `created_at` | `timestamptz` | Fecha de creacion |
-
-## `public.notification_rules`
-
-Define las ventanas de alerta de vencimiento para una organizacion o para un contrato puntual.
-
-**Clave primaria:** `id`
-
-**Claves foraneas:**
-
-- `organization_id -> organizations.id`
-- `document_id -> documents.id` (opcional)
-- `created_by -> users.id` (opcional)
-
-| Columna | Tipo | Detalle |
-|---------|------|---------|
-| `id` | `bigint` | Identidad de la regla |
-| `organization_id` | `bigint` | Organizacion propietaria |
-| `document_id` | `bigint` | Contrato especifico al que aplica la regla; si es `null`, aplica como regla por defecto de la organizacion |
-| `days_before_due` | `integer` | Numero de dias previos al vencimiento que disparan la alerta |
-| `is_active` | `boolean` | Permite activar o desactivar la regla sin eliminarla |
-| `created_by` | `bigint` | Usuario que registro la regla |
-| `created_at` | `timestamptz` | Fecha de creacion |
-| `updated_at` | `timestamptz` | Fecha de actualizacion |
-
-### Resolucion de reglas de alerta
-
-La aplicacion resuelve las alertas con este orden:
-
-- si un contrato tiene reglas activas propias, se usan esas
-- si no tiene, hereda las reglas activas de la organizacion
-- si no existe configuracion, el backend usa un fallback temporal compatible con la version actual
+| `document_type` | `document_type` | Tipo documental al que pertenece la plantilla |
+| `template_format_id` | `integer` | Formato funcional asociado |
 
 ### Estructura utilizada en `content`
 
@@ -283,22 +261,125 @@ La aplicacion resuelve las alertas con este orden:
 {
   "body_md": "# Contrato\n\nEntre las partes...",
   "fields": [],
-  "version": 1
+  "operational_fields": [],
+  "version": "1.0",
+  "contract_date_mapping": {
+    "start_date_field": "fecha_inicio",
+    "end_date_field": "fecha_fin"
+  }
 }
 ```
 
-<!--
-## Desalineaciones Actuales con la API Documentada
+`operational_fields` y `contract_date_mapping` son relevantes porque el backend los valida y los usa en flujos de generación documental.
 
-La documentacion OpenAPI y el modelo fisico actual no estan completamente alineados. Estas son las diferencias que conviene tener presentes:
+## `public.template_formats`
 
-| Tema | API documentada | Base real en Supabase |
-|------|------------------|-----------------------|
-| Tipo de documento | `Empresa`, `Trabajador` | `COMPANY`, `LABOR` |
-| Estado de documento | `Borrador`, `Pendiente de firma`, `Activo`, `Por vencer`, `Expirado`, `Terminado` | `DRAFT`, `PENDING_SIGNATURE`, `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `TERMINATED` |
-| Valor y moneda | En `DocumentResponse` | En `documents_services` y/o `form_data` |
-| Licencias | Campo expuesto por la API | No existe como columna en `public` |
-| Mensajes de conversacion | `sender` y `message` | `role`, `content`, `timestamp` |
+Es el catálogo de formatos disponibles para las plantillas. Permite separar el tipo documental del formato operativo concreto que usa la organización.
 
-Esta diferencia no invalida la API, pero si obliga a entender que el backend esta transformando el modelo antes de exponerlo al frontend.
--->
+**Clave primaria:** `id`
+
+**Relaciones entrantes:**
+
+- `document_templates.template_format_id -> template_formats.id`
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del formato |
+| `document_type` | `document_type` | Tipo documental asociado |
+| `format_code` | `varchar` | Codigo tecnico normalizado del formato |
+| `label` | `varchar` | Nombre visible del formato |
+| `default_name` | `varchar` | Nombre sugerido para la plantilla |
+| `default_description` | `text` | Descripcion sugerida |
+| `is_active` | `boolean` | Indica si el formato sigue disponible |
+
+## `public.document_folders`
+
+Representa carpetas documentales por organización y por rol propietario. Sirve para clasificar contratos sin mezclar visibilidad entre grupos funcionales.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> organizations.id`
+- `created_by -> users.id`
+
+**Relaciones entrantes:**
+
+- `documents.folder_id -> document_folders.id`
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad de la carpeta |
+| `organization_id` | `bigint` | Organización propietaria |
+| `name` | `varchar` | Nombre visible de la carpeta |
+| `owner_role` | `user_role` | Rol dueño de la carpeta |
+| `created_by` | `bigint` | Usuario que creó la carpeta |
+| `created_at` | `timestamptz` | Fecha de creacion |
+| `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+### Restricción relevante de `owner_role`
+
+La base de datos restringe `owner_role` a los valores `HR` y `MANAGER`. El backend usa ese dato para controlar visibilidad y administración de carpetas.
+
+## `public.notification_rules`
+
+Define las ventanas de alerta de vencimiento para una organización o para un contrato puntual.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> organizations.id`
+- `document_id -> documents.id` (opcional)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad de la regla |
+| `organization_id` | `bigint` | Organización propietaria |
+| `document_id` | `bigint` | Contrato específico al que aplica la regla; si es `null`, la regla es organizacional |
+| `days_before_due` | `integer` | Número de días previos al vencimiento que disparan la alerta |
+| `is_active` | `boolean` | Permite activar o desactivar la regla sin eliminarla |
+| `created_at` | `timestamptz` | Fecha de creacion |
+| `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+### Resolución de reglas de alerta
+
+El backend resuelve las alertas con este orden:
+
+1. reglas activas propias del contrato
+2. reglas activas por defecto de la organización
+3. fallback operativo si no existe configuración
+
+Además, la función `public.sync_document_states` usa la ventana activa más amplia para decidir cuándo un contrato pasa a `EXPIRING_SOON`.
+
+## `public.notification_send_logs`
+
+Registra el resultado diario del envío consolidado de correos por organización. Su objetivo es evitar duplicados cuando corre el proceso programado de alertas.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> organizations.id`
+
+**Restricción relevante:**
+
+- unicidad por `organization_id` + `sent_date`
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `integer` | Identidad del log |
+| `organization_id` | `integer` | Organización a la que pertenece el envío |
+| `sent_date` | `date` | Fecha del lote diario |
+| `emails_sent` | `integer` | Cantidad de correos enviados en esa corrida |
+| `created_at` | `timestamptz` | Fecha de registro |
+
+## Función SQL asociada al dominio
+
+Aunque no es una tabla, hay una función de negocio relevante para entender el esquema:
+
+| Funcion | Rol |
+|---------|-----|
+| `public.sync_document_states(p_organization_id bigint default null)` | Recalcula `documents.state` a partir de fechas y reglas activas |
+
+Esta función forma parte del comportamiento persistente del sistema porque escribe estados sobre `public.documents`.

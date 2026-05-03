@@ -1,76 +1,109 @@
 ---
-title: Vision General de la Base de Datos
-description: Como se organiza la persistencia de ContractIA en Supabase y que rol cumple cada esquema principal.
+title: Visión General de la Base de Datos
+description: Cómo se organiza la persistencia relacional y el soporte documental de ContractIA en Supabase.
 ---
 
-ContractIA organiza su persistencia en **Supabase** y separa la informacion en varias capas para mantener desacoplados el dominio de negocio, la autenticacion, la continuidad del agente y el almacenamiento de archivos.
+Esta documentación describe la **base de datos vigente del producto en Supabase**. El foco está puesto en el modelo persistente que utiliza la aplicación y en los soportes directos de Supabase necesarios para operar el dominio documental.
 
 ## Organizacion General
 
-La estructura principal se apoya en estos esquemas:
+La persistencia del sistema se organiza en las siguientes capas:
 
-| Esquema | Rol dentro del proyecto | Nivel de detalle en esta documentacion |
-|---------|-------------------------|----------------------------------------|
-| `public` | Modelo relacional del producto | Completo |
-| `auth` | Identidad, sesiones y proveedores de acceso | Funcional |
-| `checkpoint` | Estado interno del agente conversacional | Resumen tecnico |
-| `storage` | Objetos y metadatos de archivos | Resumen tecnico |
-| `realtime`, `vault`, `extensions` | Infraestructura interna de Supabase | Referencia breve |
+| Capa | Dónde vive | Rol dentro del proyecto | Nivel de detalle en esta documentación |
+|------|------------|-------------------------|----------------------------------------|
+| Dominio | `public` | Modelo relacional principal del producto | Completo |
+| Identidad | `auth` | Login, sesiones y proveedor OAuth | Funcional |
+| Archivos | `storage` | Persistencia fisica de documentos | Funcional |
+| Infraestructura | `realtime`, `vault`, `extensions` | Soporte interno de Supabase | Breve |
 
-En esta documentacion el foco principal esta puesto en `public`, porque ahi vive el modelo que utiliza la aplicacion para organizaciones, usuarios, documentos, conversaciones y plantillas.
+El foco principal está en `public`, porque ahí viven las entidades que el backend usa de forma directa: organizaciones, usuarios, documentos, catálogo de servicios, conversaciones, carpetas, plantillas y reglas de notificación.
+
+## Tablas del Dominio
+
+Las tablas relacionales actualmente relevantes para el producto son las siguientes:
+
+| Tabla | Rol principal |
+|-------|---------------|
+| `organizations` | Raíz del tenant y datos corporativos |
+| `users` | Usuario funcional vinculado a Auth |
+| `documents` | Cabecera documental y referencia al archivo |
+| `services` | Catálogo de servicios por organización |
+| `documents_services` | Lineas economicas y temporales por contrato |
+| `conversations` | Historial visible del chat del producto |
+| `document_templates` | Plantillas por organizacion |
+| `template_formats` | Catálogo de formatos de plantilla |
+| `document_folders` | Carpetas documentales por rol |
+| `notification_rules` | Reglas de alerta por organización o contrato |
+| `notification_send_logs` | Registro diario de correos enviados |
+
+La tabla legacy `public.empresas` ya no forma parte del modelo vigente.
 
 ## Criterios del Modelo
 
-### 1. Aislamiento por organizacion
+### 1. Aislamiento por organización
 
-La tabla `organizations` funciona como raiz del dominio. A partir de ella se encadenan usuarios, documentos, servicios, conversaciones y plantillas mediante `organization_id`.
+`public.organizations` funciona como raíz del dominio. Desde ahí se encadenan usuarios, documentos, servicios, conversaciones, carpetas, plantillas y reglas mediante `organization_id`.
 
-### 2. Separacion entre identidad y usuario de negocio
+### 2. Separación entre identidad y usuario de negocio
 
-La autenticacion se delega a Supabase Auth en `auth.users`, mientras que el contexto funcional del sistema se conserva en `public.users`.
+La autenticación se delega a Supabase Auth en `auth.users`, mientras que el contexto funcional del sistema se conserva en `public.users`.
 
-La relacion entre ambas capas se resuelve con `public.users.supabase_user_id`, lo que permite mantener desacoplado el esquema interno de Auth del modelo de negocio de la aplicacion.
+La vinculación entre ambas capas se hace con `public.users.supabase_user_id`, lo que permite desacoplar la identidad administrada por Supabase del modelo de negocio propio.
 
-### 3. Documento, archivo y detalle economico por separado
+### 3. Modelo documental descompuesto
 
-El proyecto no concentra todo en una sola tabla:
+El sistema no concentra toda la información contractual en una sola tabla:
 
-- `public.documents` guarda la cabecera documental
-- `public.documents_services` guarda el detalle economico y de servicios
+- `public.documents` guarda la cabecera del contrato
+- `public.documents_services` guarda el detalle económico por línea de servicio
+- `public.services` define el catálogo reutilizable
+- `public.document_folders` clasifica documentos por rol
 - `storage` conserva el archivo binario asociado
 
-Esta separacion hace mas claro el modelo y evita cargar la tabla principal con informacion que pertenece a otra capa.
+Esta separación evita duplicidad y facilita que el backend combine cabecera, líneas de servicio y archivo según el caso de uso.
 
-### 4. Uso de JSON para estructuras flexibles
+### 4. Plantillas con formato explícito
 
-El proyecto utiliza `jsonb` cuando la estructura necesita mantenerse flexible o agrupar datos que no justifican una tabla adicional. Esto ocurre principalmente en:
+Las plantillas no solo se almacenan por organización. También se apoyan en `public.template_formats`, que define formatos reutilizables por `document_type` y código técnico.
+
+Esto permite que una organización tenga varias plantillas del mismo tipo documental sin perder el contexto del formato esperado.
+
+### 5. Uso selectivo de JSONB
+
+El proyecto usa `jsonb` cuando necesita conservar estructuras flexibles sin multiplicar tablas auxiliares. Los tres puntos más importantes son:
 
 - `public.documents.form_data`
 - `public.conversations.content`
 - `public.document_templates.content`
-- tablas del esquema `checkpoint`
+
+En particular, `documents.form_data` no solo guarda campos variables del contrato. El backend también reutiliza claves como `value` y `currency` para filtros, rankings y consultas agregadas.
 
 ## Recorrido Principal de los Datos
 
-El flujo general de la aplicacion se organiza asi:
+El flujo relacional principal de la aplicación puede leerse así:
 
-1. El usuario inicia sesion con Google mediante Supabase Auth.
-2. Supabase administra la identidad y la sesion en el esquema `auth`.
-3. La aplicacion vincula esa identidad con `public.users` y su `organization_id`.
-4. Los documentos se registran en `public.documents` y su archivo se guarda en Storage.
-5. El detalle economico del documento se registra en `public.documents_services`.
-6. Las conversaciones visibles para la interfaz se guardan en `public.conversations`.
-7. El estado interno del agente se conserva en el esquema `checkpoint`.
+1. El usuario inicia sesión con Google mediante Supabase Auth.
+2. Supabase gestiona identidad y sesión en `auth`.
+3. La aplicación vincula esa identidad con `public.users` y su `organization_id`.
+4. Las carpetas y el catálogo de servicios se resuelven dentro de la organización actual.
+5. Los contratos se registran en `public.documents` y sus líneas viven en `public.documents_services`.
+6. El archivo del contrato se guarda en Supabase Storage y queda referenciado desde `file_path` y `file_name`.
+7. Las plantillas viven en `public.document_templates` y se relacionan opcionalmente con `public.template_formats`.
+8. Las reglas de alerta viven en `public.notification_rules` y el historial de envíos en `public.notification_send_logs`.
+9. La función `public.sync_document_states` recalcula estados documentales a partir de fechas y reglas activas.
 
-## Relacion con la API
+## Relación con la API y el Backend
 
-La API no siempre expone las entidades exactamente igual a como se persisten en la base de datos. En varios casos el backend agrupa, transforma o simplifica informacion antes de entregarla al frontend.
+La API no expone siempre las tablas exactamente como se persisten. En varios casos, el backend agrupa, valida o transforma información antes de entregarla al frontend.
 
-Los ajustes mas importantes son estos:
+Los ajustes más importantes son estos:
 
-- los enums de documentos se almacenan en ingles, aunque en la API puedan presentarse en un formato mas funcional
-- el detalle economico del documento no vive en `public.documents`, sino en `public.documents_services`
-- parte de la informacion variable del documento puede viajar agrupada dentro de `form_data`
-- la API puede presentar ciertos campos como si fueran directos del documento, aunque internamente provengan de una relacion o de una transformacion adicional
+- los enums documentales se almacenan en inglés: `COMPANY`, `LABOR`, `DRAFT`, `ACTIVE`, etc.
+- el detalle económico principal vive en `documents_services`, no en `documents`
+- el backend también conserva información resumida dentro de `documents.form_data` para ciertas consultas
+- `document_templates.content` guarda una estructura rica de plantilla, incluyendo `fields`, `operational_fields` y, cuando aplica, `contract_date_mapping`
+- el archivo del contrato no se entrega de forma directa desde Storage; el backend genera URLs firmadas temporales
 
-Por eso, este modulo documenta primero la estructura de persistencia y luego deja contexto suficiente para entender como esa informacion llega a la capa de aplicacion.
+## Alcance de Esta Documentación
+
+Este módulo documenta la base de datos del producto y su soporte directo en Supabase, manteniendo el foco en el dominio transaccional y en las capas necesarias para autenticación y almacenamiento documental.
