@@ -1,0 +1,39 @@
+get:
+  tags:
+    - Catálogo de Servicios
+  summary: Listar servicios del catálogo
+  operationId: listServices
+  parameters:
+    - name: include_inactive
+      in: query
+      required: false
+      schema:
+        type: boolean
+  responses:
+    '200':
+      description: Lista de servicios obtenida correctamente.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/ServiceResponse'
+
+post:
+  tags:
+    - Catálogo de Servicios
+  summary: Crear un servicio de catálogo
+  operationId: createService
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/ServiceCreateRequest'
+  responses:
+    '201':
+      description: Servicio creado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ServiceResponse'

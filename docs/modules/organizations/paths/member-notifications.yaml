@@ -1,0 +1,32 @@
+parameters:
+  - name: member_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: Identificador del miembro.
+
+patch:
+  tags:
+    - Organizaciones
+  summary: Actualizar la suscripción de alertas de un miembro
+  operationId: updateOrganizationMemberNotifications
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/OrganizationMemberNotificationsUpdateRequest'
+  responses:
+    '200':
+      description: Configuración de alertas actualizada correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationMemberResponse'
+    '404':
+      description: Member Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

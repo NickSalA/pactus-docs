@@ -17,3 +17,76 @@ OrganizationResponse:
     - id
     - name
     - is_active
+
+OrganizationMemberCreateRequest:
+  type: object
+  properties:
+    email:
+      type: string
+      format: email
+    role:
+      type: string
+      enum: [WORKER, HR, MANAGER, ADMIN]
+  required:
+    - email
+    - role
+
+OrganizationMemberRoleUpdateRequest:
+  type: object
+  properties:
+    role:
+      type: string
+      enum: [WORKER, HR, MANAGER, ADMIN]
+  required:
+    - role
+
+OrganizationMemberNotificationsUpdateRequest:
+  type: object
+  properties:
+    receives_notifications:
+      type: boolean
+  required:
+    - receives_notifications
+
+OrganizationMemberResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    organization_id:
+      type: integer
+    supabase_user_id:
+      type: string
+      format: uuid
+      nullable: true
+    email:
+      type: string
+      format: email
+    full_name:
+      type: string
+      nullable: true
+    avatar_url:
+      type: string
+      nullable: true
+    role:
+      type: string
+      enum: [WORKER, HR, MANAGER, ADMIN]
+    receives_notifications:
+      type: boolean
+    is_active:
+      type: boolean
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - organization_id
+    - email
+    - role
+    - receives_notifications
+    - is_active
+    - created_at
+    - updated_at

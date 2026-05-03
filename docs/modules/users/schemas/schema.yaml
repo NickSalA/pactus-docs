@@ -1,96 +1,42 @@
-UserCreateRequest:
-  type: object
-  properties:
-    email:
-      type: string
-      format: email
-      description: The user's email address.
-      example: jhon.doe@gmail.com
-    password:
-      type: string
-      format: password
-      description: The user's password.
-      example: "securePassword123"
-    role:
-      type: string
-      description: The user's role (e.g., admin, user).
-      example: user
-  required:
-    - email
-    - password
-    - role
-
-UserUpdateRequest:
-  type: object
-  properties:
-    email:
-      type: string
-      format: email
-      description: The user's email address.
-      example: jhon.doe@gmail.com
-    password:
-      type: string
-      format: password
-      description: The user's password.
-      example: "AnotherPassword123"
-
-UserResponse:
-  type: object
-  properties:
-    id:
-      type: integer
-      description: The unique identifier of the user.
-      example: 14
-    email:
-      type: string
-      format: email
-      description: The user's email address.
-      example: jhon.doe@gmail.com
-    role:
-      type: string
-      description: The user's role (e.g., admin, user).
-      example: user
-  required:
-    - id
-    - email
-    - role
-
-UserListResponse:
-  type: array
-  items:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: The unique identifier of the user.
-        example: 14
-      email:
-        type: string
-        format: email
-        description: The user's email address.
-        example: jhon.doe@gmail.com
-      role:
-        type: string
-        description: The user's role (e.g., admin, user).
-        example: user
-    required:
-      - id
-      - email
-      - role
-
 CurrentUserResponse:
   type: object
   properties:
     id:
       type: integer
-    email:
-      type: string
     organization_id:
       type: integer
+    supabase_user_id:
+      type: string
+      format: uuid
+      nullable: true
+    email:
+      type: string
+      format: email
+    full_name:
+      type: string
+      nullable: true
+    avatar_url:
+      type: string
+      nullable: true
     role:
       type: string
+      enum: [WORKER, HR, MANAGER, ADMIN]
+    receives_notifications:
+      type: boolean
+    is_active:
+      type: boolean
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
   required:
     - id
-    - email
     - organization_id
+    - email
     - role
+    - receives_notifications
+    - is_active
+    - created_at
+    - updated_at

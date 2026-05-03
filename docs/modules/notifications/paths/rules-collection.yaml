@@ -1,0 +1,33 @@
+get:
+  tags:
+    - Notificaciones
+  summary: Listar reglas de notificación de la organización actual
+  operationId: listNotificationRules
+  responses:
+    '200':
+      description: Lista de reglas obtenida correctamente.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/NotificationRuleResponse'
+
+post:
+  tags:
+    - Notificaciones
+  summary: Crear una regla de notificación
+  operationId: createNotificationRule
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/NotificationRuleCreateRequest'
+  responses:
+    '201':
+      description: Regla creada correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/NotificationRuleResponse'

@@ -1,3 +1,7 @@
+NotificationType:
+  type: string
+  enum: [critical, warning, info]
+
 NotificationResponse:
   type: object
   properties:
@@ -6,11 +10,92 @@ NotificationResponse:
     document_id:
       type: integer
     type:
-      type: string
-      enum: [INFO, WARNING, CRITICAL]
+      $ref: '#/NotificationType'
     title:
       type: string
     description:
       type: string
     days_remaining:
       type: integer
+  required:
+    - id
+    - document_id
+    - type
+    - title
+    - description
+    - days_remaining
+
+NotificationRuleCreateRequest:
+  type: object
+  properties:
+    document_id:
+      type: integer
+      nullable: true
+    days_before_due:
+      type: integer
+      minimum: 1
+    is_active:
+      type: boolean
+  required:
+    - days_before_due
+
+NotificationRuleUpdateRequest:
+  type: object
+  properties:
+    days_before_due:
+      type: integer
+      minimum: 1
+      nullable: true
+    is_active:
+      type: boolean
+      nullable: true
+
+NotificationRuleResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    organization_id:
+      type: integer
+    document_id:
+      type: integer
+      nullable: true
+    days_before_due:
+      type: integer
+    is_active:
+      type: boolean
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - organization_id
+    - days_before_due
+    - is_active
+    - created_at
+    - updated_at
+
+SendEmailAlertsResponse:
+  type: object
+  properties:
+    emails_sent:
+      type: integer
+  required:
+    - emails_sent
+
+CronSendEmailsResponse:
+  type: object
+  properties:
+    emails_sent:
+      type: integer
+    orgs_processed:
+      type: integer
+    orgs_skipped:
+      type: integer
+  required:
+    - emails_sent
+    - orgs_processed
+    - orgs_skipped

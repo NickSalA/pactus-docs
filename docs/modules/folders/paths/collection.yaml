@@ -1,0 +1,33 @@
+get:
+  tags:
+    - Carpetas
+  summary: Listar carpetas visibles para el usuario actual
+  operationId: listFolders
+  responses:
+    '200':
+      description: Lista de carpetas obtenida correctamente.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/FolderResponse'
+
+post:
+  tags:
+    - Carpetas
+  summary: Crear una carpeta
+  operationId: createFolder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/FolderCreateRequest'
+  responses:
+    '201':
+      description: Carpeta creada correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/FolderResponse'

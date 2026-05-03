@@ -1,0 +1,52 @@
+FolderResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    organization_id:
+      type: integer
+    name:
+      type: string
+    owner_role:
+      type: string
+      enum: [HR, MANAGER]
+    created_by:
+      type: integer
+    created_by_name:
+      type: string
+      nullable: true
+    created_by_email:
+      type: string
+      nullable: true
+    documents_count:
+      type: integer
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - organization_id
+    - name
+    - owner_role
+    - created_by
+    - documents_count
+    - created_at
+    - updated_at
+
+FolderCreateRequest:
+  type: object
+  properties:
+    name:
+      type: string
+  required:
+    - name
+
+FolderUpdateRequest:
+  type: object
+  properties:
+    name:
+      type: string
+      nullable: true

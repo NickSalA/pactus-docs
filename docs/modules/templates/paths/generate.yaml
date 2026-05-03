@@ -4,10 +4,10 @@ parameters:
     required: true
     schema:
       type: integer
-    description: ID de la plantilla
+    description: ID de la plantilla.
 
 post:
-  summary: Generar un contrato a partir de la plantilla.
+  summary: Generar un documento a partir de una plantilla
   operationId: generateTemplateDocument
   tags:
     - Plantillas
@@ -17,13 +17,21 @@ post:
       application/json:
         schema:
           type: object
+          additionalProperties: true
+          description: Payload de `form_data` utilizado para generar el documento a partir de la plantilla.
   responses:
     '201':
-      description: Documento generado.
+      description: Documento generado y persistido.
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/GeneratedDocumentResponse'
+            $ref: '../../documents/schemas/schema.yaml#/DocumentResponse'
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
     '404':
       description: Template Not Found
       content:

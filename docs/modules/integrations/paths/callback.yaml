@@ -1,23 +1,25 @@
 get:
   tags:
     - Integraciones
-  summary: Intercambiar código de Google por tokens.
+  summary: Intercambiar código OAuth por token de Google Drive
   operationId: exchangeDriveCode
+  security: []
   parameters:
     - name: code
       in: query
       required: true
       schema:
         type: string
+      description: Código OAuth devuelto por Google.
   responses:
     '200':
-      description: Tokens obtenidos con éxito.
+      description: Token obtenido correctamente.
       content:
         application/json:
           schema:
             $ref: '../schemas/schema.yaml#/TokenResponse'
     '400':
-      description: Bad Request
+      description: Código inválido o expirado.
       content:
         application/json:
           schema:

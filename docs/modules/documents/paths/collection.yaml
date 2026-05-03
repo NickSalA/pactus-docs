@@ -1,24 +1,24 @@
 post:
-  summary: Subir un nuevo documento
-  description: Permite subir un nuevo documento al sistema para su posterior procesamiento.
+  summary: Crear un nuevo documento
+  description: Registra un documento usando un archivo binario y un campo `document` con JSON serializado.
   operationId: createDocument
-  tags: 
+  tags:
     - Documentos
   requestBody:
     required: true
     content:
       multipart/form-data:
         schema:
-          $ref: '../../documents/schemas/schema.yaml#/DocumentCreateRequest'
+          $ref: '../schemas/schema.yaml#/DocumentMultipartCreateRequest'
   responses:
     '201':
-      description: Documento subido satisfactoriamente
+      description: Documento creado satisfactoriamente.
       content:
         application/json:
           schema:
-            $ref: '../../documents/schemas/schema.yaml#/DocumentResponse'
+            $ref: '../schemas/schema.yaml#/DocumentResponse'
     '400':
-      description: Bad Request
+      description: Payload inválido o archivo inválido.
       content:
         application/json:
           schema:
@@ -29,102 +29,28 @@ post:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/AuthenticationError'
-    '413':
-      description: Payload Too Large
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/PayloadTooLargeError'
-
     '500':
       description: Internal Server Error
       content:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/InternalServerError'
-    '502':
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/BadGatewayError'
-    '503':
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'
-    '504':
-      description: Gateway Timeout
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/GatewayTimeoutError'
 
 get:
-  summary: Obtener todos los documentos existentes
-  description: Devuelve una lista de todos los documentos que han sido subidos al sistema.
-  operationId: getAllDocuments
-  tags: 
+  summary: Listar documentos visibles para el usuario actual
+  operationId: listDocuments
+  tags:
     - Documentos
   responses:
     '200':
-      description: OK
-      content: 
+      description: Lista de documentos obtenida con éxito.
+      content:
         application/json:
           schema:
-            $ref: '../../documents/schemas/schema.yaml#/DocumentListResponse'
-          examples:
-            twoDocuments:
-              summary: Ejemplo con dos documentos
-              value:
-                - id: 1
-                  name: Contrato de arrendamiento
-                  client: Acme Corp
-                  type: SOPORTE
-                  start_date: '2024-01-01'
-                  end_date: '2025-01-01'
-                  licenses: 5
-                  value: 10000
-                  currency: USD
-                  state: ACTIVO
-                - id: 2
-                  name: Factura de servicios
-                  client: Beta LLC
-                  type: SERVICIOS
-                  start_date: '2024-02-01'
-                  end_date: '2024-02-28'
-                  value: 2000
-                  currency: USD
-                  licenses: 0
-                  state: EXPIRADO
+            $ref: '../schemas/schema.yaml#/DocumentListResponse'
     '401':
       description: Unauthorized
       content:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/AuthenticationError'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/InternalServerError'
-    '502':
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/BadGatewayError'
-    '503':
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'
-    '504':
-      description: Gateway Timeout
-      content:
-        application/json:
-          schema: 
-            $ref: '../../../schemas/errors.yaml#/GatewayTimeoutError'

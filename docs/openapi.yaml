@@ -1,17 +1,18 @@
 openapi: '3.0.3'
 info:
   title: ContractIA
-  description: API para la gestión de contratos, usuarios y chatbot.
+  description: API para la gestión documental, conversacional y organizacional de ContractIA.
   version: '1.0.0'
   license:
     name: Proprietary - All Rights Reserved
     url: https://github.com/NickSalA/ContractIA/blob/main/LICENSE
   contact:
-    name: NickSalA
+    name: ContractIA
     url: https://github.com/NickSalA/ContractIA
     email: contact@example.com
+
 servers:
-  - url: https://api/v1
+  - url: /
 
 components:
   securitySchemes:
@@ -19,54 +20,96 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    CronSecret:
+      type: apiKey
+      in: header
+      name: X-Cron-Secret
 
 security:
   - BearerAuth: []
 
 tags:
-  - name: Autenticación
-    description: Operaciones relacionadas con la autenticación de usuarios.
   - name: Usuarios
-    description: Operaciones para la gestión de usuarios.
+    description: Operaciones relacionadas con el usuario autenticado.
   - name: Chatbot
-    description: Operaciones para interactuar con el chatbot.
+    description: Operaciones para interactuar con el asistente conversacional.
   - name: Documentos
-    description: Operaciones para la gestión de documentos.
+    description: Operaciones para la gestión documental.
   - name: Conversaciones
-    description: Operaciones para la gestión de conversaciones.
+    description: Operaciones para consultar conversaciones persistidas.
   - name: Integraciones
-    description: Operaciones para la integración con servicios de terceros (Google Drive).
+    description: Operaciones de integración con Google Drive.
+  - name: Catálogo de Servicios
+    description: Operaciones para administrar el catálogo de servicios.
+  - name: Carpetas
+    description: Operaciones para organizar documentos por carpetas.
+  - name: Organizaciones
+    description: Operaciones para administrar miembros de la organización actual.
   - name: Notificaciones
-    description: Operaciones para la gestión de alertas y notificaciones.
+    description: Operaciones para alertas contractuales y reglas de notificación.
   - name: Plantillas
-    description: Operaciones para la gestión y generación de documentos mediante plantillas.
+    description: Operaciones para la gestión y generación de contratos mediante plantillas.
 
 paths:
   /user/me:
     $ref: 'modules/users/paths/me.yaml'
-  /user/{id}:
-    $ref:  'modules/users/paths/item.yaml'
   /chatbot:
     $ref: 'modules/chat/paths.yaml'
   /documents:
     $ref: 'modules/documents/paths/collection.yaml'
-  /documents/{id}:
+  /documents/{document_id}:
     $ref: 'modules/documents/paths/item.yaml'
-  /conversations:
+  /documents/{document_id}/file-url:
+    $ref: 'modules/documents/paths/file-url.yaml'
+  /conversations/user/{user_id}:
     $ref: 'modules/conversations/paths/collection.yaml'
-  /conversations/{id}:
+  /conversations/{conversation_id}:
     $ref: 'modules/conversations/paths/item.yaml'
   /integrations/drive/auth-url:
     $ref: 'modules/integrations/paths/auth-url.yaml'
   /integrations/drive/callback:
     $ref: 'modules/integrations/paths/callback.yaml'
+  /integrations/drive/download/{file_id}:
+    $ref: 'modules/integrations/paths/download.yaml'
   /integrations/drive/import:
     $ref: 'modules/integrations/paths/import.yaml'
+  /services:
+    $ref: 'modules/services/paths/collection.yaml'
+  /services/{service_id}:
+    $ref: 'modules/services/paths/item.yaml'
+  /folders:
+    $ref: 'modules/folders/paths/collection.yaml'
+  /folders/{folder_id}:
+    $ref: 'modules/folders/paths/item.yaml'
+  /organizations/me/members:
+    $ref: 'modules/organizations/paths/members-collection.yaml'
+  /organizations/me/members/{member_id}/role:
+    $ref: 'modules/organizations/paths/member-role.yaml'
+  /organizations/me/members/{member_id}/notifications:
+    $ref: 'modules/organizations/paths/member-notifications.yaml'
   /notifications:
     $ref: 'modules/notifications/paths.yaml'
+  /notifications/send-email-alerts:
+    $ref: 'modules/notifications/paths/send-email-alerts.yaml'
+  /notifications/cron/send-emails:
+    $ref: 'modules/notifications/paths/cron-send-emails.yaml'
+  /notifications/rules:
+    $ref: 'modules/notifications/paths/rules-collection.yaml'
+  /notifications/rules/{rule_id}:
+    $ref: 'modules/notifications/paths/rules-item.yaml'
   /templates:
     $ref: 'modules/templates/paths/collection.yaml'
+  /templates/formats:
+    $ref: 'modules/templates/paths/formats.yaml'
+  /templates/drafts:
+    $ref: 'modules/templates/paths/drafts.yaml'
+  /templates/preview:
+    $ref: 'modules/templates/paths/preview.yaml'
   /templates/{template_id}:
     $ref: 'modules/templates/paths/item.yaml'
   /templates/{template_id}/generate:
     $ref: 'modules/templates/paths/generate.yaml'
+  /templates/{template_id}/publish:
+    $ref: 'modules/templates/paths/publish.yaml'
+  /templates/{template_id}/archive:
+    $ref: 'modules/templates/paths/archive.yaml'

@@ -1,0 +1,47 @@
+parameters:
+  - name: rule_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: Identificador de la regla de notificación.
+
+patch:
+  tags:
+    - Notificaciones
+  summary: Actualizar una regla de notificación
+  operationId: updateNotificationRule
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/NotificationRuleUpdateRequest'
+  responses:
+    '200':
+      description: Regla actualizada correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/NotificationRuleResponse'
+    '404':
+      description: Rule Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
+
+delete:
+  tags:
+    - Notificaciones
+  summary: Eliminar una regla de notificación
+  operationId: deleteNotificationRule
+  responses:
+    '204':
+      description: Regla eliminada correctamente.
+    '404':
+      description: Rule Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

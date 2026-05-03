@@ -1,21 +1,15 @@
 post:
   tags:
-    - Integraciones
-  summary: Importar archivos desde Google Drive
-  operationId: importDriveFiles
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: '../schemas/schema.yaml#/ImportRequest'
+    - Notificaciones
+  summary: Enviar alertas manuales por correo
+  operationId: sendEmailAlerts
   responses:
     '200':
-      description: Importación encolada correctamente.
+      description: Alertas enviadas.
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/ImportResponse'
+            $ref: '../schemas/schema.yaml#/SendEmailAlertsResponse'
     '401':
       description: Unauthorized
       content:

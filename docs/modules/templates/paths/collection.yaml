@@ -1,8 +1,24 @@
 get:
   tags:
     - Plantillas
-  summary: Listar todas las plantillas de la organización.
+  summary: Listar plantillas de la organización actual
   operationId: listTemplates
+  parameters:
+    - name: document_type
+      in: query
+      required: false
+      schema:
+        $ref: '../schemas/schema.yaml#/DocumentType'
+    - name: format_code
+      in: query
+      required: false
+      schema:
+        type: string
+    - name: state
+      in: query
+      required: false
+      schema:
+        $ref: '../schemas/schema.yaml#/TemplateState'
   responses:
     '200':
       description: Lista de plantillas.
@@ -18,3 +34,28 @@ get:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/AuthenticationError'
+
+post:
+  tags:
+    - Plantillas
+  summary: Crear una nueva plantilla
+  operationId: createTemplate
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/CreateTemplateRequest'
+  responses:
+    '201':
+      description: Plantilla creada correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/TemplateResponse'
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'

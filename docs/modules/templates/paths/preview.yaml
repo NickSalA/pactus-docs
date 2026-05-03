@@ -1,0 +1,18 @@
+post:
+  tags:
+    - Plantillas
+  summary: Previsualizar una plantilla
+  operationId: previewTemplate
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/PreviewTemplateRequest'
+  responses:
+    '200':
+      description: Preview generado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/PreviewTemplateResponse'

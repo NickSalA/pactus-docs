@@ -1,20 +1,87 @@
 parameters:
-  - name: id
+  - name: document_id
     in: path
     required: true
     schema:
       type: integer
-    description: ID del documento
+    description: Identificador del documento.
+
+get:
+  summary: Obtener un documento por ID
+  operationId: getDocument
+  tags:
+    - Documentos
+  responses:
+    '200':
+      description: Documento obtenido correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/DocumentResponse'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/AuthenticationError'
+    '404':
+      description: Document Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
+
+patch:
+  summary: Actualizar un documento existente
+  operationId: updateDocument
+  tags:
+    - Documentos
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../schemas/schema.yaml#/DocumentMultipartUpdateRequest'
+  responses:
+    '200':
+      description: Documento actualizado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/DocumentResponse'
+    '400':
+      description: Payload inválido o archivo inválido.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/AuthenticationError'
+    '404':
+      description: Document Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
 
 delete:
   summary: Eliminar un documento existente
   operationId: deleteDocument
-  description: Deletes a specific document by ID
-  tags: 
+  tags:
     - Documentos
   responses:
     '204':
-      description: Documento eliminado satisfactoriamente
+      description: Documento eliminado satisfactoriamente.
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/AuthenticationError'
     '404':
       description: Document Not Found
       content:

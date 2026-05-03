@@ -1,18 +1,13 @@
 get:
   tags:
     - Integraciones
-  summary: Obtener URL de autorización de Google Drive.
+  summary: Obtener URL de autorización de Google Drive
   operationId: getDriveAuthUrl
+  security: []
   responses:
     '200':
-      description: URL generada con éxito.
+      description: URL generada correctamente.
       content:
         application/json:
           schema:
             $ref: '../schemas/schema.yaml#/AuthURLResponse'
-    '401':
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/AuthenticationError'

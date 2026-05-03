@@ -1,0 +1,33 @@
+get:
+  tags:
+    - Organizaciones
+  summary: Listar miembros de la organización actual
+  operationId: listOrganizationMembers
+  responses:
+    '200':
+      description: Lista de miembros obtenida correctamente.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/OrganizationMemberResponse'
+
+post:
+  tags:
+    - Organizaciones
+  summary: Crear un nuevo miembro en la organización actual
+  operationId: createOrganizationMember
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/OrganizationMemberCreateRequest'
+  responses:
+    '201':
+      description: Miembro creado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationMemberResponse'

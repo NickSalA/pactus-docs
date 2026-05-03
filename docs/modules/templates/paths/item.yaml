@@ -4,12 +4,12 @@ parameters:
     required: true
     schema:
       type: integer
-    description: ID de la plantilla
+    description: ID de la plantilla.
 
 get:
   tags:
     - Plantillas
-  summary: Obtener detalles de una plantilla.
+  summary: Obtener detalles de una plantilla
   operationId: getTemplate
   responses:
     '200':
@@ -18,6 +18,37 @@ get:
         application/json:
           schema:
             $ref: '../schemas/schema.yaml#/TemplateResponse'
+    '404':
+      description: Template Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
+
+patch:
+  tags:
+    - Plantillas
+  summary: Actualizar una plantilla en borrador
+  operationId: updateTemplate
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/UpdateTemplateRequest'
+  responses:
+    '200':
+      description: Plantilla actualizada correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/TemplateResponse'
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
     '404':
       description: Template Not Found
       content:

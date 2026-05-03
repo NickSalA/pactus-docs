@@ -1,23 +1,23 @@
 parameters:
-  - name: conversation_id
+  - name: document_id
     in: path
     required: true
     schema:
       type: integer
-    description: Identificador de la conversación.
+    description: Identificador del documento.
 
 get:
-  summary: Obtener una conversación por ID
-  operationId: getConversation
+  summary: Obtener URL firmada del archivo de un documento
+  operationId: getDocumentFileUrl
   tags:
-    - Conversaciones
+    - Documentos
   responses:
     '200':
-      description: Conversación obtenida satisfactoriamente.
+      description: URL firmada generada correctamente.
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/ConversationRead'
+            $ref: '../schemas/schema.yaml#/DocumentFileUrlResponse'
     '401':
       description: Unauthorized
       content:
@@ -25,7 +25,7 @@ get:
           schema:
             $ref: '../../../schemas/errors.yaml#/AuthenticationError'
     '404':
-      description: Conversation Not Found
+      description: Document Not Found
       content:
         application/json:
           schema:

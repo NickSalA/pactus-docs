@@ -1,0 +1,18 @@
+post:
+  tags:
+    - Notificaciones
+  summary: Ejecutar el envío diario de correos para todas las organizaciones
+  operationId: cronSendEmails
+  security:
+    - CronSecret: []
+  responses:
+    '200':
+      description: Proceso de cron ejecutado correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/CronSendEmailsResponse'
+    '401':
+      description: No autorizado
+    '503':
+      description: Cron no configurado en este servidor

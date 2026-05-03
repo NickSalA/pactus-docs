@@ -1,0 +1,44 @@
+ServiceResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    is_active:
+      type: boolean
+    documents_count:
+      type: integer
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - name
+    - is_active
+    - documents_count
+    - created_at
+    - updated_at
+
+ServiceCreateRequest:
+  type: object
+  properties:
+    name:
+      type: string
+    is_active:
+      type: boolean
+  required:
+    - name
+
+ServiceUpdateRequest:
+  type: object
+  properties:
+    name:
+      type: string
+      nullable: true
+    is_active:
+      type: boolean
+      nullable: true

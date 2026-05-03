@@ -1,0 +1,26 @@
+parameters:
+  - name: template_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID de la plantilla.
+
+post:
+  tags:
+    - Plantillas
+  summary: Publicar una plantilla
+  operationId: publishTemplate
+  responses:
+    '200':
+      description: Plantilla publicada correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/TemplateResponse'
+    '404':
+      description: Template Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'

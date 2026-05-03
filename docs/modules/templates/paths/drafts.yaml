@@ -1,0 +1,18 @@
+post:
+  tags:
+    - Plantillas
+  summary: Generar y persistir un borrador de plantilla
+  operationId: generateTemplateDraft
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../schemas/schema.yaml#/TemplateDraftMultipartRequest'
+  responses:
+    '201':
+      description: Borrador generado y persistido correctamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/PersistedTemplateDraftResponse'
