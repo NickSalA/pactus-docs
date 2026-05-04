@@ -1,6 +1,6 @@
 # ContractIA Docs
 
-Este repositorio es exclusivamente de documentacion para ContractIA.
+Este repositorio se utiliza exclusivamente para la documentacion para ContractIA.
 
 ## Contenido
 
