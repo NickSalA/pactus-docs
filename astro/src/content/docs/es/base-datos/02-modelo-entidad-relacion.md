@@ -106,7 +106,7 @@ No hay foreign key física entre negocio y Storage. La aplicación enlaza ambas 
 
 - `public.documents.file_path`
 - `public.documents.file_name`
-- bucket `documents`
+- bucket `contracts`
 
 ### `notification_rules` + `documents` -> `sync_document_states()`
 

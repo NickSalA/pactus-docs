@@ -15,10 +15,10 @@ El archivo binario de un contrato se mantiene fuera de las tablas de negocio. La
 | `public.documents.file_path` | Ruta tecnica del archivo |
 | `storage.objects` | Persistencia del binario |
 
-Actualmente los archivos documentales se almacenan en el bucket `documents`, con una ruta organizada por documento:
+Actualmente los archivos documentales se almacenan en el bucket `contracts`, con una ruta organizada por organización, tipo documental y documento:
 
 ```text
-documents/{document_id}/{filename}
+orgs/{organization_id}/{document_type}/docs/{document_id}/{safe_name}
 ```
 
 En la aplicación esto se refleja así:

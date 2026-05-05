@@ -117,7 +117,7 @@ Panel principal con métricas y resumen de actividad:
 
 Gestión completa del ciclo de vida de contratos:
 - Tabla con todos los contratos del sistema
-- Filtrado por estado: Todos, Activo, Por vencer, Expirado
+- Filtrado por estado según el modelo vigente del backend
 - Búsqueda por nombre, cliente o ID
 - Acciones: Ver documento PDF, Editar, Eliminar
 - Formulario modal para crear nuevos contratos
@@ -129,9 +129,12 @@ Gestión completa del ciclo de vida de contratos:
 
 | Estado | Color | Descripción |
 |--------|-------|-------------|
-| `ACTIVO` | Verde (emerald) | Contrato vigente sin fecha próxima de vencimiento |
-| `POR_VENCER` | Amarillo (amber) | Contrato con fecha de vencimiento próxima |
-| `EXPIRADO` | Rojo (red) | Contrato con fecha de vencimiento pasada |
+| `DRAFT` | Gris (slate) | Contrato en preparación o pendiente de completar |
+| `PENDING_SIGNATURE` | Azul (sky) | Contrato listo para circular, aún sin firma final |
+| `ACTIVE` | Verde (emerald) | Contrato vigente fuera de ventana activa de alerta |
+| `EXPIRING_SOON` | Amarillo (amber) | Contrato vigente dentro de ventana de vencimiento |
+| `EXPIRED` | Rojo (red) | Contrato cuyo periodo ya concluyó |
+| `TERMINATED` | Zinc (neutral) | Contrato cerrado antes de su vencimiento natural |
 
 ### Agente IA (`/ai-agent`)
 

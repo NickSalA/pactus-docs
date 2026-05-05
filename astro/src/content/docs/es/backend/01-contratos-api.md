@@ -1,288 +1,339 @@
 ---
 title: Contratos API
-description: Definición formal de los contratos HTTP entre el frontend desplegado en Vercel y el backend implementado en FastAPI.
+description: Definición formal de los contratos HTTP entre el frontend y el backend implementado en FastAPI.
 ---
 
-Los contratos API de **ContractIA** son la definición formal de cómo se comunican el frontend y el backend. En términos prácticos, establecen qué petición puede enviar el cliente desplegado en **Vercel**, qué parámetros y cuerpos acepta **FastAPI**, qué código HTTP devuelve el servidor y qué estructura debe tener cada respuesta.
+Los contratos API de **ContractIA** describen cómo se comunican el frontend y el backend en términos concretos: qué ruta existe, qué método HTTP utiliza, qué body acepta, qué respuesta devuelve y qué restricciones de acceso aplica.
 
-Este contrato evita ambigüedades entre equipos: el frontend no "adivina" payloads y el backend no responde con formatos improvisados. Ambos implementan exactamente lo que quedó descrito en OpenAPI.
+En la práctica, este contrato evita ambigüedades entre equipos. El frontend no debería adivinar payloads ni respuestas, y el backend no debería exponer formatos distintos a los que han quedado documentados.
 
 ## Fuente de Verdad
 
-La fuente oficial de estos contratos vive en los archivos YAML del proyecto:
+La fuente de verdad de la API vive en dos capas complementarias:
 
-- `docs/openapi.yaml`: índice principal de rutas, seguridad y tags.
-- `docs/modules/*/paths.yaml` y `docs/modules/*/paths/*.yaml`: definición de endpoints por módulo.
-- `docs/modules/*/schemas/schema.yaml`: definición de request y response bodies.
-- `docs/schemas/errors.yaml`: contrato común de errores.
+- el backend real en `ContractAI-Backend/src/contractai_backend/modules/*/api/routers*.py`
+- la especificación OpenAPI del repositorio en `docs/openapi.yaml` y `docs/modules/**/*.yaml`
 
-## Qué Fija un Contrato API
+El objetivo de esta documentación es que ambas capas queden alineadas.
 
-Cada contrato deja por escrito cinco elementos:
+## Estructura General de la API
 
-1. La ruta y el método HTTP, por ejemplo `POST /chatbot`.
-2. Los parámetros obligatorios, ya sea en `path`, `query` o headers.
-3. El tipo de body permitido, como `application/json` o `multipart/form-data`.
-4. La forma exacta del JSON de respuesta y sus códigos HTTP.
-5. Los errores esperados, como `400`, `401`, `404` o `500`.
+La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es decir, los endpoints reales parten de prefijos como:
 
-En **ContractIA**, además, la API declara autenticación global mediante `BearerAuth`, por lo que el frontend debe enviar el token JWT cuando el endpoint lo requiera.
+- `/chatbot`
+- `/documents`
+- `/conversations`
+- `/integrations`
+- `/services`
+- `/folders`
+- `/organizations`
+- `/notifications`
+- `/templates`
+- `/user`
+
+Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se aplica hoy sobre los routers montados por la aplicación.
 
 ## Contratos Vigentes
 
+### Usuario autenticado
+
+- `GET /user/me`
+  Devuelve el perfil del usuario autenticado a partir del token Bearer validado contra Supabase.
+
+Respuesta típica:
+
+```json
+{
+  "id": 19,
+  "organization_id": 2,
+  "supabase_user_id": "7d7c0d7e-4d4f-4e6f-9c08-6f20b4f17d4c",
+  "email": "ana@empresa.com",
+  "full_name": "Ana Torres",
+  "avatar_url": null,
+  "role": "ADMIN",
+  "receives_notifications": true,
+  "is_active": true,
+  "created_at": "2026-04-05T10:00:00Z",
+  "updated_at": "2026-04-05T10:00:00Z"
+}
+```
+
+El router `/login` existe en la aplicación, pero actualmente no expone endpoints propios documentables.
+
 ### Chatbot
 
-- `POST /chatbot` (`sendChatMessage`)
+- `POST /chatbot`
   Recibe `ChatRequest` y devuelve `ChatResponse`.
-  Request JSON:
+
+Request JSON:
 
 ```json
 {
-  "message": "Resume las clausulas de renovacion",
+  "message": "Resume las cláusulas de renovación",
   "thread_id": 12
 }
 ```
 
-  Response `200`:
+Response `200`:
 
 ```json
 {
-  "response": "La clausula de renovacion establece una prorroga automatica de 12 meses.",
+  "response": "La cláusula establece una prórroga automática de 12 meses.",
   "thread_id": 12
 }
 ```
-
-  Errores documentados: `400`, `401`, `413`, `429`, `500`, `502`, `503`, `504`.
-
-### Usuarios
-
-- `POST /user` (`createUser`)
-  Recibe `UserCreateRequest` y devuelve `UserResponse`.
-
-```json
-{
-  "email": "ana@example.com",
-  "password": "securePassword123",
-  "role": "admin"
-}
-```
-
-  Response `201`:
-
-```json
-{
-  "id": 14,
-  "email": "ana@example.com",
-  "role": "admin"
-}
-```
-
-- `GET /user` (`listUsers`)
-  Devuelve `UserListResponse`, es decir, un arreglo de usuarios.
-
-- `GET /user/{id}` (`getUser`)
-  Requiere el parámetro de ruta `id` y devuelve `UserResponse`.
-
-- `PATCH /user/{id}` (`updateUser`)
-  Requiere `id` y recibe `UserUpdateRequest`.
-  Response `200`: `UserResponse`.
-
-- `DELETE /user/{id}` (`deleteUser`)
-  Requiere `id`.
-  Response `204`: sin body.
 
 ### Documentos
 
-- `POST /documents` (`createDocument`)
-  Este endpoint es una excepción importante: no usa JSON, sino `multipart/form-data`.
-  El contrato `DocumentCreateRequest` exige:
+El módulo documental es uno de los contratos más importantes del sistema. Su comportamiento real ya no coincide con la estructura histórica que exponía campos planos como `value`, `currency` o `licenses` al nivel raíz.
 
-  - `file`
-  - `name`
-  - `client`
-  - `type`
-  - `start_date`
-  - `end_date`
-  - `value`
-  - `currency`
-  - `licenses`
+- `POST /documents`
+  Crea un documento nuevo usando `multipart/form-data`.
 
-  Response `201`: `DocumentResponse`.
+El body real contiene:
 
-- `GET /documents` (`getAllDocuments`)
-  Devuelve `DocumentListResponse`, una lista de documentos con campos como `id`, `name`, `client`, `type`, `start_date`, `end_date`, `value`, `currency`, `licenses` y `state`.
+- `file`: archivo binario
+- `document`: string JSON serializado con el payload documental
 
-- `DELETE /documents/{id}` (`deleteDocument`)
-  Requiere `id`.
-  Response `204`: sin body.
-
-### Conversaciones
-
-- `GET /conversations` (`getAllConversations`)
-  Devuelve `ConversationListResponse`, una lista de conversaciones del usuario autenticado.
-
-- `GET /conversations/{id}` (`getConversationHistory`)
-  Requiere `id` y devuelve `ConversationResponse`.
-  La respuesta incluye `id`, `title`, `created_at` y `content`, donde `content` es un arreglo de mensajes con `sender` y `message`.
-
-### Integraciones con Google Drive
-
-- `GET /integrations/drive/auth-url` (`getDriveAuthUrl`)
-  Devuelve `AuthURLResponse`.
+Ejemplo conceptual del campo `document`:
 
 ```json
 {
-  "url": "https://accounts.google.com/o/oauth2/auth?..."
-}
-```
-
-- `GET /integrations/drive/callback` (`exchangeDriveCode`)
-  Requiere el query param `code`.
-  Response `200`: `TokenResponse`.
-
-```json
-{
-  "token": "ya29.a0AfH6S...",
-  "refresh_token": "1//0gExample",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "client_id": "google-client-id",
-  "client_secret": "google-client-secret",
-  "scopes": [
-    "https://www.googleapis.com/auth/drive.readonly"
-  ]
-}
-```
-
-- `POST /integrations/drive/import` (`importDriveFiles`)
-  Recibe `ImportRequest` y devuelve `ImportResponse`.
-
-```json
-{
-  "token": {
-    "access_token": "ya29.a0AfH6S..."
+  "name": "Contrato Marco 2026",
+  "client": "Acme Corp",
+  "type": "COMPANY",
+  "start_date": "2026-01-01",
+  "end_date": "2026-12-31",
+  "form_data": {
+    "value": 15000,
+    "currency": "USD"
   },
-  "files": [
+  "folder_id": 3,
+  "service_items": [
     {
-      "file_id": "1AbCdEfGh",
-      "document": {
-        "name": "Contrato Marco 2026",
-        "type": "SERVICIOS"
-      }
+      "service_id": 5,
+      "description": "Administración integral",
+      "value": 15000,
+      "currency": "USD",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31"
     }
   ]
 }
 ```
 
-  Response `200`:
+- `GET /documents`
+  Devuelve la lista de documentos visibles para el usuario autenticado dentro de su organización.
+
+- `GET /documents/{document_id}`
+  Devuelve el detalle completo de un documento.
+
+- `PATCH /documents/{document_id}`
+  Actualiza un documento existente. Utiliza también `multipart/form-data`, con un campo `document` serializado y un archivo opcional `file`.
+
+- `DELETE /documents/{document_id}`
+  Elimina el documento y sus recursos asociados.
+
+- `GET /documents/{document_id}/file-url`
+  Devuelve una URL firmada temporal para acceder al archivo almacenado en Supabase Storage.
+
+Response típica de documento:
 
 ```json
 {
-  "message": "Importacion iniciada",
-  "queued_files": 1,
-  "index_name": "organization-12"
+  "id": 33,
+  "name": "Contrato Marco 2026",
+  "client": "Acme Corp",
+  "type": "COMPANY",
+  "start_date": "2026-01-01",
+  "end_date": "2026-12-31",
+  "form_data": {
+    "value": 15000,
+    "currency": "USD"
+  },
+  "state": "ACTIVE",
+  "folder_id": 3,
+  "file_path": "orgs/2/company/docs/33/contrato_marco_2026.pdf",
+  "file_name": "Contrato Marco 2026.pdf",
+  "service_items": [
+    {
+      "id": 97,
+      "service_id": 5,
+      "description": "Administración integral",
+      "value": 15000,
+      "currency": "USD",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31"
+    }
+  ],
+  "created_at": "2026-04-12T14:20:00Z",
+  "updated_at": "2026-04-12T14:20:00Z"
 }
 ```
 
-### Notificaciones
+### Conversaciones
 
-- `GET /notifications` (`listNotifications`)
-  Devuelve un arreglo de `NotificationResponse`.
+- `GET /conversations/user/{user_id}`
+  Lista las conversaciones de un usuario concreto. El backend valida que `user_id` coincida con el usuario autenticado.
+
+- `GET /conversations/{conversation_id}`
+  Devuelve el detalle de una conversación concreta.
+
+La respuesta real del historial conversacional utiliza mensajes con esta estructura:
 
 ```json
 [
   {
-    "id": "notif-001",
-    "document_id": 7,
-    "type": "WARNING",
-    "title": "Contrato proximo a vencer",
-    "description": "El contrato con Acme Corp vence en 15 dias.",
-    "days_remaining": 15
+    "role": "user",
+    "content": "¿Cuáles son las cláusulas principales?",
+    "timestamp": "2026-04-10T10:00:00Z"
+  },
+  {
+    "role": "assistant",
+    "content": "Las cláusulas principales son...",
+    "timestamp": "2026-04-10T10:00:02Z"
   }
 ]
 ```
 
-- `POST /notifications` (`sendNotificationAlerts`)
-  No declara request body en el contrato actual.
-  Response `200`:
+### Integraciones con Google Drive
 
-```json
-{
-  "emails_sent": 24
-}
-```
+- `GET /integrations/drive/auth-url`
+  Devuelve la URL de autorización de Google Drive.
 
-### Plantillas y Generacion de Contratos
+- `GET /integrations/drive/callback`
+  Recibe el `code` OAuth y devuelve el token autenticado.
 
-- `GET /templates` (`listTemplates`)
-  Devuelve una lista de `TemplateResponse`.
+- `POST /integrations/drive/download/{file_id}`
+  Descarga el binario de un archivo de Drive a partir de un token válido.
 
-- `GET /templates/{template_id}` (`getTemplate`)
-  Requiere `template_id` y devuelve `TemplateResponse`.
+- `POST /integrations/drive/import`
+  Encola la importación en segundo plano de uno o varios archivos de Google Drive hacia el pipeline documental del sistema.
 
-```json
-{
-  "id": 3,
-  "name": "Contrato de prestacion de servicios",
-  "description": "Plantilla base corporativa",
-  "content": {
-    "body_md": "# Contrato\n\nEntre las partes..."
-  }
-}
-```
+El payload de importación permite adjuntar metadata documental rica, porque cada entrada de `files[]` reutiliza el modelo de documento en borrador del backend.
 
-- `POST /templates/{template_id}/generate` (`generateTemplateDocument`)
-  Requiere `template_id`.
-  El contrato actual acepta `application/json` con un body tipado como `object`.
-  Response `201`: `GeneratedDocumentResponse`.
+### Catálogo de Servicios
 
-```json
-{
-  "id": 81,
-  "name": "Contrato Acme Corp 2026",
-  "file_url": "https://files.contractia.dev/contracts/81.pdf",
-  "client": "Acme Corp"
-}
-```
+- `GET /services`
+  Lista el catálogo de servicios de la organización actual.
 
-## Contrato Unificado de Errores
+- `POST /services`
+  Crea un nuevo servicio de catálogo.
 
-Cuando FastAPI devuelve un error, el frontend no debería procesarlo como texto libre, sino como un objeto estructurado. El archivo `docs/schemas/errors.yaml` define contratos comunes como `ValidationError`, `AuthenticationError`, `NotFoundError` e `InternalServerError`.
+- `PATCH /services/{service_id}`
+  Actualiza un servicio existente.
 
-Ejemplo de error de validacion:
+- `DELETE /services/{service_id}`
+  Elimina un servicio del catálogo.
 
-```json
-{
-  "code": "VALIDATION_ERROR",
-  "message": "Uno o mas campos no son validos.",
-  "details": {},
-  "traceId": "req-7f9c2a1b",
-  "type": "validation_error",
-  "fieldErrors": [
-    {
-      "field": "email",
-      "message": "El campo email es obligatorio."
-    }
-  ]
-}
-```
+### Carpetas
 
-## Observaciones del Contrato Actual
+- `GET /folders`
+  Lista las carpetas visibles para el usuario autenticado.
 
-Los YAML ya dejan cerrados los nombres de rutas, métodos, códigos de respuesta y la mayoría de esquemas principales. Sin embargo, hay contratos que todavía tienen tipado abierto y deberían endurecerse si se busca una integración completamente estricta:
+- `POST /folders`
+  Crea una carpeta en el ámbito del rol actual.
 
-1. `POST /templates/{template_id}/generate` acepta un body `type: object`, pero aún no define propiedades obligatorias.
-2. `POST /integrations/drive/import` define `token` como un `object` genérico, sin una estructura interna cerrada.
-3. `POST /notifications` no declara request body, por lo que actualmente el contrato solo fija la respuesta.
+- `PATCH /folders/{folder_id}`
+  Actualiza una carpeta existente.
 
-Mientras estos puntos no se detallen en OpenAPI, el acuerdo entre Vercel y FastAPI en esos casos seguirá siendo parcial.
+- `DELETE /folders/{folder_id}`
+  Elimina una carpeta si no tiene contratos asociados y si el usuario puede administrarla.
+
+### Miembros de la Organización
+
+- `GET /organizations/me/members`
+  Lista los miembros de la organización del usuario actual.
+
+- `POST /organizations/me/members`
+  Crea un nuevo miembro dentro de la organización actual.
+
+- `PATCH /organizations/me/members/{member_id}/role`
+  Actualiza el rol de un miembro.
+
+- `PATCH /organizations/me/members/{member_id}/notifications`
+  Actualiza si un miembro debe recibir alertas contractuales.
+
+### Notificaciones
+
+- `GET /notifications`
+  Devuelve las alertas que aplican al usuario autenticado para el día actual.
+
+- `POST /notifications/send-email-alerts`
+  Dispara manualmente el envío consolidado de correos de vencimiento para la organización actual. Requiere permisos de administrador.
+
+- `POST /notifications/cron/send-emails`
+  Ejecuta el envío masivo diario de correos para todas las organizaciones. Este endpoint no usa JWT: se protege con el header `X-Cron-Secret`.
+
+- `GET /notifications/rules`
+  Lista las reglas de alerta de la organización actual.
+
+- `POST /notifications/rules`
+  Crea una nueva regla de alerta.
+
+- `PATCH /notifications/rules/{rule_id}`
+  Actualiza una regla existente.
+
+- `DELETE /notifications/rules/{rule_id}`
+  Elimina una regla.
+
+El tipo real de notificación se devuelve en minúsculas, porque ese valor se alinea con el frontend:
+
+- `info`
+- `warning`
+- `critical`
+
+### Plantillas
+
+El módulo de plantillas expone hoy más rutas de las que tenía documentadas originalmente.
+
+- `GET /templates`
+  Lista las plantillas disponibles para la organización actual.
+
+- `POST /templates`
+  Crea una plantilla nueva.
+
+- `GET /templates/{template_id}`
+  Devuelve el detalle de una plantilla concreta.
+
+- `PATCH /templates/{template_id}`
+  Actualiza una plantilla en borrador.
+
+- `POST /templates/{template_id}/generate`
+  Genera un documento persistido a partir de una plantilla y un payload de `form_data`.
+
+- `GET /templates/formats`
+  Lista los formatos de plantilla disponibles según rol y tipo documental.
+
+- `POST /templates/drafts`
+  Genera y persiste un borrador de plantilla desde prompt, archivo o ambos.
+
+- `POST /templates/preview`
+  Previsualiza una plantilla sin persistirla.
+
+- `POST /templates/{template_id}/publish`
+  Publica una plantilla.
+
+- `POST /templates/{template_id}/archive`
+  Archiva una plantilla.
+
+La respuesta de `generate` no es un objeto simplificado ad hoc. El backend devuelve un documento persistido con el mismo shape base del módulo documental.
+
+## Reglas de Seguridad Relevantes
+
+Aunque OpenAPI define la API a nivel formal, hay tres reglas prácticas que esta documentación debe reflejar siempre:
+
+1. La mayoría de endpoints usa autenticación Bearer JWT validada contra Supabase.
+2. `GET /integrations/drive/auth-url` y `GET /integrations/drive/callback` son públicos.
+3. `POST /notifications/cron/send-emails` se protege con `X-Cron-Secret`, no con JWT.
 
 ## Regla de Gobierno
 
-En este proyecto, un cambio de integración no debería empezar en el código, sino en el contrato:
+En este proyecto, un cambio de integración no debería empezar en el frontend, sino en el contrato:
 
-1. Primero se actualiza el YAML de OpenAPI.
-2. Después se adapta FastAPI para cumplirlo.
-3. Luego el frontend en Vercel consume exactamente ese esquema.
-4. Finalmente se valida el contrato con Redocly para asegurar consistencia.
+1. Primero se actualiza el backend o se confirma el comportamiento real.
+2. Después se alinea `docs/openapi.yaml` y sus módulos.
+3. Luego se actualiza la documentación narrativa de `astro`.
+4. Finalmente el frontend consume el contrato resultante.
 
-De este modo, los archivos YAML no son documentación decorativa: son el acuerdo técnico que controla la comunicación entre ambas capas del sistema.
+De este modo, la documentación no actúa como adorno, sino como una representación fiel del sistema en producción.
