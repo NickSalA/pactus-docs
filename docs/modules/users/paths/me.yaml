@@ -4,8 +4,6 @@ get:
   operationId: getMe
   tags:
     - Usuarios
-  security:
-    - BearerAuth: []
   responses:
     '200':
       description: Perfil del usuario obtenido con éxito.
@@ -14,4 +12,8 @@ get:
           schema:
             $ref: '../schemas/schema.yaml#/CurrentUserResponse'
     '401':
-      description: No autorizado (token inválido o expirado).
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

@@ -1,0 +1,32 @@
+parameters:
+  - name: member_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del miembro.
+
+patch:
+  summary: Actualizar rol de un miembro
+  operationId: updateOrganizationMemberRole
+  tags:
+    - Organizaciones
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/OrganizationMemberRoleUpdateRequest'
+  responses:
+    '200':
+      description: Rol actualizado satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationMemberResponse'
+    '404':
+      description: Miembro no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

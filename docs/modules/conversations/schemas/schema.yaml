@@ -1,41 +1,63 @@
-ConversationResponse:
+ConversationMessage:
+  type: object
+  additionalProperties: true
+  description: Mensaje persistido en la conversación. El contenido exacto depende del flujo del agente.
+
+ConversationRead:
   type: object
   properties:
     id:
       type: integer
-      example: 1
     title:
       type: string
-      example: Conversación sobre contrato de arrendamiento
-    created_at:
-      type: string
-      format: date-time
-      example: '2024-01-01T12:00:00Z'
+    organization_id:
+      type: integer
+    user_id:
+      type: integer
     content:
       type: array
       items:
-        type: object
-        properties:
-          sender:
-            type: string
-            enum: [user, bot]
-            example: user
-          message:
-            type: string
-            example: "¿Cuáles son las cláusulas principales del contrato?"
+        $ref: '#/ConversationMessage'
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - title
+    - organization_id
+    - user_id
+    - content
+    - created_at
+    - updated_at
+
+ConversationList:
+  type: object
+  properties:
+    id:
+      type: integer
+    title:
+      type: string
+    organization_id:
+      type: integer
+    user_id:
+      type: integer
+    created_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - title
+    - organization_id
+    - user_id
+    - created_at
+
+ConversationResponse:
+  $ref: '#/ConversationRead'
 
 ConversationListResponse:
   type: array
   items:
-    type: object
-    properties:
-      id:
-        type: integer
-        example: 1
-      title:
-        type: string
-        example: Conversación sobre contrato de arrendamiento
-      created_at:
-        type: string
-        format: date-time
-        example: '2024-01-01T12:00:00Z'
+    $ref: '#/ConversationList'

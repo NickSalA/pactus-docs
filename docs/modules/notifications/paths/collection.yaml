@@ -1,0 +1,20 @@
+get:
+  tags:
+    - Notificaciones
+  summary: Consultar notificaciones de contratos próximos a vencer
+  operationId: listNotifications
+  responses:
+    '200':
+      description: Lista de notificaciones obtenida.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/NotificationResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

@@ -1,0 +1,32 @@
+parameters:
+  - name: member_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del miembro.
+
+patch:
+  summary: Actualizar preferencia de notificaciones de un miembro
+  operationId: updateOrganizationMemberNotifications
+  tags:
+    - Organizaciones
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/OrganizationMemberNotificationsUpdateRequest'
+  responses:
+    '200':
+      description: Preferencia actualizada satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationMemberResponse'
+    '404':
+      description: Miembro no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

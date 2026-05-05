@@ -5,11 +5,12 @@ ChatRequest:
   properties:
     message:
       type: string
-      description: The user's message to the chatbot.
-      example: "Hola, ¿cómo estás?"
+      description: Mensaje del usuario para el chatbot.
+      example: Resume mis contratos activos.
     thread_id:
       type: integer
-      description: ID de la conversación.
+      nullable: true
+      description: ID de la conversación existente. Si se omite, el backend crea una nueva conversación.
       example: 12
 
 ChatResponse:
@@ -20,8 +21,7 @@ ChatResponse:
   properties:
     response:
       type: string
-      description: The chatbot's response to the user's message.
-      example: "¡Hola! Estoy bien, gracias por preguntar. ¿En qué puedo ayudarte hoy?"
+      description: Respuesta generada por el chatbot.
     thread_id:
       type: integer
       description: ID de la conversación.

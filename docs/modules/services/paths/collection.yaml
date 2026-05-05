@@ -1,0 +1,57 @@
+get:
+  summary: Listar servicios del catálogo
+  operationId: listServices
+  tags:
+    - Servicios
+  parameters:
+    - name: include_inactive
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Solo los administradores pueden incluir servicios inactivos.
+  responses:
+    '200':
+      description: Servicios obtenidos satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ServiceListResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+post:
+  summary: Crear un servicio del catálogo
+  operationId: createService
+  tags:
+    - Servicios
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/ServiceCreateRequest'
+  responses:
+    '201':
+      description: Servicio creado satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ServiceResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '422':
+      description: Datos inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'

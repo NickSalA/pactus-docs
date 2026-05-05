@@ -1,0 +1,47 @@
+parameters:
+  - name: service_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del servicio.
+
+patch:
+  summary: Actualizar un servicio del catálogo
+  operationId: updateService
+  tags:
+    - Servicios
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/ServiceUpdateRequest'
+  responses:
+    '200':
+      description: Servicio actualizado satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ServiceResponse'
+    '404':
+      description: Servicio no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+delete:
+  summary: Eliminar un servicio del catálogo
+  operationId: deleteService
+  tags:
+    - Servicios
+  responses:
+    '204':
+      description: Servicio eliminado satisfactoriamente.
+    '404':
+      description: Servicio no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

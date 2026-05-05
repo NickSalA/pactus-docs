@@ -1,0 +1,43 @@
+get:
+  summary: Listar carpetas
+  operationId: listFolders
+  tags:
+    - Carpetas
+  responses:
+    '200':
+      description: Carpetas obtenidas satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/FolderListResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+post:
+  summary: Crear una carpeta
+  operationId: createFolder
+  tags:
+    - Carpetas
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/FolderCreateRequest'
+  responses:
+    '201':
+      description: Carpeta creada satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/FolderResponse'
+    '422':
+      description: Datos inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'

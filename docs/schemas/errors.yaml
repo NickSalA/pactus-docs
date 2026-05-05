@@ -1,247 +1,67 @@
 ErrorResponse:
   type: object
-  required:
-    - code
-    - message
+  description: Respuesta común de los manejadores de errores del backend.
   properties:
-    code:
+    error:
+      type: boolean
+      example: true
+    type:
       type: string
-      description: Application-specific error code.
-      example: INTERNAL_ERROR
+      description: Nombre de la excepción o categoría del error.
+      example: NotFoundError
     message:
       type: string
-      description: Human-readable error message.
-      example: Ha ocurrido un error.
-    details:
-      type: object
-      description: Optional structured details for debugging or validation.
-      additionalProperties: true
-    traceId:
+      description: Mensaje legible para el consumidor.
+      example: Recurso no encontrado
+    request_id:
       type: string
-      description: Request identifier for tracing logs.
+      description: Identificador de la petición para trazabilidad.
       example: req-7f9c2a1b
+  required:
+    - error
+    - type
+    - message
+    - request_id
 
 ValidationError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: VALIDATION_ERROR
-    message:
-      type: string
-      example: Uno o mas campos no son validos.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - validation_error
-    fieldErrors:
-      type: array
-      description: List of field-specific validation errors.
-      items:
-        type: object
-        required:
-          - field
-          - message
-        properties:
-          field:
+  allOf:
+    - $ref: '#/ErrorResponse'
+    - type: object
+      description: Error de validación producido por FastAPI/Pydantic.
+      properties:
+        type:
+          type: string
+          example: ValidationError
+        message:
+          type: string
+          example: Los datos enviados en la petición no son válidos.
+        details:
+          type: array
+          items:
             type: string
-            example: email
-          message:
-            type: string
-            example: El campo email es obligatorio.
+          example:
+            - body -> name: Field required
 
 AuthenticationError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: INVALID_CREDENTIALS
-    message:
-      type: string
-      example: Email o contrasena invalidos.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - authentication_error
+  $ref: '#/ErrorResponse'
 
 NotFoundError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: NOT_FOUND
-    message:
-      type: string
-      example: El recurso solicitado no fue encontrado.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - not_found
-    resourceId:
-      type: string
-      example: resource-12345
+  $ref: '#/ErrorResponse'
 
 PayloadTooLargeError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: PAYLOAD_TOO_LARGE
-    message:
-      type: string
-      example: El contenido enviado excede el tamano permitido.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - payload_too_large
+  $ref: '#/ErrorResponse'
 
 TooManyRequestsError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: RATE_LIMIT_EXCEEDED
-    message:
-      type: string
-      example: Se excedio el limite de solicitudes.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - too_many_requests
+  $ref: '#/ErrorResponse'
 
 InternalServerError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: INTERNAL_SERVER_ERROR
-    message:
-      type: string
-      example: Ocurrio un error interno en el servidor.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - internal_server_error
+  $ref: '#/ErrorResponse'
 
 BadGatewayError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: BAD_GATEWAY
-    message:
-      type: string
-      example: Fallo la comunicacion con el proveedor externo.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - bad_gateway
+  $ref: '#/ErrorResponse'
 
 ServiceUnavailableError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: SERVICE_UNAVAILABLE
-    message:
-      type: string
-      example: El servicio no esta disponible temporalmente.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - service_unavailable
+  $ref: '#/ErrorResponse'
 
 GatewayTimeoutError:
-  type: object
-  required:
-    - code
-    - message
-  properties:
-    code:
-      type: string
-      example: GATEWAY_TIMEOUT
-    message:
-      type: string
-      example: El proveedor externo tardo demasiado en responder.
-    details:
-      type: object
-      additionalProperties: true
-    traceId:
-      type: string
-      example: req-7f9c2a1b
-    type:
-      type: string
-      enum:
-        - gateway_timeout
+  $ref: '#/ErrorResponse'

@@ -1,0 +1,24 @@
+post:
+  tags:
+    - Plantillas
+  summary: Generar y guardar borrador de plantilla
+  operationId: generateTemplateDraft
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../schemas/schema.yaml#/TemplateDraftMultipartRequest'
+  responses:
+    '201':
+      description: Borrador generado y persistido.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/PersistedTemplateDraftResponse'
+    '400':
+      description: Payload inválido.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

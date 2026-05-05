@@ -1,0 +1,27 @@
+parameters:
+  - name: document_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del documento.
+
+get:
+  summary: Obtener URL firmada del archivo
+  description: Genera una URL temporal para acceder al archivo almacenado del documento.
+  operationId: getDocumentFileUrl
+  tags:
+    - Documentos
+  responses:
+    '200':
+      description: URL firmada generada.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/DocumentFileUrlResponse'
+    '404':
+      description: Documento no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

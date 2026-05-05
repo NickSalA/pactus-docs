@@ -1,0 +1,33 @@
+parameters:
+  - name: file_id
+    in: path
+    required: true
+    schema:
+      type: string
+    description: ID del archivo en Google Drive.
+
+post:
+  tags:
+    - Integraciones
+  summary: Descargar archivo de Google Drive
+  operationId: downloadDriveFile
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/DriveRequest'
+  responses:
+    '200':
+      description: Archivo descargado.
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

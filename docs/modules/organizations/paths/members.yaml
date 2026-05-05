@@ -1,0 +1,49 @@
+get:
+  summary: Listar miembros de la organización actual
+  operationId: listOrganizationMembers
+  tags:
+    - Organizaciones
+  responses:
+    '200':
+      description: Miembros obtenidos satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationMemberListResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+post:
+  summary: Agregar miembro a la organización actual
+  operationId: addOrganizationMember
+  tags:
+    - Organizaciones
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/OrganizationMemberCreateRequest'
+  responses:
+    '201':
+      description: Miembro creado satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationMemberResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado para administrar miembros.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

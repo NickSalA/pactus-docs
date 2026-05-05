@@ -1,0 +1,32 @@
+post:
+  tags:
+    - Notificaciones
+  summary: Enviar alertas por cron
+  description: Endpoint protegido por el header `X-Cron-Secret` en lugar de JWT.
+  operationId: cronSendEmails
+  security: []
+  parameters:
+    - name: X-Cron-Secret
+      in: header
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Resultado del envío de correos por cron.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/CronSendEmailsResponse'
+    '401':
+      description: Secreto inválido o ausente.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '503':
+      description: Cron no configurado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

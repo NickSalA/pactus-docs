@@ -1,23 +1,73 @@
 parameters:
-  - name: id
+  - name: document_id
     in: path
     required: true
     schema:
       type: integer
-    description: ID del documento
+    description: ID del documento.
 
-delete:
-  summary: Eliminar un documento existente
-  operationId: deleteDocument
-  description: Deletes a specific document by ID
-  tags: 
+get:
+  summary: Obtener un documento por ID
+  operationId: getDocument
+  tags:
     - Documentos
   responses:
-    '204':
-      description: Documento eliminado satisfactoriamente
-    '404':
-      description: Document Not Found
+    '200':
+      description: Documento obtenido satisfactoriamente.
       content:
         application/json:
           schema:
-            $ref: '../../../schemas/errors.yaml#/NotFoundError'
+            $ref: '../schemas/schema.yaml#/DocumentResponse'
+    '404':
+      description: Documento no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+patch:
+  summary: Actualizar un documento
+  description: Recibe un campo form-data `document` con JSON serializado y opcionalmente un nuevo archivo.
+  operationId: updateDocument
+  tags:
+    - Documentos
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../schemas/schema.yaml#/DocumentMultipartUpdateRequest'
+  responses:
+    '200':
+      description: Documento actualizado satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/DocumentResponse'
+    '400':
+      description: Datos inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '404':
+      description: Documento no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+delete:
+  summary: Eliminar un documento
+  operationId: deleteDocument
+  tags:
+    - Documentos
+  responses:
+    '204':
+      description: Documento eliminado satisfactoriamente.
+    '404':
+      description: Documento no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

@@ -1,117 +1,219 @@
-components:
-  schemas:
-    DocumentType:
-      type: string
-      enum: [SERVICIOS, LICENCIAS, SOPORTE]
-      description: El tipo de documento (e.g., servicios, licencias).
-      example: SERVICIOS
+DocumentType:
+  type: string
+  enum:
+    - COMPANY
+    - LABOR
+  description: Tipo de documento permitido por el backend.
 
-    DocumentState:
-      type: string
-      enum: [ACTIVO, POR_VENCER, EXPIRADO]
-      description: El estado actual del documento (e.g., activo, expirado).
-      example: ACTIVO
+DocumentState:
+  type: string
+  enum:
+    - DRAFT
+    - PENDING_SIGNATURE
+    - ACTIVE
+    - EXPIRING_SOON
+    - EXPIRED
+    - TERMINATED
+  description: Estado actual del documento.
 
-DocumentCreateRequest:
+CurrencyType:
+  type: string
+  enum:
+    - PEN
+    - USD
+    - EUR
+
+DocumentServiceItemRequest:
+  type: object
+  properties:
+    service_id:
+      type: integer
+      minimum: 1
+    description:
+      type: string
+      nullable: true
+    value:
+      type: number
+      format: float
+      minimum: 0
+    currency:
+      $ref: '#/CurrencyType'
+    start_date:
+      type: string
+      format: date
+    end_date:
+      type: string
+      format: date
+  required:
+    - service_id
+    - value
+    - currency
+    - start_date
+    - end_date
+
+DocumentServiceItemResponse:
+  allOf:
+    - $ref: '#/DocumentServiceItemRequest'
+    - type: object
+      properties:
+        id:
+          type: integer
+      required:
+        - id
+
+CreateDocumentDraftRequest:
+  type: object
+  properties:
+    name:
+      type: string
+      nullable: true
+    client:
+      type: string
+      nullable: true
+    type:
+      allOf:
+        - $ref: '#/DocumentType'
+      nullable: true
+    start_date:
+      type: string
+      format: date
+      nullable: true
+    end_date:
+      type: string
+      format: date
+      nullable: true
+    form_data:
+      type: object
+      additionalProperties: true
+      default: {}
+    state:
+      allOf:
+        - $ref: '#/DocumentState'
+      nullable: true
+    folder_id:
+      type: integer
+      minimum: 1
+      nullable: true
+    service_items:
+      type: array
+      items:
+        $ref: '#/DocumentServiceItemRequest'
+      default: []
+
+DocumentMultipartCreateRequest:
   type: object
   properties:
     file:
       type: string
       format: binary
+    document:
+      type: string
+      description: JSON serializado con la forma de CreateDocumentDraftRequest.
+      example: '{"name":"Contrato Alpha","client":"Acme","type":"COMPANY","form_data":{}}'
+  required:
+    - file
+
+DocumentMultipartUpdateRequest:
+  type: object
+  properties:
+    file:
+      type: string
+      format: binary
+      nullable: true
+    document:
+      type: string
+      description: JSON serializado con campos parciales de UpdateDocumentRequest.
+  required:
+    - document
+
+UpdateDocumentRequest:
+  type: object
+  properties:
     name:
       type: string
-      description: El nombre del documento.
-      example: Plataforma Corporativa Pro
+      nullable: true
     client:
       type: string
-      description: El nombre del cliente asociado al documento.
-      example: Acme Corp
+      nullable: true
     type:
-      $ref: '#/components/schemas/DocumentType'
+      allOf:
+        - $ref: '#/DocumentType'
+      nullable: true
     start_date:
       type: string
       format: date
-      description: La fecha de inicio del contrato o documento.
-      example: 2024-01-01
+      nullable: true
     end_date:
       type: string
       format: date
-      description: La fecha de finalización del contrato o documento.
-      example: 2024-12-31
-    value:
-      type: number
-      format: float
-      description: El valor monetario asociado al documento.
-      example: 10000.00
-    currency:
-      type: string
-      description: La moneda del valor monetario (e.g., USD, EUR).
-      example: USD
-    licenses:
+      nullable: true
+    form_data:
+      type: object
+      additionalProperties: true
+      nullable: true
+    state:
+      allOf:
+        - $ref: '#/DocumentState'
+      nullable: true
+    folder_id:
       type: integer
-      description: El número de licencias asociadas al documento.
-      example: 5
-  required:
-    - file
-    - name
-    - client
-    - type
-    - start_date
-    - end_date
-    - value
-    - currency
-    - licenses
+      minimum: 1
+      nullable: true
+    service_items:
+      type: array
+      nullable: true
+      items:
+        $ref: '#/DocumentServiceItemRequest'
 
 DocumentResponse:
   type: object
   properties:
     id:
       type: integer
-      description: El identificador único del documento.
-      example: 1
     name:
       type: string
-      description: El nombre del documento.
-      example: Plataforma Corporativa Pro
+      nullable: true
     client:
       type: string
-      description: El nombre del cliente asociado al documento.
-      example: Acme Corp
+      nullable: true
     type:
-      $ref: '#/components/schemas/DocumentType'
+      allOf:
+        - $ref: '#/DocumentType'
+      nullable: true
     start_date:
       type: string
       format: date
-      description: La fecha de inicio del contrato o documento.
-      example: 2024-01-01
+      nullable: true
     end_date:
       type: string
       format: date
-      description: La fecha de finalización del contrato o documento.
-      example: 2024-12-31
-    value:
-      type: number
-      format: float
-      description: El valor monetario asociado al documento.
-      example: 10000.00
-    currency:
-      type: string
-      description: La moneda del valor monetario (e.g., USD, EUR).
-      example: USD
-    licenses:
-      type: integer
-      description: El número de licencias asociadas al documento.
-      example: 5
+      nullable: true
+    form_data:
+      type: object
+      additionalProperties: true
     state:
-      $ref: '#/components/schemas/DocumentState'
-    # filename:
-    #   type: string
-    #   description: El nombre del archivo subido.
-    #   example: contrato.pdf
-    # size:
-    #   type: integer
-    #   description: El tamaño del archivo en bytes.
-    #   example: 204800
+      allOf:
+        - $ref: '#/DocumentState'
+      nullable: true
+    folder_id:
+      type: integer
+      nullable: true
+    file_path:
+      type: string
+      nullable: true
+    file_name:
+      type: string
+      nullable: true
+    service_items:
+      type: array
+      items:
+        $ref: '#/DocumentServiceItemResponse'
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
   required:
     - id
     - name
@@ -119,71 +221,36 @@ DocumentResponse:
     - type
     - start_date
     - end_date
-    - value
-    - currency
-    - licenses
+    - form_data
     - state
+    - folder_id
+    - file_path
+    - file_name
+    - service_items
+    - created_at
+    - updated_at
 
 DocumentListResponse:
   type: array
   items:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: El identificador único del documento.
-        example: 1
-      name:
-        type: string
-        description: El nombre del documento.
-        example: Plataforma Corporativa Pro
-      client:
-        type: string
-        description: El nombre del cliente asociado al documento.
-        example: Acme Corp
-      type:
-        $ref: '#/components/schemas/DocumentType'
-      start_date:
-        type: string
-        format: date
-        description: La fecha de inicio del contrato o documento.
-        example: 2024-01-01
-      end_date:
-        type: string
-        format: date
-        description: La fecha de finalización del contrato o documento.
-        example: 2024-12-31
-      value:
-        type: number
-        format: float
-        description: El valor monetario asociado al documento.
-        example: 10000.00
-      currency:
-        type: string
-        description: La moneda del valor monetario (e.g., USD, EUR).
-        example: USD
-      licenses:
-        type: integer
-        description: El número de licencias asociadas al documento.
-        example: 5
-      state:
-        $ref: '#/components/schemas/DocumentState'
-      # filename:
-      #   type: string
-      #   description: El nombre del archivo subido.
-      #   example: contrato.pdf
-      # size:
-      #   type: integer
-      #   description: El tamaño del archivo en bytes.
-      #   example: 204800
-    required:
-      - id
-      - name
-      - client
-      - type
-      - start_date
-      - end_date
-      - value
-      - currency
-      - licenses
-      - state
+    $ref: '#/DocumentResponse'
+
+DocumentFileUrlResponse:
+  type: object
+  properties:
+    url:
+      type: string
+      format: uri
+  required:
+    - url
+
+DocumentCatalogServiceResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+  required:
+    - id
+    - name

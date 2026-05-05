@@ -17,3 +17,41 @@ OrganizationResponse:
     - id
     - name
     - is_active
+    - created_at
+    - updated_at
+
+OrganizationMemberCreateRequest:
+  type: object
+  properties:
+    email:
+      type: string
+      format: email
+    role:
+      $ref: '../../users/schemas/schema.yaml#/UserRole'
+  required:
+    - email
+    - role
+
+OrganizationMemberRoleUpdateRequest:
+  type: object
+  properties:
+    role:
+      $ref: '../../users/schemas/schema.yaml#/UserRole'
+  required:
+    - role
+
+OrganizationMemberNotificationsUpdateRequest:
+  type: object
+  properties:
+    receives_notifications:
+      type: boolean
+  required:
+    - receives_notifications
+
+OrganizationMemberResponse:
+  $ref: '../../users/schemas/schema.yaml#/UserResponse'
+
+OrganizationMemberListResponse:
+  type: array
+  items:
+    $ref: '#/OrganizationMemberResponse'

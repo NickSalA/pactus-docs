@@ -1,0 +1,47 @@
+parameters:
+  - name: folder_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID de la carpeta.
+
+patch:
+  summary: Actualizar una carpeta
+  operationId: updateFolder
+  tags:
+    - Carpetas
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/FolderUpdateRequest'
+  responses:
+    '200':
+      description: Carpeta actualizada satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/FolderResponse'
+    '404':
+      description: Carpeta no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+delete:
+  summary: Eliminar una carpeta
+  operationId: deleteFolder
+  tags:
+    - Carpetas
+  responses:
+    '204':
+      description: Carpeta eliminada satisfactoriamente.
+    '404':
+      description: Carpeta no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

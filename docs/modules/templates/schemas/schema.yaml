@@ -1,26 +1,286 @@
+TemplateState:
+  type: string
+  enum:
+    - DRAFT
+    - PUBLISHED
+    - ARCHIVED
+
+TemplateGenerationMode:
+  type: string
+  enum:
+    - strict
+    - adaptive
+
+TemplateField:
+  type: object
+  properties:
+    key:
+      type: string
+    label:
+      type: string
+    type:
+      type: string
+      default: text
+    required:
+      type: boolean
+      default: false
+    placeholder:
+      type: string
+      nullable: true
+  required:
+    - key
+    - label
+
+TemplateContractDateMapping:
+  type: object
+  properties:
+    start_date_field:
+      type: string
+    end_date_field:
+      type: string
+  required:
+    - start_date_field
+    - end_date_field
+
+TemplateContent:
+  type: object
+  properties:
+    body_md:
+      type: string
+    fields:
+      type: array
+      items:
+        $ref: '#/TemplateField'
+    operational_fields:
+      type: array
+      items:
+        $ref: '#/TemplateField'
+      default: []
+    version:
+      type: string
+      nullable: true
+      default: '1.0'
+    contract_date_mapping:
+      allOf:
+        - $ref: '#/TemplateContractDateMapping'
+      nullable: true
+  required:
+    - body_md
+    - fields
+
+TemplateUsage:
+  type: object
+  properties:
+    input_tokens:
+      type: integer
+      default: 0
+    output_tokens:
+      type: integer
+      default: 0
+    total_tokens:
+      type: integer
+      default: 0
+
 TemplateResponse:
   type: object
   properties:
     id:
+      type: integer
+    organization_id:
       type: integer
     name:
       type: string
     description:
       type: string
       nullable: true
+    document_type:
+      $ref: '../../documents/schemas/schema.yaml#/DocumentType'
+    template_format_id:
+      type: integer
+      nullable: true
+    format_code:
+      type: string
+      nullable: true
+    format_label:
+      type: string
+      nullable: true
     content:
-      type: object
-      properties:
-        body_md:
-          type: string
-GeneratedDocumentResponse:
+      $ref: '#/TemplateContent'
+    created_at:
+      type: string
+      format: date-time
+      nullable: true
+    state:
+      $ref: '#/TemplateState'
+  required:
+    - id
+    - organization_id
+    - name
+    - description
+    - document_type
+    - template_format_id
+    - format_code
+    - format_label
+    - content
+    - created_at
+    - state
+
+CreateTemplateRequest:
+  type: object
+  properties:
+    name:
+      type: string
+      nullable: true
+    description:
+      type: string
+      nullable: true
+    document_type:
+      allOf:
+        - $ref: '../../documents/schemas/schema.yaml#/DocumentType'
+      nullable: true
+    format_code:
+      type: string
+    content:
+      $ref: '#/TemplateContent'
+  required:
+    - format_code
+    - content
+
+UpdateTemplateRequest:
+  type: object
+  minProperties: 1
+  properties:
+    name:
+      type: string
+      nullable: true
+    description:
+      type: string
+      nullable: true
+    content:
+      allOf:
+        - $ref: '#/TemplateContent'
+      nullable: true
+
+TemplateFormatResponse:
   type: object
   properties:
     id:
       type: integer
+    document_type:
+      $ref: '../../documents/schemas/schema.yaml#/DocumentType'
+    format_code:
+      type: string
+    label:
+      type: string
+    default_name:
+      type: string
+    default_description:
+      type: string
+      nullable: true
+  required:
+    - id
+    - document_type
+    - format_code
+    - label
+    - default_name
+    - default_description
+
+GenerateTemplateDraftRequest:
+  type: object
+  properties:
     name:
       type: string
-    file_url:
+      nullable: true
+    description:
       type: string
-    client:
+      nullable: true
+    instructions:
       type: string
+      nullable: true
+    jurisdiction:
+      type: string
+      nullable: true
+    document_type:
+      allOf:
+        - $ref: '../../documents/schemas/schema.yaml#/DocumentType'
+      nullable: true
+    format_code:
+      type: string
+    generation_mode:
+      $ref: '#/TemplateGenerationMode'
+  required:
+    - format_code
+
+TemplateDraftMultipartRequest:
+  type: object
+  properties:
+    file:
+      type: string
+      format: binary
+      nullable: true
+    request:
+      type: string
+      description: JSON serializado con la forma de GenerateTemplateDraftRequest.
+  required:
+    - request
+
+PersistedTemplateDraftResponse:
+  type: object
+  properties:
+    template:
+      $ref: '#/TemplateResponse'
+    warnings:
+      type: array
+      items:
+        type: string
+    source:
+      type: object
+      additionalProperties: true
+    usage:
+      allOf:
+        - $ref: '#/TemplateUsage'
+      nullable: true
+  required:
+    - template
+    - warnings
+    - source
+    - usage
+
+PreviewTemplateRequest:
+  type: object
+  properties:
+    document_type:
+      allOf:
+        - $ref: '../../documents/schemas/schema.yaml#/DocumentType'
+      nullable: true
+    format_code:
+      type: string
+    content:
+      $ref: '#/TemplateContent'
+    sample_data:
+      type: object
+      additionalProperties: true
+      default: {}
+  required:
+    - format_code
+    - content
+
+PreviewTemplateResponse:
+  type: object
+  properties:
+    markdown:
+      type: string
+    resolved_payload:
+      type: object
+      additionalProperties: true
+    warnings:
+      type: array
+      items:
+        type: string
+  required:
+    - markdown
+    - resolved_payload
+    - warnings
+
+GeneratedDocumentResponse:
+  $ref: '../../documents/schemas/schema.yaml#/DocumentResponse'

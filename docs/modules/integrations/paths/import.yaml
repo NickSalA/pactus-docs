@@ -1,7 +1,7 @@
 post:
   tags:
     - Integraciones
-  summary: Importar archivos de Google Drive en segundo plano.
+  summary: Importar archivos de Google Drive en segundo plano
   operationId: importDriveFiles
   requestBody:
     required: true
@@ -16,8 +16,20 @@ post:
         application/json:
           schema:
             $ref: '../schemas/schema.yaml#/ImportResponse'
-    '400':
-      description: Bad Request
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No tiene permisos para importar este tipo de contrato.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '422':
+      description: Datos inválidos.
       content:
         application/json:
           schema:

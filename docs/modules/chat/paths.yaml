@@ -1,6 +1,6 @@
 post:
-  summary: Iniciar conversación con el agente RAG
-  description: Envía un mensaje al chatbot y devuelve la respuesta junto al identificador de conversación.
+  summary: Enviar mensaje al chatbot
+  description: Envía un mensaje al agente RAG y devuelve la respuesta junto al identificador de conversación.
   operationId: sendChatMessage
   tags:
     - Chatbot
@@ -12,56 +12,20 @@ post:
           $ref: 'schemas/schema.yaml#/ChatRequest'
   responses:
     '200':
-      description: Respuesta exitosa
+      description: Respuesta exitosa.
       content:
         application/json:
           schema:
             $ref: 'schemas/schema.yaml#/ChatResponse'
-    '400':
-      description: Bad Request
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/errors.yaml#/ErrorResponse'
+    '422':
+      description: Datos de entrada inválidos.
       content:
         application/json:
           schema:
             $ref: '../../schemas/errors.yaml#/ValidationError'
-    '401':
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '../../schemas/errors.yaml#/AuthenticationError'
-    '413':
-      description: Payload Too Large
-      content:
-        application/json:
-          schema:
-            $ref: '../../schemas/errors.yaml#/PayloadTooLargeError'
-    '429':
-      description: Too Many Requests
-      content:
-        application/json:
-          schema:
-            $ref: '../../schemas/errors.yaml#/TooManyRequestsError'
-    '500':
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '../../schemas/errors.yaml#/InternalServerError'
-    '502':
-      description: Bad Gateway
-      content:
-        application/json:
-          schema:
-            $ref: '../../schemas/errors.yaml#/BadGatewayError'
-    '503':
-      description: Service Unavailable
-      content:
-        application/json:
-          schema:
-            $ref: '../../schemas/errors.yaml#/ServiceUnavailableError'
-    '504':
-      description: Gateway Timeout
-      content:
-        application/json:
-          schema:
-            $ref: '../../schemas/errors.yaml#/GatewayTimeoutError'

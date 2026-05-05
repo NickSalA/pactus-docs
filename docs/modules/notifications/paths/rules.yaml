@@ -1,0 +1,45 @@
+get:
+  tags:
+    - Notificaciones
+  summary: Listar reglas de notificación
+  operationId: listNotificationRules
+  responses:
+    '200':
+      description: Reglas obtenidas.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/NotificationRuleResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+post:
+  tags:
+    - Notificaciones
+  summary: Crear regla de notificación
+  operationId: createNotificationRule
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/NotificationRuleCreateRequest'
+  responses:
+    '201':
+      description: Regla creada.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/NotificationRuleResponse'
+    '422':
+      description: Datos inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'

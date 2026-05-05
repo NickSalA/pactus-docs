@@ -1,7 +1,7 @@
 get:
   tags:
     - Integraciones
-  summary: Intercambiar código de Google por tokens.
+  summary: Intercambiar código de Google por tokens
   operationId: exchangeDriveCode
   parameters:
     - name: code
@@ -16,8 +16,8 @@ get:
         application/json:
           schema:
             $ref: '../schemas/schema.yaml#/TokenResponse'
-    '400':
-      description: Bad Request
+    '422':
+      description: Parámetros inválidos.
       content:
         application/json:
           schema:

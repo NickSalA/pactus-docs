@@ -1,0 +1,20 @@
+get:
+  tags:
+    - Plantillas
+  summary: Listar formatos disponibles de plantillas
+  operationId: listTemplateFormats
+  parameters:
+    - name: document_type
+      in: query
+      required: false
+      schema:
+        $ref: '../../documents/schemas/schema.yaml#/DocumentType'
+  responses:
+    '200':
+      description: Formatos obtenidos.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/TemplateFormatResponse'

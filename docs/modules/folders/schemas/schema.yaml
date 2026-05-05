@@ -1,0 +1,60 @@
+FolderCreateRequest:
+  type: object
+  properties:
+    name:
+      type: string
+  required:
+    - name
+
+FolderUpdateRequest:
+  type: object
+  minProperties: 1
+  properties:
+    name:
+      type: string
+      nullable: true
+
+FolderResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    organization_id:
+      type: integer
+    name:
+      type: string
+    owner_role:
+      $ref: '../../users/schemas/schema.yaml#/UserRole'
+    created_by:
+      type: integer
+    created_by_name:
+      type: string
+      nullable: true
+    created_by_email:
+      type: string
+      nullable: true
+    documents_count:
+      type: integer
+      default: 0
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - organization_id
+    - name
+    - owner_role
+    - created_by
+    - created_by_name
+    - created_by_email
+    - documents_count
+    - created_at
+    - updated_at
+
+FolderListResponse:
+  type: array
+  items:
+    $ref: '#/FolderResponse'

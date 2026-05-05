@@ -1,0 +1,25 @@
+post:
+  tags:
+    - Notificaciones
+  summary: Enviar alertas de vencimiento por correo
+  description: Envía correos consolidados para la organización del usuario autenticado. Requiere rol administrador.
+  operationId: sendEmailAlerts
+  responses:
+    '200':
+      description: Alertas enviadas.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/SendEmailAlertsResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Solo administradores pueden enviar alertas.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

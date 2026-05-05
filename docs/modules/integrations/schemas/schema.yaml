@@ -3,6 +3,10 @@ AuthURLResponse:
   properties:
     url:
       type: string
+      format: uri
+  required:
+    - url
+
 TokenResponse:
   type: object
   properties:
@@ -21,32 +25,49 @@ TokenResponse:
       type: array
       items:
         type: string
+  required:
+    - token
+    - refresh_token
+    - token_uri
+    - client_id
+    - client_secret
+    - scopes
+
 DriveRequest:
   type: object
   properties:
     token:
       type: object
-ImportRequest:
-  type: object
-  properties:
-    token:
-      type: object
-    files:
-      type: array
-      items:
-        $ref: '#/DriveImportFile'
+      additionalProperties: true
+  required:
+    - token
+
 DriveImportFile:
   type: object
   properties:
     file_id:
       type: string
+      minLength: 1
     document:
+      $ref: '../../documents/schemas/schema.yaml#/CreateDocumentDraftRequest'
+  required:
+    - file_id
+
+ImportRequest:
+  type: object
+  properties:
+    token:
       type: object
-      properties:
-        name:
-          type: string
-        type:
-          type: string
+      additionalProperties: true
+    files:
+      type: array
+      minItems: 1
+      items:
+        $ref: '#/DriveImportFile'
+  required:
+    - token
+    - files
+
 ImportResponse:
   type: object
   properties:
@@ -56,3 +77,7 @@ ImportResponse:
       type: integer
     index_name:
       type: string
+  required:
+    - message
+    - queued_files
+    - index_name

@@ -1,0 +1,35 @@
+parameters:
+  - name: user_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del usuario propietario de las conversaciones.
+
+get:
+  summary: Listar conversaciones de un usuario
+  description: Lista las conversaciones del usuario indicado. El backend rechaza la consulta si el ID no coincide con el usuario autenticado.
+  operationId: listUserConversations
+  tags:
+    - Conversaciones
+  responses:
+    '200':
+      description: Conversaciones obtenidas satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/ConversationList'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No tiene permisos para acceder a conversaciones de otro usuario.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
