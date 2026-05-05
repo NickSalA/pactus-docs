@@ -45,6 +45,9 @@ ValidationError:
 AuthenticationError:
   $ref: '#/ErrorResponse'
 
+ForbiddenError:
+  $ref: '#/ErrorResponse'
+
 NotFoundError:
   $ref: '#/ErrorResponse'
 

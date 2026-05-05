@@ -32,4 +32,4 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'

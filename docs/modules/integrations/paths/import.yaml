@@ -27,7 +27,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
     '422':
       description: Datos inválidos.
       content:

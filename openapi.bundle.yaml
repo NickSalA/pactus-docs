@@ -147,7 +147,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ForbiddenError'
   /conversations/{conversation_id}:
     parameters:
       - name: conversation_id
@@ -629,7 +629,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ForbiddenError'
         '422':
           description: Datos inválidos.
           content:
@@ -684,7 +684,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ForbiddenError'
   /organizations/me/members/{member_id}/role:
     parameters:
       - name: member_id
@@ -795,7 +795,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ForbiddenError'
   /notifications/cron/send-emails:
     post:
       tags:
@@ -1264,6 +1264,8 @@ components:
         - type
         - message
         - request_id
+    ForbiddenError:
+      $ref: '#/components/schemas/ErrorResponse'
     ChatRequest:
       type: object
       required:
