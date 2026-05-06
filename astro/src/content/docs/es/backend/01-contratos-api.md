@@ -13,8 +13,9 @@ La fuente de verdad de la API vive en dos capas complementarias:
 
 - el backend real en `ContractAI-Backend/src/contractai_backend/modules/*/api/routers*.py`
 - la especificación OpenAPI del repositorio en `docs/openapi.yaml` y `docs/modules/**/*.yaml`
+- el bundle para visualizadores Swagger/OpenAPI en `openapi.bundle.yaml`
 
-El objetivo de esta documentación es que ambas capas queden alineadas.
+El objetivo de esta documentación es que esas capas queden alineadas. Para consumo en Swagger o herramientas que no resuelven referencias locales, debe usarse `openapi.bundle.yaml`.
 
 ## Estructura General de la API
 

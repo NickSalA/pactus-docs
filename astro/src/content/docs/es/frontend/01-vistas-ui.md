@@ -130,11 +130,11 @@ Gestión completa del ciclo de vida de contratos:
 | Estado | Color | Descripción |
 |--------|-------|-------------|
 | `DRAFT` | Gris (slate) | Contrato en preparación o pendiente de completar |
-| `PENDING_SIGNATURE` | Azul (sky) | Contrato listo para circular, aún sin firma final |
+| `PENDING_SIGNATURE` | Azul (blue) | Contrato listo para circular, aún sin firma final |
 | `ACTIVE` | Verde (emerald) | Contrato vigente fuera de ventana activa de alerta |
 | `EXPIRING_SOON` | Amarillo (amber) | Contrato vigente dentro de ventana de vencimiento |
 | `EXPIRED` | Rojo (red) | Contrato cuyo periodo ya concluyó |
-| `TERMINATED` | Zinc (neutral) | Contrato cerrado antes de su vencimiento natural |
+| `TERMINATED` | Gris por fallback | Contrato cerrado antes de su vencimiento natural |
 
 ### Agente IA (`/ai-agent`)
 
