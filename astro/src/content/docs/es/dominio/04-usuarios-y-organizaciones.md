@@ -60,3 +60,31 @@ El cliente frontend usa estos endpoints desde `src/lib/api/organizations.ts`.
 ## Preferencia de Notificaciones
 
 `receives_notifications` controla si el usuario participa en alertas de vencimiento. El backend tambien exige que el usuario este activo para listar o enviar eventos de notificacion a ese usuario.
+
+## Acceso a la Navegacion
+
+El sidebar del frontend filtra las pestanas segun el rol del usuario:
+
+### Menu Principal
+
+| Pestana | Ruta | ADMIN | HR | MANAGER | WORKER |
+|---------|------|-------|----|---------|--------|
+| Dashboard | /dashboard | Si | Si | Si | Si |
+| Contratos | /contracts | Si | Si | Si | Si |
+| Plantillas | /templates | Si* | Si | Si | No |
+| Agente IA | /ai-agent | Si | Si | Si | Si |
+
+* ADMIN tiene acceso sin restriccion por tipo documental (no filtrado por COMPANY/LABOR).
+
+### Consola de Administracion
+
+Solo ADMIN puede acceder a las rutas `/admin/*`:
+
+| Pestana | Ruta |
+|---------|------|
+| Dashboard | /admin |
+| Gestion de Accesos | /admin/access |
+| Configuracion de Alertas | /admin/alerts |
+| Gestion Documental | /admin/document-management |
+
+Las funciones de permisos en el frontend (`canAccessAdminConsole`, `canAuthorTemplates`) definen estas reglas en `src/lib/permissions.ts`.
