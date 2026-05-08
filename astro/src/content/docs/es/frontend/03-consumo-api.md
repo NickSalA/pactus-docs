@@ -103,17 +103,22 @@ export async function fetchAPI<T>(
 
 ### Autenticación
 
-La autenticación principal del frontend ya no se resuelve mediante un `POST /login` contra FastAPI. El flujo actual vive en **Supabase Auth** y el backend participa a través del token Bearer que recibe en cada request protegido.
-
-Desde la perspectiva del consumo HTTP, el endpoint relevante para la capa de frontend es:
-
 | Método | Endpoint | Descripción | Timeout |
 |--------|----------|-------------|---------|
-| GET | `/user/me` | Obtener perfil autenticado | AUTH |
+| POST | `/login` | Iniciar sesión | AUTH |
 
 ```typescript
-export async function getCurrentUser(): Promise<CurrentUser> {
-  return fetchAPI<CurrentUser>('/user/me', { method: 'GET' }, TIMEOUTS.AUTH);
+export async function login(data: LoginRequest): Promise<LoginResponse> {
+  const response = await fetchAPI<LoginResponse>('/login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }, TIMEOUTS.AUTH);
+
+  if (response.access_token) {
+    localStorage.setItem('access_token', response.access_token);
+  }
+
+  return response;
 }
 
 export function logout(): void {
@@ -125,13 +130,37 @@ export function logout(): void {
 
 | Método | Endpoint | Descripción | Timeout |
 |--------|----------|-------------|---------|
-| GET | `/user/me` | Obtener usuario autenticado | AUTH |
+| POST | `/user` | Crear usuario | DEFAULT |
+| GET | `/user` | Listar usuarios | DEFAULT |
+| GET | `/user/{id}` | Obtener por ID | DEFAULT |
+| PATCH | `/user/{id}` | Actualizar | DEFAULT |
+| DELETE | `/user/{id}` | Eliminar | AUTH |
 
 ```typescript
-export async function getCurrentUser(): Promise<CurrentUser> {
-  return fetchAPI<CurrentUser>('/user/me', {
-    method: 'GET',
-  }, TIMEOUTS.AUTH);
+export async function createUser(data: UserCreateRequest): Promise<User> {
+  return fetchAPI<User>('/user', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }, TIMEOUTS.DEFAULT);
+}
+
+export async function getUsers(): Promise<User[]> {
+  return fetchAPI<User[]>('/user', { method: 'GET' }, TIMEOUTS.DEFAULT);
+}
+
+export async function getUserById(id: number): Promise<User> {
+  return fetchAPI<User>(`/user/${id}`, { method: 'GET' }, TIMEOUTS.DEFAULT);
+}
+
+export async function updateUser(id: number, data: UserUpdateRequest): Promise<User> {
+  return fetchAPI<User>(`/user/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }, TIMEOUTS.DEFAULT);
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  return fetchAPI<void>(`/user/${id}`, { method: 'DELETE' }, TIMEOUTS.AUTH);
 }
 ```
 
@@ -139,11 +168,11 @@ export async function getCurrentUser(): Promise<CurrentUser> {
 
 | Método | Endpoint | Descripción | Timeout |
 |--------|----------|-------------|---------|
-| POST | `/chatbot` | Enviar mensaje | AI |
+| POST | `/chatbot/` | Enviar mensaje | AI |
 
 ```typescript
 export async function sendMessage(data: ChatRequest): Promise<ChatResponse> {
-  return fetchAPI<ChatResponse>('/chatbot', {
+  return fetchAPI<ChatResponse>('/chatbot/', {
     method: 'POST',
     body: JSON.stringify(data),
   }, TIMEOUTS.AI);
@@ -154,18 +183,18 @@ export async function sendMessage(data: ChatRequest): Promise<ChatResponse> {
 
 | Método | Endpoint | Descripción | Timeout |
 |--------|----------|-------------|---------|
-| GET | `/conversations/user/{user_id}` | Listar conversaciones del usuario | DEFAULT |
-| GET | `/conversations/{conversation_id}` | Obtener historial | DEFAULT |
+| GET | `/conversations` | Listar todas | DEFAULT |
+| GET | `/conversations/{id}` | Obtener historial | DEFAULT |
 
 ```typescript
-export async function getConversations(userId: number): Promise<Conversation[]> {
-  return fetchAPI<Conversation[]>(`/conversations/user/${userId}`, {
+export async function getConversations(): Promise<Conversation[]> {
+  return fetchAPI<Conversation[]>('/conversations', {
     method: 'GET',
   }, TIMEOUTS.DEFAULT);
 }
 
-export async function getConversationById(conversationId: number): Promise<ConversationWithContent> {
-  return fetchAPI<ConversationWithContent>(`/conversations/${conversationId}`, {
+export async function getConversationById(id: number): Promise<ConversationWithContent> {
+  return fetchAPI<ConversationWithContent>(`/conversations/${id}`, {
     method: 'GET',
   }, TIMEOUTS.DEFAULT);
 }
@@ -175,10 +204,10 @@ export async function getConversationById(conversationId: number): Promise<Conve
 
 | Método | Endpoint | Descripción | Timeout |
 |--------|----------|-------------|---------|
-| POST | `/documents` | Crear documento | UPLOAD |
-| GET | `/documents` | Listar todos | DEFAULT |
+| POST | `/documents/` | Subir documento | UPLOAD |
+| GET | `/documents/` | Listar todos | DEFAULT |
 | GET | `/documents/{id}` | Obtener por ID | DEFAULT |
-| GET | `/documents/{id}/file-url` | URL firmada del archivo | DEFAULT |
+| GET | `/documents/{id}/file-url` | URL firmada del PDF | DEFAULT |
 | PATCH | `/documents/{id}` | Actualizar | UPLOAD |
 | DELETE | `/documents/{id}` | Eliminar | AUTH |
 
@@ -186,8 +215,18 @@ export async function getConversationById(conversationId: number): Promise<Conve
 export async function uploadDocument(data: DocumentCreateRequest): Promise<Document> {
   const formData = new FormData();
   formData.append('file', data.file);
-
-  formData.append('document', JSON.stringify(data.document));
+  
+  const documentData = {
+    name: data.name,
+    client: data.client,
+    type: data.type,
+    start_date: data.start_date,
+    end_date: data.end_date,
+    value: data.value,
+    currency: data.currency,
+    licenses: data.licenses,
+  };
+  formData.append('document', JSON.stringify(documentData));
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.UPLOAD);
@@ -196,7 +235,7 @@ export async function uploadDocument(data: DocumentCreateRequest): Promise<Docum
     ? localStorage.getItem('access_token') 
     : null;
 
-  const response = await fetch(`${API_BASE_URL}/documents`, {
+  const response = await fetch(`${API_BASE_URL}/documents/`, {
     method: 'POST',
     body: formData,
     signal: controller.signal,
@@ -210,7 +249,7 @@ export async function uploadDocument(data: DocumentCreateRequest): Promise<Docum
 }
 
 export async function getDocuments(): Promise<Document[]> {
-  return fetchAPI<Document[]>('/documents', { method: 'GET' }, TIMEOUTS.DEFAULT, false);
+  return fetchAPI<Document[]>('/documents/', { method: 'GET' }, TIMEOUTS.DEFAULT, false);
 }
 
 export async function getDocumentById(id: number): Promise<Document> {
@@ -252,7 +291,7 @@ export async function getDocuments(): Promise<Document[]> {
     return documentsInFlight;
   }
 
-  documentsInFlight = fetchAPI<Document[]>('/documents', { method: 'GET' })
+  documentsInFlight = fetchAPI<Document[]>('/documents/', { method: 'GET' })
     .then((documents) => {
       documentsCache = { data: documents, timestamp: Date.now() };
       return documents;
@@ -282,74 +321,52 @@ export interface ChatResponse {
 }
 
 // Conversaciones
-export type MessageRole = 'user' | 'assistant';
+export type MessageSender = 'user' | 'bot';
 
 export interface ConversationMessage {
-  role: MessageRole;
-  content: string;
-  timestamp: string;
+  sender: MessageSender;
+  message: string;
 }
 
 export interface Conversation {
   id: number;
   title: string;
-  organization_id: number;
-  user_id: number;
   created_at: string;
 }
 
 export interface ConversationWithContent extends Conversation {
   content: ConversationMessage[];
-  updated_at: string;
 }
 
 // Documentos
-export type DocumentType = 'COMPANY' | 'LABOR';
-export type DocumentState = 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'TERMINATED';
-export type CurrencyType = 'PEN' | 'USD' | 'EUR';
-
-export interface DocumentServiceItem {
-  id?: number;
-  service_id: number;
-  description?: string | null;
-  value: number;
-  currency: CurrencyType;
-  start_date: string;
-  end_date: string;
-}
-
-export interface DocumentDraftPayload {
-  name?: string | null;
-  client?: string | null;
-  type?: DocumentType | null;
-  start_date?: string | null;
-  end_date?: string | null;
-  form_data: Record<string, unknown>;
-  state?: DocumentState | null;
-  folder_id?: number | null;
-  service_items?: DocumentServiceItem[];
-}
+export type DocumentType = 'SERVICIOS' | 'LICENCIAS' | 'SOPORTE';
+export type DocumentState = 'ACTIVO' | 'POR_VENCER' | 'EXPIRADO';
 
 export interface Document {
   id: number;
-  name?: string | null;
-  client?: string | null;
-  type?: DocumentType | null;
-  start_date?: string | null;
-  end_date?: string | null;
-  form_data: Record<string, unknown>;
-  state?: DocumentState | null;
-  folder_id?: number | null;
+  name: string;
+  client: string;
+  type: DocumentType;
+  start_date: string;
+  end_date: string;
+  value: number;
+  currency: string;
+  licenses: number;
+  state: DocumentState;
   file_path?: string | null;
   file_name?: string | null;
-  service_items: DocumentServiceItem[];
-  created_at: string;
-  updated_at: string;
 }
 
 export interface DocumentCreateRequest {
   file: File;
-  document: DocumentDraftPayload;
+  name: string;
+  client: string;
+  type: DocumentType;
+  start_date: string;
+  end_date: string;
+  value: number;
+  currency: string;
+  licenses: number;
 }
 ```
 

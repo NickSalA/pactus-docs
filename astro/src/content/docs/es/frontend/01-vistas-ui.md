@@ -117,7 +117,7 @@ Panel principal con métricas y resumen de actividad:
 
 Gestión completa del ciclo de vida de contratos:
 - Tabla con todos los contratos del sistema
-- Filtrado por estado según el modelo vigente del backend
+- Filtrado por estado: Todos, Activo, Por vencer, Expirado
 - Búsqueda por nombre, cliente o ID
 - Acciones: Ver documento PDF, Editar, Eliminar
 - Formulario modal para crear nuevos contratos
@@ -129,12 +129,9 @@ Gestión completa del ciclo de vida de contratos:
 
 | Estado | Color | Descripción |
 |--------|-------|-------------|
-| `DRAFT` | Gris (slate) | Contrato en preparación o pendiente de completar |
-| `PENDING_SIGNATURE` | Azul (blue) | Contrato listo para circular, aún sin firma final |
-| `ACTIVE` | Verde (emerald) | Contrato vigente fuera de ventana activa de alerta |
-| `EXPIRING_SOON` | Amarillo (amber) | Contrato vigente dentro de ventana de vencimiento |
-| `EXPIRED` | Rojo (red) | Contrato cuyo periodo ya concluyó |
-| `TERMINATED` | Gris por fallback | Contrato cerrado antes de su vencimiento natural |
+| `ACTIVO` | Verde (emerald) | Contrato vigente sin fecha próxima de vencimiento |
+| `POR_VENCER` | Amarillo (amber) | Contrato con fecha de vencimiento próxima |
+| `EXPIRADO` | Rojo (red) | Contrato con fecha de vencimiento pasada |
 
 ### Agente IA (`/ai-agent`)
 
@@ -204,3 +201,64 @@ export default function MainLayout({ children }) {
 4. Callback en `/auth/callback` procesa la sesión
 5. Redirección automática a `/dashboard`
 6. Navegación interna mediante Sidebar
+
+## Páginas de Administración
+
+El sistema incluye páginas de administración para gestión avanzado:
+
+| Ruta | Página | Descripción |
+|-----|--------|-------------|
+| `/admin` | Dashboard Admin | Resumen de métricas del sistema |
+| `/admin/access` | Gestión de Accesos | Control de usuarios y roles |
+| `/admin/alerts` | Alertas | Configuración de notificaciones |
+| `/admin/document-management` | Gestión Documents | Administración de documentos |
+| `/admin/templates` | Plantillas | Gestión de plantillas |
+
+### admin (`/admin`)
+
+Dashboard administrativo con métricas del sistema:
+
+- Totales de usuarios
+- Contratos por estado
+- Actividad reciente
+
+### admin/access (`/admin/access`)
+
+Gestión de usuarios y permisos:
+
+- Lista de usuarios por organización
+- Roles: ADMIN, MANAGER, WORKER
+- Asignación de roles
+
+### admin/alerts (`/admin/alerts`)
+
+Página de alertas y notificaciones:
+
+- Configuración de alertas
+- Notificaciones por email
+- Estado de envíos
+
+### admin/document-management (`/admin/document-management`)
+
+Administración de documentos:
+
+- Ver todos los documentos
+- Eliminación manual
+
+### admin/templates (`/admin/templates`)
+
+Gestión de plantillas de contratos:
+
+- Lista de plantillas
+- Crear/editar plantillas
+
+## Páginas Legales
+
+El sistema incluye páginas legales accesibles sin autenticación:
+
+| Ruta | Descripción |
+|-----|-------------|
+| `/terminos` | Términos de Servicio |
+| `/privacidad` | Política de Privacidad |
+
+Estas páginas usan el Route Group `(legal)` para mostrar contenido sin Sidebar/Header.

@@ -265,6 +265,141 @@ export interface LoginResponse {
 }
 ```
 
+## Tipos de Contratos y Filtros
+
+### Tipos de Filtro
+
+```typescript
+export type SortOrder = "newest" | "oldest";
+
+export type DateRange = {
+  end: string | null;
+  start: string | null;
+};
+
+export type DocumentFilterValue = "all" | "active" | "expiring" | "expired";
+```
+
+### Tipos de Selección
+
+```typescript
+export interface SelectionState {
+  selectedIds: number[];
+  isAllSelected: boolean;
+}
+```
+
+### Document
+
+```typescript
+export interface Document {
+  id: number;
+  organization_id: number;
+  name: string;
+  client: string;
+  type: DocumentType;
+  start_date: string;
+  end_date: string;
+  state: DocumentState | null;
+  form_data: Record<string, unknown>;
+  file_path: string | null;
+  file_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### Estados de Documento
+
+```typescript
+export enum DocumentState {
+  ACTIVE = "ACTIVE",
+  EXPIRING = "EXPIRING",
+  EXPIRED = "EXPIRED",
+}
+
+export enum DocumentType {
+  SERVICES = "SERVICIOS",
+  COMPANY = "COMPANY",
+  LICENSE = "LICENSE",
+}
+```
+
+## Hooks de Contratos
+
+### useContractsFilters
+
+El hook `useContractsFilters` gestiona todos los filtros de la página de contratos:
+
+```typescript
+// src/features/contracts/hooks/use-contracts-filters.ts
+import { useState, useMemo, useCallback } from "react";
+
+export function useContractsFilters(activeContracts: Document[]) {
+  const [filter, setFilter] = useState<DocumentFilterValue>("all");
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(9);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [dateRange, setDateRange] = useState<DateRange>({ end: null, start: null });
+
+  const filteredContracts = useMemo(() => {
+    let result = filterContracts(activeContracts, filter, search);
+    // Aplicar filtros adicionales...
+    return result;
+  }, [activeContracts, filter, search, sortOrder, dateRange]);
+
+  return {
+    filter,
+    search,
+    currentPage,
+    itemsPerPage,
+    sortOrder,
+    dateRange,
+    filteredContracts,
+    totalPages,
+    paginatedContracts,
+    changeFilter,
+    changeSearch,
+    changePage,
+    changeItemsPerPage,
+    changeSortOrder,
+    changeDateRange,
+  };
+}
+```
+
+### useContractsPage
+
+El hook `useContractsPage` gestiona el estado completo de la página:
+
+```typescript
+// src/features/contracts/hooks/use-contracts-page.ts
+export function useContractsPage(contracts: Document[]) {
+  const filters = useContractsFilters(contracts);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Recargar contratos...
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return {
+    ...filters,
+    isLoading,
+    error,
+    refresh,
+  };
+}
+```
+
 ## Variables de Entorno
 
 Variables necesarias para la autenticación:
