@@ -87,9 +87,11 @@ export function useContractsFilters(activeContracts: Document[]) {
 | Filtro | Descripción |
 |-------|-------------|
 | `all` | Mostrar todos los contratos |
-| `active` | Solo contratos activos |
-| `expiring` | Contratos próximos a vencer |
-| `expired` | Contratos vencidos |
+| `DRAFT` | Contratos en borrador |
+| `PENDING_SIGNATURE` | Contratos pendientes de firma |
+| `ACTIVE` | Contratos activos |
+| `EXPIRING_SOON` | Contratos próximos a vencer |
+| `EXPIRED` | Contratos vencidos |
 
 ### Ordenamiento
 
