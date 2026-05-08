@@ -9,8 +9,8 @@ ContractIA utiliza **Vercel Cron** para ejecutar tareas programadas, como el env
 
 | Endpoint | Descripción | Programación |
 |----------|-------------|-------------|
-| `/api/cron/send-emails` | Envío de alertas de contratos por vencer | 8:00 AM (Lima) |
-| `/api/cron/warmup` | Warmup de la aplicación | Antes de las funciones |
+| `/api/cron/send-emails` | Envío de alertas de contratos por vencer | 8:00 AM Lima (0 13 * * * UTC) |
+| `/api/cron/warmup` | Warmup de la aplicación | 12:00 AM Lima (0 5 * * * UTC) |
 
 ## send-emails
 
@@ -66,18 +66,49 @@ export async function GET(request: Request) {
 
 ### Propósito
 
-El endpoint `/api/cron/warmup` mantiene las funciones Lambda "calientes" para evitar cold starts.
+El endpoint `/api/cron/warmup` mantiene las funciones Lambda "calientes" para evitar cold starts. Realiza un ping al backend para despertar el contenedor.
+
+### Programación
+
+```cron
+# Vercel Cron
+0 5 * * *  # UTC = 12:00 AM Lima (UTC-5)
+```
 
 ### Implementación
 
 ```typescript
 // src/app/api/cron/warmup/route.ts
 export const runtime = "nodejs";
-export const maxDuration = 60;
 
-export async function GET() {
-  // Realiza peticiones simples para mantener funciones activas
-  return NextResponse.json({ status: "ok", warmed: true });
+export async function GET(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
+
+  // Valida que la petición venga de Vercel
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8_000);
+
+    const baseUrl = apiUrl.replace(/\/api\/v1\/?$/, "");
+    const response = await fetch(`${baseUrl}/`, {
+      method: "GET",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    return NextResponse.json({ ok: true, status: response.status });
+  } catch {
+    // Un error o timeout aquí no es crítico — el contenedor igual se despertó
+    return NextResponse.json({ ok: true, warmed: false });
+  }
 }
 ```
 
@@ -114,6 +145,10 @@ El frontend reenvía el secreto al backend mediante el header `X-Cron-Secret`, p
     {
       "path": "/api/cron/send-emails",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/warmup",
+      "schedule": "0 5 * * *"
     }
   ]
 }
