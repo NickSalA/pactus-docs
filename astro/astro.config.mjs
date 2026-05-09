@@ -9,7 +9,7 @@ export default defineConfig({
 			title: 'ContractIA',
 			defaultLocale: 'es',
 			locales: {
-				es: { label: 'EspaÃ±ol'},
+				es: { label: 'Español'},
 			},
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/NickSalA/ContractIA' }],
 			sidebar: [
@@ -40,6 +40,10 @@ export default defineConfig({
 				{
 					label: 'IA y Datos',
 					autogenerate: { directory: 'ia' },
+				},
+				{
+					label: 'Pruebas del Backend',
+					autogenerate: { directory: 'pruebas-backend' },
 				},
 			],
 		}),
