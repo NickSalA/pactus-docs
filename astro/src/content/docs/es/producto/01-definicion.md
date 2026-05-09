@@ -1,5 +1,5 @@
 ---
-title: Definición del Producto y Alcance
+title: Definición del Producto
 description: Resumen detallado de ContractIA, objetivos, AQT y funcionalidades técnicas.
 ---
 
@@ -7,54 +7,60 @@ description: Resumen detallado de ContractIA, objetivos, AQT y funcionalidades t
 
 ## Arquitectura de Calidad Técnica (AQT)
 
-La **Arquitectura de Calidad Técnica (AQT)** define los pilares fundamentales que garantizan la robustez y efectividad del sistema. Estos atributos de calidad guían cada decisión técnica en el desarrollo de ContractIA:
+La **Arquitectura de Calidad Técnica (AQT)** define los pilares fundamentales que garantizan la robustez y efectividad del sistema:
 
-1. **Precisión Legal (RAG):** Garantizar que las respuestas del agente de IA estén fundamentadas estrictamente en el contenido de los contratos cargados, evitando alucinaciones mediante técnicas de *Retrieval-Augmented Generation*.
-2. **Seguridad Basada en Identidad:** Integración con **Supabase Auth** y **Google OAuth** para una gestión de identidades moderna y segura, delegando la autenticación compleja a proveedores especializados.
-3. **Aislamiento por Organización (Multi-tenancy):** Arquitectura diseñada para separar estrictamente los datos entre diferentes empresas o departamentos mediante un identificador único de organización (`organization_id`).
-4. **Escalabilidad Horizontal:** Capacidad de procesar grandes volúmenes de documentos de forma asíncrona y manejar múltiples sesiones conversacionales concurrentes mediante una arquitectura stateless.
-5. **Interoperabilidad:** Diseño basado en microservicios con contratos de API claros (FastAPI/OpenAPI) para facilitar la integración con otros sistemas empresariales y nubes de almacenamiento.
+| Atributo | Descripción |
+|----------|-------------|
+| **Precisión Legal (RAG)** | Garantizar que las respuestas del agente de IA estén fundamentadas estrictamente en el contenido de los contratos cargados, evitando alucinaciones mediante técnicas de *Retrieval-Augmented Generation* |
+| **Seguridad Basada en Identidad** | Integración con **Supabase Auth** y **Google OAuth** para gestión moderna y segura de identidades |
+| **Aislamiento por Organización (Multi-tenancy)** | Arquitectura diseñada para separar estrictamente los datos entre diferentes empresas mediante un identificador único de organización (`organization_id`) |
+| **Escalabilidad Horizontal** | Capacidad de procesar grandes volúmenes de documentos de forma asíncrona y manejar múltiples sesiones concurrentes mediante arquitectura stateless |
+| **Interoperabilidad** | Diseño basado en microservicios con contratos de API claros (FastAPI/OpenAPI) para facilitar la integración con sistemas empresariales y nubes de almacenamiento |
 
-## Funcionalidades y Features Detalladas
+## Stack Tecnológico
 
-ContractIA se articula en torno a los siguientes módulos funcionales, soportados por una infraestructura backend especializada:
+ContractIA utiliza las siguientes tecnologías en sus componentes principales:
 
-### 1. Agente IA y Flujo Conversacional
+| Componente | Tecnología |
+|------------|------------|
+| **Frontend** | Next.js 14 (App Router), TypeScript, Zustand, Tailwind CSS |
+| **Backend** | FastAPI (Python), Pydantic, SQLAlchemy |
+| **Base de Datos** | PostgreSQL (Supabase), Qdrant Cloud (vectores) |
+| **IA y Procesamiento** | Gemini, LlamaParser, LangGraph, Voyage AI Embeddings |
+| **Almacenamiento** | Supabase Storage, Google Drive API |
+| **Autenticación** | Supabase Auth, JWT |
 
-Un asistente virtual avanzado orquestado con **LangGraph** que permite una interacción profunda con los documentos:
+## Funcionalidades Principales
 
-* **Memoria de Conversación Persistente:** Gestión de hilos de chat almacenados en PostgreSQL, permitiendo retomar consultas previas dentro del contexto de la organización.
-* **Razonamiento Inteligente:** Capacidad de decidir cuándo buscar información en los contratos (RAG) para responder preguntas legales específicas.
-* **Streaming de Respuestas:** Visualización en tiempo real de la generación de texto para una experiencia de usuario fluida.
+ContractIA se articula en torno a los siguientes módulos funcionales:
 
-### 2. Gestión Documental e Ingesta Inteligente
+### Módulos del Sistema
 
-Módulo centralizado para la administración del conocimiento legal:
+| Módulo | Descripción |
+|--------|-------------|
+| **Dashboard** | Panel principal con métricas, documentos recientes y acciones rápidas |
+| **Gestión de Contratos** | CRUD completo de contratos con estados, carpetas y importación desde Google Drive |
+| **Agente IA** | Chatbot conversacional basado en LangGraph con acceso al contenido de los contratos |
+| **Plantillas** | Gestión de plantillas con campos dinámicos y generación de PDF |
+| **Administración** | Gestión de usuarios, alertas, servicios y carpetas organizacionales |
 
-* **Parsing de Alta Fidelidad:** Conversión de PDFs complejos (con tablas y jerarquías) a Markdown estructurado mediante **LlamaParse**.
-* **Indexación Vectorial:** Fragmentación semántica y almacenamiento de vectores en **Qdrant Cloud** para búsquedas semánticas.
-* **Propiedad Organizacional:** Cada documento pertenece a una organización, garantizando que el conocimiento legal no se cruce entre distintos clientes.
+### Tecnologías de IA
 
-### 3. Integración con Nube (Google Drive)
+| Componente | Función |
+|------------|---------|
+| **RAG Pipeline** | Recuperación de información relevante desde contratos para fundamentar las respuestas del agente |
+| **Agente LangGraph** | Orquestación del flujo conversacional con herramientas de búsqueda y decisión |
+| **Extracción Estructurada** | Uso de Gemini para extraer información de contratos (cliente, fechas, montos, servicios) |
+| **Generación de Contratos** | Creación de borradores y documentos finales mediante IA generativa |
 
-Capacidad de importar documentos directamente desde el almacenamiento en la nube:
+## Roles y Permisos
 
-* **Conectividad con Google Drive:** Integración nativa para listar, seleccionar e importar contratos directamente desde carpetas de Drive.
-* **Sincronización de Archivos:** Flujo de importación que descarga y procesa automáticamente los documentos seleccionados para integrarlos al pipeline de IA.
-* **OAuth2 Cloud Integration:** Gestión segura de tokens de acceso para la lectura de documentos en la nube.
+El sistema implementa un control de acceso basado en roles:
 
-### 4. Generación Automática de Contratos
+| Rol | Descripción |
+|-----|-------------|
+| **ADMIN** | Acceso completo a todos los módulos, gestión de usuarios y configuraciones de la organización |
+| **MANAGER** | Gestión de contratos de tipo empresarial (COMPANY), acceso a carpetas designadas |
+| **WORKER** | Acceso a contratos laborales (LABOR) y funcionalidades básicas del sistema |
 
-Módulo especializado en la creación de nuevos documentos legales basados en el conocimiento de la organización:
-
-* **Motor de Generación:** Creación de contratos en formato PDF a partir de plantillas predefinidas y datos dinámicos.
-* **Relleno Inteligente de Datos:** Integración automática de datos de la organización y formularios de usuario para personalizar cada contrato.
-* **Consistencia Legal:** Uso de plantillas aprobadas por la organización para garantizar que todos los contratos generados cumplan con los estándares internos.
-
-### 5. Estructura de Organizaciones y Usuarios
-
-Gestión de acceso basada en la pertenencia a una entidad corporativa:
-
-* **Multi-tenancy Nativo:** El sistema está diseñado para que todos los recursos (documentos, chats, plantillas) estén aislados por organización.
-* **Auth via Supabase/Google:** Los usuarios acceden mediante Google Auth a través de Supabase, simplificando el flujo de entrada y mejorando la seguridad.
-* **Perfil de Usuario (`/user/me`):** Identificación automática de la organización del usuario al momento de la conexión para cargar su entorno específico.
+Cada rol tiene carpetas asignadas y políticas de acceso específicas para garantizar el aislamiento de la información. Los contratos se filtran por tipo según el rol del usuario: ADMIN y MANAGER acceden a COMPANY, mientras que WORKER accede a LABOR.
