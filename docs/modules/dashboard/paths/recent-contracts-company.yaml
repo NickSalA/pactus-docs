@@ -1,0 +1,26 @@
+get:
+  tags:
+    - Dashboards
+  summary: Obtener contratos empresariales recientes
+  operationId: getCompanyRecentContracts
+  responses:
+    '200':
+      description: Lista de contratos empresariales actualizados recientemente.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/RecentContractResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Sin permisos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

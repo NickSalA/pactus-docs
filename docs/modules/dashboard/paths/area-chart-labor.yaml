@@ -1,0 +1,31 @@
+get:
+  tags:
+    - Dashboards
+  summary: Obtener gráfico de área de contratos laborales
+  operationId: getLaborAreaChart
+  parameters:
+    - name: currency
+      in: query
+      required: false
+      schema:
+        $ref: '../../documents/schemas/schema.yaml#/CurrencyType'
+      description: Filtrar puntos del gráfico por una moneda específica.
+  responses:
+    '200':
+      description: Datos del gráfico de área para contratos laborales.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/AreaChartResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Sin permisos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

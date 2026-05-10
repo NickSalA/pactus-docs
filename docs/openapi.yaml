@@ -45,6 +45,8 @@ tags:
     description: Operaciones para alertas, correos y reglas de notificación.
   - name: Plantillas
     description: Operaciones para la gestión y generación de documentos mediante plantillas.
+  - name: Dashboards
+    description: Endpoints para gráficos y métricas del dashboard.
   - name: Sistema
     description: Operaciones básicas de estado del servidor.
 
@@ -133,3 +135,19 @@ paths:
     $ref: 'modules/templates/paths/publish.yaml'
   /templates/{template_id}/archive:
     $ref: 'modules/templates/paths/archive.yaml'
+  /dashboard/area_chart/company:
+    $ref: 'modules/dashboard/paths/area-chart-company.yaml'
+  /dashboard/area_chart/labor:
+    $ref: 'modules/dashboard/paths/area-chart-labor.yaml'
+  /dashboard/alert_center/company:
+    $ref: 'modules/dashboard/paths/alert-center-company.yaml'
+  /dashboard/alert_center/labor:
+    $ref: 'modules/dashboard/paths/alert-center-labor.yaml'
+  /dashboard/recent_contracts/company:
+    $ref: 'modules/dashboard/paths/recent-contracts-company.yaml'
+  /dashboard/recent_contracts/labor:
+    $ref: 'modules/dashboard/paths/recent-contracts-labor.yaml'
+  /dashboard/top_companies:
+    $ref: 'modules/dashboard/paths/top-companies.yaml'
+  /dashboard/top_services:
+    $ref: 'modules/dashboard/paths/top-services.yaml'
