@@ -50,14 +50,25 @@ El Dashboard proporciona dos acciones rápidas principales:
 | **Crear Nuevo Contrato** | Abre el formulario de creación de contrato con wizard de 4 pasos |
 | **Importar desde Google Drive** | Abre el selector de archivos de Google Drive para importar contratos |
 
+## Dashboards Ejecutivos
+
+El Dashboard operativo proporciona una visión general básica. Para análisis executives profundos, consulte los módulos de dashboards especializados:
+
+| Módulo | Descripción | Destinado a |
+|--------|-------------|-------------|
+| [Dashboards de Empresa](/es/producto/07-dashboards-empresa) | Análisis de clientes B2B, ingresos proyectados, alertas y retención | CFO, Director Comercial, CEO |
+| [Dashboards de Trabajador](/es/producto/08-dashboards-trabajador) | Gestión de RRHH, gasto de planilla, alertas y retención de trabajadores | Director RRHH, CFO, Gerente Legal |
+
+Estos módulos proporcionan Ficha Técnica, Guía de Funcionalidad y Valor de Negocio para la toma de decisiones estratégicas.
+
 ## Flujo de Navegación
 
 ```
 Login → Dashboard → [Acciones]
                       ↓
-         ┌────────────┼────────────┐
-         ↓            ↓            ↓
-    Contratos    Agente IA    Administración
+           ┌────────────┼────────────┐
+           ↓            ↓            ↓
+      Contratos    Agente IA    Administración
 ```
 
 El Dashboard actúa como hub central desde el cual el usuario puede navegar a cualquier módulo del sistema mediante la barra lateral de navegación.
