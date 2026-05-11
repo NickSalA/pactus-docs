@@ -145,7 +145,31 @@ def test_creates_message_with_defaults():
 
 ## Organizations
 
-Las pruebas de organizaciones suivent el mismo patrón de entidades jednost.
+Las pruebas de organizaciones suivent le même patrón d'entités jednost.
+
+## Dashboard
+
+El archivo `dashboard/domain/test_access_policy.py` contiene pruebas para las políticas de acceso al dashboard. El acceso depende del rol del usuario y del tipo de documento.
+
+### Pruebas de ensure_dashboard_access
+
+| Test | Descripción |
+|------|-------------|
+| `test_manager_can_access_company_dashboard` | MANAGER puede acceder al dashboard COMPANY |
+| `test_hr_can_access_labor_dashboard` | HR puede acceder al dashboard LABOR |
+| `test_manager_cannot_access_labor_dashboard` | MANAGER no puede acceder a LABOR |
+| `test_hr_cannot_access_company_dashboard` | HR no puede acceder a COMPANY |
+| `test_admin_and_worker_cannot_access_dashboard` | ADMIN y WORKER no pueden acceder |
+
+```python
+def test_manager_can_access_company_dashboard():
+    ensure_dashboard_access(current_user=_make_user(UserRole.MANAGER), document_type=DocumentType.COMPANY)
+
+
+def test_hr_cannot_access_company_dashboard():
+    with pytest.raises(ForbiddenError):
+        ensure_dashboard_access(current_user=_make_user(UserRole.HR), document_type=DocumentType.COMPANY)
+```
 
 ## Características Comunes
 

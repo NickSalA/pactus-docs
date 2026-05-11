@@ -15,6 +15,7 @@ Las pruebas de integración se encuentran en el directorio `infrastructure` y `a
 | documents | test_postgres_repo.py, test_qdrant_repo.py, test_supabase_storage.py, test_llama_parser.py, test_gemini_structured_extractor.py | test_document_service.py |
 | templates | test_jinja_render.py | test_template_service.py, test_template_authoring_service.py, test_rendered_contract_formatter.py |
 | chatbot | test_qdrant_repo.py, test_conversation_repo.py | test_chatbot_service.py, test_conversation_service.py |
+| dashboard | test_postgres_repo.py | test_dashboard_service.py, test_dashboard_service_rankings.py, test_dashboard_service_area_chart.py, test_dashboard_service_alert_center.py |
 | organizations | test_postgres_repo.py | test_organization_service.py |
 | notifications | test_gmail_service.py | test_email_alert_service.py |
 | integrations | | test_integration_service.py |
@@ -191,6 +192,89 @@ Archivo: `chatbot/application/test_chatbot_service.py`
 | `test_create_conversation` | Crear conversación |
 | `test_send_message` | Enviar mensaje |
 | `test_get_conversation` | Obtener conversación |
+
+## Dashboard
+
+### SQLModelDashboardRepository
+
+Archivo: `dashboard/infrastructure/test_postgres_repo.py`
+
+Pruebas del repositorio PostgreSQL para el dashboard.
+
+### DashboardService (Acceso y Límites)
+
+Archivo: `dashboard/application/test_dashboard_service.py`
+
+| Test | Descripción |
+|------|-------------|
+| `test_manager_can_access_company_dashboard` | MANAGER accede a COMPANY |
+| `test_hr_can_access_labor_dashboard` | HR accede a LABOR |
+| `test_admin_is_forbidden` | ADMIN denegado |
+| `test_worker_is_forbidden` | WORKER denegado |
+| `test_recent_contracts_uses_limit_four` | Límite de 4 contratos recientes |
+| `test_top_companies_uses_limit_five` | Límite de 5 en rankings |
+| `test_alert_center_uses_preview_limit_three` | Límite de 3 en alertas |
+
+### DashboardService (Rankings)
+
+Archivo: `dashboard/application/test_dashboard_service_rankings.py`
+
+| Test | Descripción |
+|------|-------------|
+| `test_top_companies_uses_volume_sort_by_default` | Orden por volumen por defecto |
+| `test_top_companies_passes_currency_and_value_sort` | Filtro por moneda y orden |
+| `test_top_companies_serializes_and_rounds_amounts` | Redondeo de montos |
+| `test_top_services_uses_volume_sort_by_default` | Ordenamiento de servicios |
+| `test_top_services_passes_currency_and_value_sort` | Filtros para servicios |
+| `test_top_services_serializes_and_rounds_amounts` | Redondeo de montos de servicios |
+
+### DashboardService (Area Chart)
+
+Archivo: `dashboard/application/test_dashboard_service_area_chart.py`
+
+| Test | Descripción |
+|------|-------------|
+| `test_area_chart_builds_historical_current_and_forecast_points` | Puntos históricos y forecast |
+| `test_area_chart_passes_currency_filter_to_repository_and_response` | Filtro de moneda |
+| `test_area_chart_uses_all_currency_when_filter_is_absent` | Moneda ALL por defecto |
+| `test_area_chart_builds_y_axis_labels_from_max_amount` | Eje Y dinámico |
+| `test_labor_area_chart_uses_labor_copy` | Textos para LABOR |
+
+```python
+@pytest.mark.asyncio
+async def test_area_chart_builds_historical_current_and_forecast_points():
+    repo = AsyncMock()
+    repo.get_monthly_amounts.return_value = _monthly_amounts(start_month, [100, 200, 300, 400, 500, 600, 700])
+    service = DashboardService(repository=repo)
+
+    response = await service.get_area_chart(current_user=_make_user(), document_type=DocumentType.COMPANY)
+
+    points = response.props.series[0].data
+    assert len(points) == AREA_CHART_HISTORY_MONTHS + 1 + AREA_CHART_FORECAST_MONTHS
+```
+
+### DashboardService (Alert Center)
+
+Archivo: `dashboard/application/test_dashboard_service_alert_center.py`
+
+| Test | Descripción |
+|------|-------------|
+| `test_alert_center_builds_critical_warning_and_long_term_buckets` | Categorías de alertas |
+| `test_alert_center_uses_expected_date_windows` | Ventanas de fechas (30, 60 días) |
+| `test_alert_center_uses_preview_limit_three` | Límite de 3 items |
+| `test_alert_center_formats_item_statuses` | Formato de estados |
+| `test_labor_alert_items_omit_service_detail_when_contract_detail_is_absent` | Detalle condicional |
+
+```python
+@pytest.mark.asyncio
+async def test_alert_center_builds_critical_warning_and_long_term_buckets():
+    response = await service.get_alert_center(current_user=_make_user(), document_type=DocumentType.COMPANY)
+
+    assert [category.due_to for category in response] == [30, 60, None]
+    assert [category.count for category in response] == [2, 1, 3]
+    assert response[0].label == "VENCEN PROXIMOS"
+    assert response[2].label == "VIGENCIA PROLONGADA"
+```
 
 ## Organizations
 

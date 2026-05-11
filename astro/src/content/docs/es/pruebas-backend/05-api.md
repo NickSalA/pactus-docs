@@ -13,6 +13,7 @@ Las pruebas de API se encuentran en el directorio `api` de cada módulo:
 |--------|---------|
 | documents | test_routers.py |
 | chatbot | test_conversation_router.py |
+| dashboard | test_routers.py, test_dashboard_auth_and_params.py |
 | integrations | test_routers.py, test_dependencies.py |
 
 ## Patrón de Testing
@@ -108,6 +109,37 @@ async def test_forbids_listing_another_users_conversations():
 |------|-------------|
 | `test_returns_404_when_conversation_is_not_visible` | No visible |
 | `test_returns_conversation_when_visible` | Visible |
+
+## Dashboard
+
+Archivo: `dashboard/api/test_routers.py`
+
+### TestDashboardRouter
+
+| Test | Descripción |
+|------|-------------|
+| `test_company_area_chart_returns_200` | Gráfico de área COMPANY |
+| `test_labor_alert_center_returns_200` | Centro de alertas LABOR |
+| `test_recent_contracts_returns_200` | Contratos recientes |
+| `test_top_rankings_return_200` | Rankings de empresas y servicios |
+
+```python
+@pytest.mark.asyncio
+async def test_company_area_chart_returns_200():
+    service = AsyncMock()
+    service.get_area_chart.return_value = _area_chart_response()
+    app = _make_app(service)
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/dashboard/area_chart/company")
+
+    assert response.status_code == 200
+    assert response.json()["props"]["title"] == "Ingresos Proyectados"
+```
+
+Archivo: `dashboard/api/test_dashboard_auth_and_params.py`
+
+Pruebas de autenticación y validación de parámetros para los endpoints del dashboard.
 
 ## Integrations
 

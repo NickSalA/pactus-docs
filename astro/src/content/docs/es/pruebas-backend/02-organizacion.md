@@ -32,6 +32,12 @@ tests/
 │   ├── infrastructure/
 │   │   └── agent/
 │   └── api/
+├── dashboard/
+│   ├── domain/
+│   ├── application/
+│   ├── infrastructure/
+│   ├── integration/
+│   └── api/
 ├── organizations/
 │   ├── domain/
 │   ├── application/
@@ -111,6 +117,20 @@ A continuación se presenta el listado completo de archivos de prueba organizado
 | `chatbot/application/test_chatbot_service.py` | application | Pruebas del servicio de chatbot |
 | `chatbot/application/test_conversation_service.py` | application | Pruebas del servicio de conversaciones |
 | `chatbot/api/test_conversation_router.py` | api | Pruebas del router de conversaciones |
+
+### Dashboard
+
+| Archivo | Capa | Descripción |
+|---------|------|-------------|
+| `dashboard/domain/test_access_policy.py` | domain | Pruebas de políticas de acceso al dashboard |
+| `dashboard/infrastructure/test_postgres_repo.py` | infrastructure | Pruebas del repositorio PostgreSQL |
+| `dashboard/integration/test_dashboard_read_models.py` | integration | Pruebas de modelos de lectura |
+| `dashboard/application/test_dashboard_service.py` | application | Pruebas del servicio principal |
+| `dashboard/application/test_dashboard_service_rankings.py` | application | Pruebas de rankings de empresas y servicios |
+| `dashboard/application/test_dashboard_service_area_chart.py` | application | Pruebas del gráfico de área |
+| `dashboard/application/test_dashboard_service_alert_center.py` | application | Pruebas del centro de alertas |
+| `dashboard/api/test_routers.py` | api | Pruebas de los endpoints HTTP |
+| `dashboard/api/test_dashboard_auth_and_params.py` | api | Pruebas de autenticación y parámetros |
 
 ### Organizations
 
