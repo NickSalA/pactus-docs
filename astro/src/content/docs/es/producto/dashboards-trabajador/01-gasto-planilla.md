@@ -54,7 +54,7 @@ Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es ese
 {
   "props": {
     "title": "Gasto de Planilla",
-    "subtitle": "Histórico y proyección",
+    "subtitle": "Costo historico y reduccion por fin de contratos",
     "y_axis": {
       "format": "currency",
       "labels": [5000, 10000, 15000, ...]
@@ -65,13 +65,13 @@ Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es ese
         "currency": "ALL",
         "name": "Gasto",
         "data": [
-          { "x": "2026-01", "y": 45000, "is_forecast": false },
-          { "x": "2026-02", "y": 48000, "is_forecast": false },
-          { "x": "2026-03", "y": 46000, "is_forecast": false },
-          { "x": "2026-04", "y": 50000, "is_forecast": false },
-          { "x": "2026-05", "y": 52000, "is_forecast": false },
-          { "x": "2026-06", "y": 51000, "is_forecast": true },
-          { "x": "2026-07", "y": 53000, "is_forecast": true }
+          { "x": "Ene", "y": 45000, "is_forecast": false },
+          { "x": "Feb", "y": 48000, "is_forecast": false },
+          { "x": "Mar", "y": 46000, "is_forecast": false },
+          { "x": "Abr", "y": 50000, "is_forecast": false },
+          { "x": "May", "y": 52000, "is_forecast": false },
+          { "x": "Jun", "y": 51000, "is_forecast": true },
+          { "x": "Jul", "y": 53000, "is_forecast": true }
         ]
       }
     ]
@@ -91,7 +91,7 @@ Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es ese
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Eje X** | Meses (formato YYYY-MM), 7 puntos |
+| **Eje X** | Meses en formato corto (Ene, Feb, Mar, etc.), 7 puntos |
 | **Eje Y** | Valor en la moneda seleccionada |
 | **Línea Sólida** | Datos históricos (mes actual y anteriores) |
 | **Línea Punteada** | Datos proyectados (meses futuros) |

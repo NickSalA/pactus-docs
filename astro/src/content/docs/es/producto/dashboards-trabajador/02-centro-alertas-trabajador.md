@@ -30,7 +30,8 @@ Este dashboard presenta **3 categorías de alertas** para contratos de tipo `LAB
 
 - `type = LABOR`
 - `state IN (ACTIVE, EXPIRING_SOON)`
-- `service_items.value > 0`
+- `name IS NOT NULL`
+- `client IS NOT NULL`
 
 ### Categorías de Alertas
 
@@ -47,26 +48,26 @@ Este dashboard presenta **3 categorías de alertas** para contratos de tipo `LAB
 ```json
 [
   {
-    "label": "VENCEN PROXIMOS 30 DÍAS",
-    "color": { "accent": "#ef4444", "bg": "#fef2f2" },
+    "label": "VENCEN PROXIMOS",
+    "color": { "accent": "#232232", "bg": "#123421" },
     "due_to": 30,
     "count": 3,
     "items": [
-      { "id": 10, "name": "Juan Pérez", "detail": null, "status": "ACTIVE" },
-      { "id": 11, "name": "María García", "detail": null, "status": "EXPIRING_SOON" },
-      { "id": 12, "name": "Carlos López", "detail": null, "status": "ACTIVE" }
+      { "id": 10, "name": "Juan Pérez", "detail": null, "status": "VENCE EN 15 DIAS" },
+      { "id": 11, "name": "María García", "detail": null, "status": "VENCE EN 22 DIAS" },
+      { "id": 12, "name": "Carlos López", "detail": null, "status": "VENCE EN 10 DIAS" }
     ]
   },
   {
-    "label": "VENCEN PROXIMOS 60 DÍAS",
-    "color": { "accent": "#f59e0b", "bg": "#fffbeb" },
+    "label": "VENCEN PROXIMOS",
+    "color": { "accent": "#F59E0B", "bg": "#FEF3C7" },
     "due_to": 60,
     "count": 5,
     "items": [...]
   },
   {
     "label": "VIGENCIA PROLONGADA",
-    "color": { "accent": "#6b7280", "bg": "#f3f4f6" },
+    "color": { "accent": "#059669", "bg": "#D1FAE5" },
     "due_to": null,
     "count": 8,
     "items": [...]

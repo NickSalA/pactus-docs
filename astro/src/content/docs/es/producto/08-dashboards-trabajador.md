@@ -1,9 +1,9 @@
 ---
 title: Dashboards de Trabajador
-description: Dashboard ejecutivo para la gestión de contratos laborales, gastos de planilla y retención de trabajadores.
+description: Dashboard ejecutivo para la gestión de contratos laborales y gastos de planilla.
 ---
 
-El módulo de **Dashboards de Trabajador** proporciona a los altos cargos una visión integral del estado de los contratos laborales, el gasto en planilla y la retención del capital intelectual. Este módulo es fundamental para la gestión de recursos humanos y la planificación presupuestaria.
+El módulo de **Dashboards de Trabajador** proporciona a los altos cargos una visión integral del estado de los contratos laborales y el gasto en planilla. Este módulo es fundamental para la gestión de recursos humanos y la planificación presupuestaria.
 
 ## Dashboards Disponibles
 
@@ -21,7 +21,7 @@ El módulo de **Dashboards de Trabajador** proporciona a los altos cargos una vi
 |---------|-------------|
 | **Gasto Mensual de Planilla** | Suma de `service_items.value` de contratos LABOR activos (7 puntos: 4 históricos + actual + 2 futuros) |
 | **Alertas de Vencimiento** | Contratos laborales con `end_date` en ventana de 30/60 días o en vigencia prolongada (>60 días futuros) - 3 categorías |
-| **Altas Recientes** | Conteo de nuevos contratos LABOR en los últimos 30 días |
+| **Contratos Laborales Recientes Actualizados** | Lista de los últimos 4 contratos LABOR actualizados (ordenados por updated_at) |
 | **Contratos Recientes** | Lista de los últimos 4 contratos laborales actualizados |
 
 ## Uso del Módulo
@@ -48,7 +48,7 @@ Mientras que el **módulo de Empresa** se enfoca en la gestión de clientes empr
 |---------|---------------------|--------------------------|
 | **Tipo de contrato** | COMPANY (empresarial) | LABOR (laboral) |
 | **Entidad** | Clientes empresas | Trabajadores |
-| **Métricas principales** | Ingresos, retención de clientes | Gasto de planilla, retención de trabajadores |
+| **Métricas principales** | Ingresos por contratos | Gasto de planilla |
 | **Stakeholder** | Comercial, Finance | RRHH, Legal |
 
 Ambos módulos comparten la estructura y nivel de detalle, permitiendo una visión unificada de la gestión contractual de la organización.

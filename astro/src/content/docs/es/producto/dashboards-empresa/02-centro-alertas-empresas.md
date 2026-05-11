@@ -30,7 +30,8 @@ Este dashboard presenta 3 categorías de alertas para contratos de tipo `COMPANY
 
 - `type = COMPANY`
 - `state IN (ACTIVE, EXPIRING_SOON)`
-- `service_items.value > 0`
+- `name IS NOT NULL`
+- `client IS NOT NULL`
 
 ### Categorías de Alertas
 
@@ -47,26 +48,26 @@ Este dashboard presenta 3 categorías de alertas para contratos de tipo `COMPANY
 ```json
 [
   {
-    "label": "VENCEN PROXIMOS 30 DÍAS",
-    "color": { "accent": "#ef4444", "bg": "#fef2f2" },
+    "label": "VENCEN PROXIMOS",
+    "color": { "accent": "#232232", "bg": "#123421" },
     "due_to": 30,
     "count": 5,
     "items": [
-      { "id": 1, "name": "Contrato Acme Corp", "detail": null, "status": "ACTIVE" },
-      { "id": 2, "name": "Contrato Beta SA", "detail": null, "status": "EXPIRING_SOON" },
-      { "id": 3, "name": "Contrato Gamma Inc", "detail": null, "status": "ACTIVE" }
+      { "id": 1, "name": "Contrato Acme Corp", "detail": null, "status": "VENCE EN 12 DIAS" },
+      { "id": 2, "name": "Contrato Beta SA", "detail": null, "status": "VENCE EN 25 DIAS" },
+      { "id": 3, "name": "Contrato Gamma Inc", "detail": null, "status": "VENCE EN 8 DIAS" }
     ]
   },
   {
-    "label": "VENCEN PROXIMOS 60 DÍAS",
-    "color": { "accent": "#f59e0b", "bg": "#fffbeb" },
+    "label": "VENCEN PROXIMOS",
+    "color": { "accent": "#F59E0B", "bg": "#FEF3C7" },
     "due_to": 60,
     "count": 8,
     "items": [...]
   },
   {
     "label": "VIGENCIA PROLONGADA",
-    "color": { "accent": "#6b7280", "bg": "#f3f4f6" },
+    "color": { "accent": "#059669", "bg": "#D1FAE5" },
     "due_to": null,
     "count": 12,
     "items": [...]

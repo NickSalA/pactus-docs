@@ -53,8 +53,8 @@ Este dashboard muestra los ingresos generados por contratos de tipo `COMPANY` (e
 ```json
 {
   "props": {
-    "title": "Ingresos por Contratos Empresariales",
-    "subtitle": "Histórico y proyección",
+    "title": "Ingresos Proyectados",
+    "subtitle": "Historico vs. contratos asegurados a futuro",
     "y_axis": {
       "format": "currency",
       "labels": [1000, 2000, 3000, ...]
@@ -65,13 +65,13 @@ Este dashboard muestra los ingresos generados por contratos de tipo `COMPANY` (e
         "currency": "ALL",
         "name": "Ingresos",
         "data": [
-          { "x": "2026-01", "y": 15000, "is_forecast": false },
-          { "x": "2026-02", "y": 18000, "is_forecast": false },
-          { "x": "2026-03", "y": 16500, "is_forecast": false },
-          { "x": "2026-04", "y": 20000, "is_forecast": false },
-          { "x": "2026-05", "y": 19000, "is_forecast": false },
-          { "x": "2026-06", "y": 21000, "is_forecast": true },
-          { "x": "2026-07", "y": 22500, "is_forecast": true }
+          { "x": "Ene", "y": 15000, "is_forecast": false },
+          { "x": "Feb", "y": 18000, "is_forecast": false },
+          { "x": "Mar", "y": 16500, "is_forecast": false },
+          { "x": "Abr", "y": 20000, "is_forecast": false },
+          { "x": "May", "y": 19000, "is_forecast": false },
+          { "x": "Jun", "y": 21000, "is_forecast": true },
+          { "x": "Jul", "y": 22500, "is_forecast": true }
         ]
       }
     ]
@@ -91,7 +91,7 @@ Este dashboard muestra los ingresos generados por contratos de tipo `COMPANY` (e
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Eje X** | Meses (formato YYYY-MM), 7 puntos |
+| **Eje X** | Meses en formato corto (Ene, Feb, Mar, etc.), 7 puntos |
 | **Eje Y** | Valor en la moneda seleccionada |
 | **Línea Sólida** | Datos históricos (mes actual y anteriores) |
 | **Línea Punteada** | Datos proyectados (meses futuros) |

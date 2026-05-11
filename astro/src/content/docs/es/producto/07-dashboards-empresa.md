@@ -3,7 +3,7 @@ title: Dashboards de Empresa
 description: Dashboard ejecutivo para la gestión de contratos empresariales y análisis de clientes B2B.
 ---
 
-El módulo de **Dashboards de Empresa** proporciona a los altos cargos una visión integral del estado de los contratos con empresas clientes. Este módulo permite tomar decisiones estratégicas sobre retención, proyección de ingresos y gestión de riesgos.
+El módulo de **Dashboards de Empresa** proporciona a los altos cargos una visión integral del estado de los contratos con empresas clientes. Este módulo permite tomar decisiones estratégicas sobre proyección de ingresos y gestión de riesgos.
 
 ## Dashboards Disponibles
 
@@ -23,8 +23,8 @@ El módulo de **Dashboards de Empresa** proporciona a los altos cargos una visi�
 |---------|-------------|
 | **Ingresos Proyectados** | Suma de `service_items.value` de contratos COMPANY activos + proyección futura (7 puntos: 4 históricos + actual + 2 futuros) |
 | **Alertas Activas** | Contratos con `end_date` en ventana de 30/60 días o en vigencia prolongada (>60 días futuros) |
-| **Servicios Top** | Agregación por `service_items.description` con mayor volumen y valor acumulado (Top 5) |
-| **Contratos Firmados** | Conteo de contratos COMPANY con `state=ACTIVE` en últimos 30 días |
+| **Servicios Top** | Agregación por `ServiceTable.name` con mayor volumen y valor acumulado (Top 5) |
+| **Contratos Recientes Actualizados** | Lista de los últimos 4 contratos COMPANY actualizados (ordenados por updated_at) |
 | **Top 5 Clientes** | Ranking por cantidad de contratos activos y valor total (máximo 5) |
 
 ## Uso del Módulo
