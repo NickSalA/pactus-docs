@@ -1,26 +1,29 @@
 ---
 title: Gasto de Planilla
-description: Gráfico de líneas con proyección de reducción de gasto laboral por finalización de contratos de trabajadores.
+description: Gráfico de área para visualización del gasto laboral histórico y proyectado.
 ---
 
-El dashboard de **Gasto de Planilla** proporciona a los altos cargos una visión del gasto total en personal, incluyendo proyecciones futuras basadas en contratos próximos a finalizar. Es esencial para la planificación presupuestaria y la gestión de costos laborales.
+El dashboard de **Gasto de Planilla** proporciona una visión del gasto total en contratos laborales mediante un gráfico de área.
 
 ## Resumen Ejecutivo
 
-Este dashboard presenta el gasto mensual de planilla de contratos laborales (`LABOR`), con tendencia histórica y proyecciones de reducción basadas en contratos con fecha de fin próxima. Permite anticipar ahorros y planificar replacements.
+Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es esencial para la planificación presupuestaria básica.
 
 ## Ficha Técnica
 
-### Definición de KPIs
+### Endpoint
 
-| KPI | Descripción | Fórmula |
-|-----|-------------|---------|
-| **Gasto Mensual Actual** | Total de remuneraciones de contratos laborales activos | SUM(service_items.value) WHERE type=LABOR AND state=ACTIVE |
-| **Gasto Proyectado** | Gasto estimado en meses futuros considerando renovaciones y finales | SUM(service_items.value) con ajustes por renovación_proyectada |
-| **Reducción Esperada** | Ahorro proyectado por contratos que finalizarán | SUM(service_items.value of contracts where end_date in projection window) |
-| **Tendencia de Gasto** | Variación porcentual mensual del gasto | (Gasto mes N / Gasto mes N-1) - 1 |
-| **Costo por Colaborador** | Gasto promedio por contrato laboral activo | SUM(valor) / COUNT(contracts) WHERE state=ACTIVE |
-| **Proporción vs. Ingresos** | Porcentaje de gasto de planilla sobre ingresos B2B | (Gasto Planilla / Ingresos COMPANY) × 100 |
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/area_chart/labor` |
+| **Rol requerido** | HR |
+
+### Parámetros de Consulta
+
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| `currency` | string | No | Filtra por moneda (PEN, USD, EUR). Si no se envía, devuelve "ALL" |
 
 ### Origen de Datos
 
@@ -28,37 +31,59 @@ Este dashboard presenta el gasto mensual de planilla de contratos laborales (`LA
 |---------|-------------------|
 | `Document` | id, client, type (LABOR), state, start_date, end_date |
 | `ServiceItem` | value, currency, start_date, end_date |
-| `Organization` | org_id para contexto |
 
 ### Filtros Aplicados
 
 - `type = LABOR` (excluye contratos empresariales)
-- `state IN (ACTIVE, EXPIRING)` (solo contratos vigentes)
+- `state IN (ACTIVE, EXPIRING_SOON)` (solo contratos vigentes o próximos a vencer)
 - `service_items.value > 0` (solo items con valor económico)
 
-### Lógica de Proyección de Reducción
+### Lógica de Cálculo
 
-La proyección de reducción de gasto considera los contratos que finalizarán en el horizonte de proyección:
+1. Suma los valores de servicios vigentes por mes
+2. Devuelve **7 puntos de datos**:
+   - 4 meses históricos
+   - Mes actual
+   - 2 meses futuros
+3. Los meses futuros tienen `is_forecast = true`
+4. **El backend no calcula reducción neta ni renovación proyectada**; solo suma servicios vigentes por mes
 
-| Parámetro | Valor |
-|-----------|-------|
-| **Horizonte de Proyección** | 6 meses |
-| **Contratos a Finalizar** | Aquellos con `end_date` entre hoy y los próximos 6 meses |
-| **Tasa de Renovación** | Porcentaje histórico de renovaciones (por defecto 70%) |
-| **Reducción Neta** | Contratos que finalizan × (1 - tasa_renovación) × valor |
+### Respuesta del Endpoint
 
-**Fórmula**:
-```
-Gasto_proyectado_mes_M = SUM(valor_contratos_vigentes_mes_M) - SUM(ahorro_por_finalizaciones_mes_M)
+```json
+{
+  "props": {
+    "title": "Gasto de Planilla",
+    "subtitle": "Histórico y proyección",
+    "y_axis": {
+      "format": "currency",
+      "labels": [5000, 10000, 15000, ...]
+    },
+    "threshold_date": "2026-05-01T00:00:00",
+    "series": [
+      {
+        "currency": "ALL",
+        "name": "Gasto",
+        "data": [
+          { "x": "2026-01", "y": 45000, "is_forecast": false },
+          { "x": "2026-02", "y": 48000, "is_forecast": false },
+          { "x": "2026-03", "y": 46000, "is_forecast": false },
+          { "x": "2026-04", "y": 50000, "is_forecast": false },
+          { "x": "2026-05", "y": 52000, "is_forecast": false },
+          { "x": "2026-06", "y": 51000, "is_forecast": true },
+          { "x": "2026-07", "y": 53000, "is_forecast": true }
+        ]
+      }
+    ]
+  }
+}
 ```
 
 ### Frecuencia de Actualización
 
 | Métrica | Valor |
 |---------|-------|
-| **Refresh Automático** | Diario a las 6:00 AM |
-| **Latencia de Datos** | Hasta 24 horas desde última modificación |
-| **Cálculo de Proyección** | Recálculo mensual con revisión de contratos próximos a vencer |
+| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
 
 ## Guía de Funcionalidad
 
@@ -66,50 +91,29 @@ Gasto_proyectado_mes_M = SUM(valor_contratos_vigentes_mes_M) - SUM(ahorro_por_fi
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Eje X** | Meses (formato YYYY-MM), con historial de 12 meses + proyección de 6 meses |
-| **Eje Y** | Valor en soles (PEN) con escala automática |
-| **Línea Sólida** | Gasto real histórico (color azul) |
-| **Línea Punteada** | Gasto proyectado (color naranja) |
-| **Área Sombreada** | Zona de reducción esperada (verde claro) |
-| **Línea de Referencia** | Meta de gasto presupuestado |
-
-### Visualización del Gráfico
-
-```
-Miles S/.
-   │
-200 │      ████████
-   │     ╱        ╲
-150 │    ╱   ████████  --- línea proyectada
-   │   ╱   ╱
-100 │  █████
-   │ ╱
- 50 │/
-   └─────────────────────────────────────
-      E   F   M   A   M   J   J   A   S
-      │   │   │   │   │   │   │   │   │
-      └──histórico──┘   └────proyección─┘
-           ████ réel         --- punté reduct°
-```
+| **Eje X** | Meses (formato YYYY-MM), 7 puntos |
+| **Eje Y** | Valor en la moneda seleccionada |
+| **Línea Sólida** | Datos históricos (mes actual y anteriores) |
+| **Línea Punteada** | Datos proyectados (meses futuros) |
 
 ### Interactividad
 
-| Interación | Comportamiento |
-|-------------|----------------|
-| **Hover sobre punto** | Muestra tooltip con gasto exacto, variación y detalle de composición |
-| **Click en mes proyectado** | Muestra detalle de qué contratos finalizan ese mes |
-| **Zoom temporal** | Arrastrar para seleccionar rango, doble click para resetear |
-| **Cambio de moneda** | Selector PEN/USD/EUR con conversión en tiempo real |
-| **Comparar presupuestos** | Superponer línea de presupuesto vs. real |
-| **Exportar** | Descargar datos como CSV |
+| Interacción | Descripción |
+|-------------|-------------|
+| **Filtro por moneda** | Parámetro opcional `currency` para filtrar por PEN, USD o EUR |
+| **Tooltip** | Muestra valor exacto del punto |
 
-### Casos de Uso
+### Funcionalidades NO Implementadas
 
-1. **Planificación de presupuesto**: El CFO proyecta el gasto de planilla para el siguiente trimestre.
-2. **Decisión de contrataciones**: Evaluar si hay espacio presupuestario para nuevas contrataciones.
-3. **Gestión de reemplazos**: Identificar cuándo se liberará presupuesto por finalizaciones.
-4. **Reporte a dirección**: Presentar estructura de costos laborales.
-5. **Negociación salarial**: Contexto de costos totales para negociaciones colectivas.
+- Horizonte de 6 meses (solo 2 meses proyectados)
+- Lógica de reducción esperada
+- Tasa de renovación 70%
+- Comparación contra ingresos B2B
+- Presupuesto vs. real
+- Conversión en tiempo real de monedas
+- Área sombreada de reducción esperada
+- Exportar CSV
+- Zoom temporal
 
 ## Valor de Negocio
 
@@ -117,35 +121,23 @@ Miles S/.
 
 | Rol | Necesidad |
 |-----|-----------|
-| **CFO** | Planificación de gastos de personal y presupuesto |
-| **Director de RRHH** | Visibilidad del costo laboral y decisiones de gestión de trabajadores |
-| **CEO** | Comprehensión de estructura de costos y rentabilidad |
-| **Gerente de Finanzas** | Control de gastos y seguimiento de presupuesto |
+| **CFO** | Visualización básica de gasto de planilla |
+| **Director de RRHH** | Gestión de costos laborales |
+| **Gerente de Finanzas** | Control de gastos |
 
-### Decisiones Associadas
+### Decisiones Asociadas
 
-- Aprobación de nuevas contrataciones
-- Ajustes de presupuesto departamental
-- Planificación de incrementos salariales
-- Decisiones de tercerización vs. planilla
-- Gestión de redundancias o restructuraciones
+- Planificación de presupuesto de personal
+- Evaluación de capacidad de nuevas contrataciones
+- Control de gasto operativo
 
-### Impacto Estratégico
+### Limitaciones
 
-El gasto de planilla es típicamente **el mayor costo operativo** de la organización:
+Este dashboard **no incluye**:
+- Proyecciones de reducción por contratos que finalizan
+- Comparación con presupuesto
+- Análisis de proporción vs. ingresos
+- Detección de tendencias de renovación
+- Forecasting avanzado
 
-| Métrica | Importancia |
-|---------|-------------|
-| **Porcentaje de ingresos** | Typically 40-60% en empresas de servicios |
-| **Impacto en rentabilidad** | Cada 5% de variación cambia significativamente el EBITDA |
-| **Proyección de reducción** | Permite planificar uso de ahorros |
-
-Este dashboard permite:
-
-- **Anticipar necesidades presupuestarias** con precisión
-- **Identificar oportunidades de ahorro** antes de que ocurran
-- **Tomar decisiones de contratación** con información completa
-- **Controlar el gasto** vs. presupuesto establecido
-- **Planificar replacements** con conocimiento del timing
-
-La línea de reducción proyectada es particularmente valiosa para anticipar cuándo se liberará presupuesto por contratos que finalizan naturalmente.
+> **Nota de alcance**: Esta documentación describe el estado actual del backend. El módulo dashboard expone endpoints agregados de lectura, no implementa aún exportación, drill-down, filtros avanzados, conversiones de moneda, cohortes, retención, churn ni tendencias históricas avanzadas.

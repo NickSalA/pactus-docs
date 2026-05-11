@@ -1,58 +1,69 @@
 ---
 title: Top Empresas (Volumen)
-description: Ranking de clientes empresariales por carga operativa, cantidad de contratos y valor total.
+description: Ranking de las principales empresas clientes por volumen o valor.
 ---
 
-El dashboard de **Top Empresas (Volumen)** presenta un ranking de los clientes empresariales más importantes según su carga operativa, permitiendo a los altos cargos identificar y gestionar las cuentas de mayor relevancia.
+El dashboard de **Top Empresas (Volumen)** presenta un ranking de los clientes empresariales más importantes.
 
 ## Resumen Ejecutivo
 
-Este dashboard ranking clasifica a los clientes de tipo `COMPANY` según múltiples métricas de volumen: cantidad de contratos activos, valor total de facturación, y carga operativa. Es esencial para la gestión de cuentas clave y la asignación de recursos.
+Este dashboard ranking clasifica a los clientes de tipo `COMPANY` según su volumen de contratos o valor total de facturación.
 
 ## Ficha Técnica
 
-### Definición de KPIs
+### Endpoint
 
-| KPI | Descripción | Fórmula |
-|-----|-------------|---------|
-| **Ranking por Volumen** | Posición del cliente según cantidad de contratos activos | RANK() ORDER BY COUNT(contracts) DESC |
-| **Cantidad de Contratos** | Número de contratos activos por cliente | COUNT(Document) WHERE state=ACTIVE GROUP BY client |
-| **Valor Total** | Suma de valores de todos los contratos del cliente | SUM(service_items.value) GROUP BY client |
-| **Carga Operativa** | Métrica compuesta: contratos + servicios + valor | Ponderación: 40% contratos, 30% servicios, 30% valor |
-| **Promedio por Contrato** | Valor medio por contrato del cliente | SUM(valor) / COUNT(contratos) |
-| **Servicios Activos** | Cantidad de servicios diferentes contratados | COUNT(DISTINCT service_id) GROUP BY client |
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/top_companies` |
+| **Rol requerido** | MANAGER |
+
+### Parámetros de Consulta
+
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| `currency` | string | No | Filtra por moneda (PEN, USD, EUR) |
+| `sort_by` | string | No | Criterio: `volume` (default) o `value` |
 
 ### Origen de Datos
 
 | Entidad | Campos Utilizados |
 |---------|-------------------|
-| `Document` | id, client, type (COMPANY), state, folder_id |
-| `ServiceItem` | service_id, value, description, currency |
-| `Organization` | org_id para contexto |
+| `Document` | id, client, type (COMPANY), state |
+| `ServiceItem` | value, currency |
 
-### Cálculo de Carga Operativa
+### Filtros Aplicados
 
-La métrica de carga operativa combina múltiples factores en un índice compuesto:
+- `type = COMPANY`
+- `state IN (ACTIVE, EXPIRING_SOON)`
+- `service_items.value > 0`
 
-| Factor | Peso | Descripción |
-|--------|------|-------------|
-| **Cantidad de Contratos** | 40% | Número de contratos activos |
-| **Cantidad de Servicios** | 30% | Diversidad de servicios contratados |
-| **Valor Total** | 30% | Facturación total |
+### Lógica de Cálculo
 
-**Fórmula**:
+- **contracts**: Cantidad de contratos distintos por cliente
+- **amount**: Suma de `service_items.value`
+- Retorna **máximo 5 empresas**
+- Si `sort_by = volume`: ordena por `contracts` descendente
+- Si `sort_by = value`: ordena por `amount` descendente
+
+### Respuesta del Endpoint
+
+```json
+[
+  { "name": "Acme Corporation", "contracts": 12, "amount": 450000.00 },
+  { "name": "TechStart SA", "contracts": 8, "amount": 320000.00 },
+  { "name": "GlobalTech Inc", "contracts": 10, "amount": 280000.00 },
+  { "name": "StartUpXYZ", "contracts": 6, "amount": 180000.00 },
+  { "name": "DataMaster", "contracts": 5, "amount": 150000.00 }
+]
 ```
-Carga Operativa = (Norm(contratos) × 0.4) + (Norm(servicios) × 0.3) + (Norm(valor) × 0.3)
-```
-donde `Norm(x) = (x - min) / (max - min)` para normalización 0-1.
 
 ### Frecuencia de Actualización
 
 | Métrica | Valor |
 |---------|-------|
-| **Refresh Automático** | Diario a las 6:00 AM |
-| **Período de Análisis** | Contratos con state=ACTIVE a la fecha |
-| **Top N** | Visualización de top 20 con opción de ver más |
+| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
 
 ## Guía de Funcionalidad
 
@@ -60,52 +71,29 @@ donde `Norm(x) = (x - min) / (max - min)` para normalización 0-1.
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Tabla de Ranking** | Lista ordenada con posición, cliente, contratos, servicios, valor |
-| **Barras Horizontales** | Representación visual de la magnitud relativa |
-| **Indicador de Posición** | 1°, 2°, 3° con badge distintivo para top 3 |
-| **Sparklines** | Mini gráfica de tendencia de los últimos 6 meses |
-| **Badge de Riesgo** | Indicador si el cliente tiene contratos próximos a vencer |
-
-### Visualización del Ranking
-
-```
-#  Empresa           Contratos  Servicios   Valor Total    Tendencia
-──────────────────────────────────────────────────────────────────────
-1  ██████████ TechCorp       12          5    S/ 450,000     ↗ +15%
-2  █████████  InnovaLabs       8          4    S/ 320,000     ↘ -5%
-3  ████████   GlobalTech       10          3    S/ 280,000     ↗ +8%
-4  ███████    StartUpXYZ        6          2    S/ 180,000     →  0%
-5  ██████     DataMaster        5          3    S/ 150,000     ↗ +20%
-...
-```
+| **Ranking de 5 empresas** | Lista ordenada por volumen o valor |
+| **Columna contratos** | Cantidad de contratos distintos |
+| **Columna monto** | Valor total acumulado |
 
 ### Interactividad
 
-| Interacción | Comportamiento |
-|-------------|----------------|
-| **Click en cliente** | Muestra dashboard detallado del cliente |
-| **Hover sobre fila** | Muestra tooltip con métricas adicionales |
-| **Ordenar por columna** | Click en header para reordenar por cualquier métrica |
-| **Filtro de ranking** | Ver top 5, 10, 20 o todos |
-| **Buscar cliente** | Filtrar por nombre de empresa |
-| **Exportar** | Descargar ranking como CSV |
+| Interacción | Descripción |
+|-------------|-------------|
+| **Ordenar por volumen** | Ver empresas por cantidad de contratos |
+| **Ordenar por valor** | Ver empresas por facturación total |
+| **Filtro por moneda** | Ver solo empresas en PEN, USD o EUR |
 
-### Funcionalidades Adicionales
+### Funcionalidades NO Implementadas
 
-| Función | Descripción |
-|---------|-------------|
-| **Comparar clientes** | Seleccionar hasta 3 clientes para comparar lado a lado |
-| **Ver detalle del cliente** | Dashboard individual con todos sus contratos |
-| **Alertas de riesgo** | Badge rojo si tiene contratos próximos a vencer |
-| **Ver tendencias** | Evolución del ranking en los últimos 6 meses |
-
-### Casos de Uso
-
-1. **Gestión de cuentas clave**: El Account Manager prioriza su tiempo en los top 10.
-2. **Asignación de recursos**: Más recursos para clientes de mayor carga operativa.
-3. **Revisión de riesgos**: Identificar clientes importantes con alertas de vencimiento.
-4. **Planificación de ingresos**: Proyección de ingresos basada en top clientes.
-5. **Reporte a dirección**: Presentación del "who's who" de la cartera de clientes.
+- Top 20 (solo Top 5)
+- Carga operativa compuesta
+- Cantidad de servicios activos
+- Promedio por contrato
+- Sparklines de tendencia
+- Badge de riesgo
+- Comparar clientes
+- Detalle individual del cliente
+- Exportar CSV
 
 ## Valor de Negocio
 
@@ -113,35 +101,23 @@ donde `Norm(x) = (x - min) / (max - min)` para normalización 0-1.
 
 | Rol | Necesidad |
 |-----|-----------|
-| **CEO** | Identificar los clientes más importantes del negocio |
-| **Director Comercial** | Gestión de cuentas clave y asignación de recursos |
-| **Gerente de Operaciones** | Distribución de carga operativa entre equipos |
-| **CFO** | Concentración de ingresos en pocos clientes (riesgo) |
+| **CEO** | Identificar clientes más importantes |
+| **Director Comercial** | Gestión de cuentas clave |
+| **CFO** | Concentración de ingresos |
 
-### Decisiones Asociadas
+### Decisiones Associadas
 
 - Asignación de Account Managers a cuentas clave
-- Decisiones de inversión en servicio al cliente
 - Identificación de riesgo por concentración
-- Desarrollo de programas de fidelización para top clientes
-- Negociación de renovación de contratos de alto valor
+- Desarrollo de programas de fidelización
 
-### Impacto Estratégico
+### Limitaciones
 
-El ranking de clientes proporciona **claridad sobre la composición de la cartera**:
+Este dashboard **no incluye**:
+- Más de 5 empresas
+- Métricas de tendencia histórica
+- Comparación entre clientes
+- Detalle de contratos por empresa
+- Exportación de datos
 
-| Métrica | Utilidad |
-|---------|----------|
-| **Top 10 representa** | Typically 60-80% del valor total de la cartera |
-| **Diversidad de servicios** | Clientes con más servicios tienen menor probabilidad de churn |
-| **Concentración** | Alerts si un solo cliente representa >30% de ingresos |
-
-Este dashboard permite:
-
-- **Priorizar esfuerzos** donde generan mayor impacto
-- **Identificar riesgo** de concentración excesiva
-- **Medir salud** de las relaciones con clientes clave
-- **Planificar recursos** de manera informada
-- **Tomar decisiones** basadas en datos de carga operativa
-
-La tendencia (sparklines) es particularmente valiosa para identificar clientes en crecimiento o declive.
+> **Nota de alcance**: Esta documentación describe el estado actual del backend.

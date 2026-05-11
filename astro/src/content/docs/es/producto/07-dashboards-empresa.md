@@ -12,24 +12,24 @@ El módulo de **Dashboards de Empresa** proporciona a los altos cargos una visi�
 | [Ingresos Proyectados](/es/producto/dashboards-empresa/01-ingresos-proyectados) | Previsión de flujo de caja con histórico y proyecciones | CFO, Director Finance |
 | [Centro de Alertas](/es/producto/dashboards-empresa/02-centro-alertas-empresas) | Sistema de semáforo para contratos críticos | Director Operations, Legal |
 | [Servicios más Contratados](/es/producto/dashboards-empresa/03-servicios-contratados) | Volumen y valor por categoría de servicio | Sales, Product Manager |
-| [Fidelidad (Retención)](/es/producto/dashboards-empresa/04-fidelidad-retencion) | Métrica de permanencia de empresas clientes | Customer Success, CEO |
 | [Contratos Recientes](/es/producto/dashboards-empresa/05-contratos-recientes-b2b) | Log visual de últimas firmas de contratos | Legal, Operations |
 | [Top Empresas (Volumen)](/es/producto/dashboards-empresa/06-top-empresas) | Ranking de clientes por carga operativa | Account Manager, Sales |
+
+> **Nota**: Los dashboards de Fidelidad/Retención, Permanencia Media, Churn y Clientes en Riesgo no están implementados en el backend actual.
 
 ## Resumen de KPIs Clave
 
 | Métrica | Descripción |
 |---------|-------------|
-| **Ingresos Proyectados** | Suma de `service_items.value` de contratos COMPANY activos + proyección futura |
-| **Alertas Activas** | Conteo de contratos con `end_date` en ventana de 30/60 días o `state=EXPIRING` |
-| **Servicios Top** | Agregación por `service_items.description` con mayor volumen y valor acumulado |
-| **Permanencia Media** | Promedio de meses entre `start_date` y fecha actual por cliente |
+| **Ingresos Proyectados** | Suma de `service_items.value` de contratos COMPANY activos + proyección futura (7 puntos: 4 históricos + actual + 2 futuros) |
+| **Alertas Activas** | Contratos con `end_date` en ventana de 30/60 días o en vigencia prolongada (>60 días futuros) |
+| **Servicios Top** | Agregación por `service_items.description` con mayor volumen y valor acumulado (Top 5) |
 | **Contratos Firmados** | Conteo de contratos COMPANY con `state=ACTIVE` en últimos 30 días |
-| **Top 10 Clientes** | Ranking por cantidad de contratos activos y valor total |
+| **Top 5 Clientes** | Ranking por cantidad de contratos activos y valor total (máximo 5) |
 
 ## Uso del Módulo
 
-Este módulo está diseñado para usuarios con rol **ADMIN** y **MANAGER** que necesitan visibilidad ejecutiva sobre la cartera de clientes empresariales. Cada dashboard incluye:
+Este módulo está diseñado para usuarios con rol **MANAGER** que necesitan visibilidad ejecutiva sobre la cartera de clientes empresariales. Cada dashboard incluye:
 
 - **Ficha Técnica**: Definición de KPIs, origen de datos y lógica de cálculo
 - **Guía de Funcionalidad**: Comportamiento visual e interacciones disponibles

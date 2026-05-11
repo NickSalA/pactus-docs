@@ -1,49 +1,84 @@
 ---
 title: Centro de Alertas (Empresas)
-description: Sistema de semáforo interactivo para identificar contratos empresariales críticos a 30, 60 días y vigencia prolongada.
+description: Sistema de alertas para identificar contratos empresariales críticos a 30, 60 días y vigencia prolongada.
 ---
 
-El **Centro de Alertas (Empresas)** es un dashboard de gestión de riesgos que permite a los altos cargos identificar y actuar proactivamente sobre contratos empresariales que requieren atención inmediata.
+El **Centro de Alertas (Empresas)** permite identificar contratos empresariales que requieren atención.
 
 ## Resumen Ejecutivo
 
-Este dashboard presenta un sistema de semáforo que clasifica los contratos de tipo `COMPANY` según su proximidad al vencimiento y duración de vigencia. Cada alerta es interactiva y permite drill-down para ver el detalle específico de cada contrato.
+Este dashboard presenta 3 categorías de alertas para contratos de tipo `COMPANY`. Cada categoría muestra un conteo y una previsualización de hasta 3 contratos.
 
 ## Ficha Técnica
 
-### Definición de KPIs
+### Endpoint
 
-| KPI | Descripción | Fórmula |
-|-----|-------------|---------|
-| **Alertas Críticas (Rojo)** | Contratos que vencen en los próximos 30 días | COUNT where DATEDIFF(end_date, NOW()) <= 30 AND state=ACTIVE |
-| **Alertas Avanzadas (Amarillo)** | Contratos que vencen entre 31 y 60 días | COUNT where DATEDIFF(end_date, NOW()) BETWEEN 31 AND 60 |
-| **Vigencia Prolongada (Naranja)** | Contratos con más de 24 meses de duración activa | COUNT where DATEDIFF(end_date, start_date) > 720 días |
-| **Total de Contratos en Alerta** | Suma de todas las alertas activas | SUM(rojo + amarillo + naranja) |
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/alert_center/company` |
+| **Rol requerido** | MANAGER |
 
 ### Origen de Datos
 
 | Entidad | Campos Utilizados |
 |---------|-------------------|
 | `Document` | id, client, type (COMPANY), state, start_date, end_date, name |
-| `ServiceItem` | value, currency (para mostrar valor en riesgo) |
-| `Organization` | org_id para filtrar contexto |
+| `ServiceItem` | value, currency, start_date, end_date |
 
-### Lógica de Clasificación
+### Filtros Aplicados
 
-| Color | Condición | Acción Recomendada |
-|-------|-----------|-------------------|
-| **Rojo** | `end_date` en los próximos 30 días | Contacto inmediato para renovación |
-| **Amarillo** | `end_date` entre 31 y 60 días | Iniciar proceso de negociación |
-| **Naranja** | Vigencia > 24 meses | Evaluar actualización de términos |
-| **Verde** | Ninguna alerta (informativo) | Estado normal |
+- `type = COMPANY`
+- `state IN (ACTIVE, EXPIRING_SOON)`
+- `service_items.value > 0`
+
+### Categorías de Alertas
+
+| Categoría | `due_to` | Descripción |
+|-----------|----------|-------------|
+| **Vencen Próximos (30 días)** | 30 | Contratos con `end_date` entre hoy y los próximos 30 días |
+| **Vencen Próximos (60 días)** | 60 | Contratos con `end_date` entre 31 y 60 días |
+| **Vigencia Prolongada** | `null` | Contratos con `end_date` posterior a hoy + 60 días |
+
+> **Importante**: La categoría "vigencia prolongada" en el backend significa `end_date > hoy + 60 días`, **no** duración mayor a 24 meses (DATEDIFF > 720 días).
+
+### Respuesta del Endpoint
+
+```json
+[
+  {
+    "label": "VENCEN PROXIMOS 30 DÍAS",
+    "color": { "accent": "#ef4444", "bg": "#fef2f2" },
+    "due_to": 30,
+    "count": 5,
+    "items": [
+      { "id": 1, "name": "Contrato Acme Corp", "detail": null, "status": "ACTIVE" },
+      { "id": 2, "name": "Contrato Beta SA", "detail": null, "status": "EXPIRING_SOON" },
+      { "id": 3, "name": "Contrato Gamma Inc", "detail": null, "status": "ACTIVE" }
+    ]
+  },
+  {
+    "label": "VENCEN PROXIMOS 60 DÍAS",
+    "color": { "accent": "#f59e0b", "bg": "#fffbeb" },
+    "due_to": 60,
+    "count": 8,
+    "items": [...]
+  },
+  {
+    "label": "VIGENCIA PROLONGADA",
+    "color": { "accent": "#6b7280", "bg": "#f3f4f6" },
+    "due_to": null,
+    "count": 12,
+    "items": [...]
+  }
+]
+```
 
 ### Frecuencia de Actualización
 
 | Métrica | Valor |
 |---------|-------|
-| **Refresh Automático** | Cada hora |
-| **Latencia de Datos** | Tiempo real desde última modificación de contrato |
-| **Notificaciones** | Envío de email cuando un contrato entra en estado rojo |
+| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
 
 ## Guía de Funcionalidad
 
@@ -51,39 +86,25 @@ Este dashboard presenta un sistema de semáforo que clasifica los contratos de t
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Tarjetas de Semáforo** | 3 tarjetas principales (Rojo, Amarillo, Naranja) con conteo y valor en riesgo |
-| **Barra de Progreso** | Representación visual del porcentaje de contratos en cada estado |
-| **Lista de Contratos** | Tabla con contratos filtrables por color de alerta |
-| **Valor en Riesgo** | Suma de `service_items.value` de contratos en alerta |
+| **3 Tarjetas de Categoría** | Cada categoría muestra label, color, count y hasta 3 items |
+| **Items** | Cada item muestra id, name, detail (nullable), status |
 
-### Interactividad: Drill-Down Ascendente
+### Interactividad
 
-| Nivel | Acción |
-|-------|--------|
-| **Nivel 1 (Semáforo)** | Click en tarjeta de color → filtra la tabla a contratos de ese estado |
-| **Nivel 2 (Tabla)** | Click en fila de contrato → abre modal con detalle completo |
-| **Nivel 3 (Modal)** | Ver datos completos del contrato, documentos asociados, servicios y acciones disponibles |
+| Interacción | Descripción |
+|-------------|-------------|
+| **Ver detalle de contrato** | Cada item muestra información básica del contrato |
 
-**Flujo de Drill-Down**:
-```
-Dashboard → [Click en tarjeta Roja] → Lista de contratos en rojo → [Click en contrato] → Modal de detalle
-```
+### Funcionalidades NO Implementadas
 
-### Funcionalidades Adicionales
-
-| Función | Descripción |
-|---------|-------------|
-| **Filtro por cliente** | Buscar contratos de una empresa específica |
-| **Ordenar por valor** | Mostrar primero los contratos con mayor valor en riesgo |
-| **Exportar lista** | Descargar CSV con todas las alertas |
-| **Acciones rápidas** | Botones para crear renovación, enviar recordatorio, agendar llamada |
-
-### Casos de Uso
-
-1. **Revisión semanal de riesgos**: El Director de Operaciones revisa el semáforo los lunes para asignar tareas.
-2. **Reuniones de cuenta clave**: El Account Manager revisa alertas de sus clientes antes de reuniones.
-3. **Reporte mensual a dirección**: El CEO revisa el total de valor en riesgo para decisiones estratégicas.
-4. **Asignación de tareas**: El Manager reparte contratos a su equipo para seguimiento.
+- Valor en riesgo (suma de valores)
+- Barra de progreso
+- Drill-down modal completo
+- Ordenar por valor
+- Exportar CSV
+- Acciones rápidas (crear renovación, enviar recordatorio)
+- Notificaciones por email
+- Filtro por cliente
 
 ## Valor de Negocio
 
@@ -91,26 +112,24 @@ Dashboard → [Click en tarjeta Roja] → Lista de contratos en rojo → [Click 
 
 | Rol | Necesidad |
 |-----|-----------|
-| **Director de Operaciones** | Visibilidad de contratos que requieren acción inmediata |
-| **Gerente Legal** | Seguimiento de renovaciones y vencimientos |
-| **Account Manager** | Gestión de cuenta cliente y prevention de churn |
-| **CEO** | Riesgo de pérdida de ingresos por contratos no renovados |
+| **Director de Operaciones** | Visibilidad de contratos que requieren acción |
+| **Gerente Legal** | Seguimiento de vencimientos |
+| **Account Manager** | Gestión de cuenta cliente |
 
 ### Decisiones Asociadas
 
 - Asignar recursos para negociación de renovaciones
-- Decidir si ofrecer descuentos por fidelidad
-- Priorizar renovación de contratos de alto valor
-- Planificar ingresos futuros con precisión
-- Evitar pérdida de clientes por falta de seguimiento
+- Priorizar contratos de alto valor
+- Planificar ingresos futuros
 
-### Impacto Estratégico
+### Limitaciones
 
-El Centro de Alertas es **fundamental** para la retención de clientes B2B:
+Este dashboard **no incluye**:
+- Suma de valor en riesgo por categoría
+- Drill-down a modal con detalle completo
+- Ordenamiento por valor
+- Exportación de datos
+- Notificaciones por email
+- Filtros avanzados
 
-- **Reducción de churn**: Identificación proactiva de contratos próximos a vencer
-- **Preservación de ingresos**: El valor en riesgo permite priorizar esfuerzos
-- **Mejora de servicio**: Seguimiento sistemático mejora la percepción del cliente
-- **Accountability**: Visibilidad clara de quién debe actuar en cada contrato
-
-La funcionalidad de drill-down permite pasar de una vista agregada a los detalles específicos de cada contrato sin abandonar el contexto del dashboard.
+> **Nota de alcance**: Esta documentación describe el estado actual del backend.

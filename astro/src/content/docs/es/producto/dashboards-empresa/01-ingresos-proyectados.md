@@ -1,24 +1,29 @@
 ---
 title: Ingresos Proyectados
-description: Gráfico de líneas con histórico de ingresos reales vs. proyección futura para previsión de flujo de caja.
+description: Gráfico de área para visualización de ingresos históricos y proyectados de contratos empresariales.
 ---
 
-El dashboard de **Ingresos Proyectados** permite a los altos cargos visualizar la tendencia histórica de ingresos por contratos empresariales y anticipar el flujo de caja futuro mediante proyecciones automáticas.
+El dashboard de **Ingresos Proyectados** permite visualizar la tendencia de ingresos por contratos empresariales mediante un gráfico de área.
 
 ## Resumen Ejecutivo
 
-Este dashboard consolida los ingresos generados por contratos de tipo `COMPANY` (empresariales), mostrando el comportamiento pasado y las proyecciones futuras. Es fundamental para la planificación financiera y la toma de decisiones sobre inversiones, gastos y crecimiento.
+Este dashboard muestra los ingresos generados por contratos de tipo `COMPANY` (empresariales). Es fundamental para la planificación financiera básica.
 
 ## Ficha Técnica
 
-### Definición de KPIs
+### Endpoint
 
-| KPI | Descripción | Fórmula |
-|-----|-------------|---------|
-| **Ingresos Reales** | Ingresos efectivamente facturados hasta la fecha actual | SUM(service_items.value) donde type=COMPANY y state=ACTIVE |
-| **Ingresos Proyectados** | Ingresos esperados en períodos futuros basados en contratos vigentes | SUM(service_items.value) donde end_date > fecha actual |
-| **Tendencia** | Variación porcentual entre períodos consecutivos | (Ingresos período N / Ingresos período N-1) - 1 |
-| **Ingreso Mensual Promedio** | Media de ingresos mensuales en el período histórico | SUM(Ingresos Reales) / número de meses |
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/area_chart/company` |
+| **Rol requerido** | MANAGER |
+
+### Parámetros de Consulta
+
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| `currency` | string | No | Filtra por moneda (PEN, USD, EUR). Si no se envía, devuelve "ALL" |
 
 ### Origen de Datos
 
@@ -26,39 +31,59 @@ Este dashboard consolida los ingresos generados por contratos de tipo `COMPANY` 
 |---------|-------------------|
 | `Document` | id, client, type (COMPANY), state, start_date, end_date |
 | `ServiceItem` | service_id, value, currency, start_date, end_date |
-| `Organization` | org_id para filtrar por contexto |
 
 ### Filtros Aplicados
 
 - `type = COMPANY` (excluye contratos laborales)
-- `state IN (ACTIVE, EXPIRING)` (solo contratos vigentes o próximos a vencer)
+- `state IN (ACTIVE, EXPIRING_SOON)` (solo contratos vigentes o próximos a vencer)
 - `service_items.value > 0` (excluye items sin valor económico)
 
-### Lógica de Proyecciones (Líneas Punteadas)
+### Lógica de Cálculo
 
-La proyección utiliza un algoritmo de **promedio móvil ponderado** con los siguientes parámetros:
+1. Agrupa los montos de servicios por mes según el solapamiento de `start_date` y `end_date` de cada service item con el mes
+2. Devuelve **7 puntos de datos**:
+   - 4 meses históricos
+   - Mes actual
+   - 2 meses futuros
+3. Los meses futuros tienen `is_forecast = true`
+4. Si no se envía el parámetro `currency`, devuelve `currency = "ALL"` y suma los valores sin conversión
 
-| Parámetro | Valor |
-|-----------|-------|
-| **Horizonte de Proyección** | 12 meses desde la fecha actual |
-| **Ponderación de Datos Históricos** | Meses más recientes tienen mayor peso (decaimiento exponencial) |
-| **Factores Considerados** | Tasa de renovación histórica, estacionalidad detectada, contratos próximos a vencer |
-| **Línea de Proyección** | Representada con estilo punteado para distinguibilidad visual |
-| **Banda de Confianza** | ±15% sombreado alrededor de la línea de proyección |
+### Respuesta del Endpoint
 
-**Fórmula simplificada**:
+```json
+{
+  "props": {
+    "title": "Ingresos por Contratos Empresariales",
+    "subtitle": "Histórico y proyección",
+    "y_axis": {
+      "format": "currency",
+      "labels": [1000, 2000, 3000, ...]
+    },
+    "threshold_date": "2026-05-01T00:00:00",
+    "series": [
+      {
+        "currency": "ALL",
+        "name": "Ingresos",
+        "data": [
+          { "x": "2026-01", "y": 15000, "is_forecast": false },
+          { "x": "2026-02", "y": 18000, "is_forecast": false },
+          { "x": "2026-03", "y": 16500, "is_forecast": false },
+          { "x": "2026-04", "y": 20000, "is_forecast": false },
+          { "x": "2026-05", "y": 19000, "is_forecast": false },
+          { "x": "2026-06", "y": 21000, "is_forecast": true },
+          { "x": "2026-07", "y": 22500, "is_forecast": true }
+        ]
+      }
+    ]
+  }
+}
 ```
-Proyección mes M = Σ(Ingresos_mes_i × peso_i) / Σ(pesos_i)
-```
-donde `peso_i = e^(-0.1 × distancia_en_meses)`
 
 ### Frecuencia de Actualización
 
 | Métrica | Valor |
 |---------|-------|
-| **Refresh Automático** | Cada 6 horas |
-| **Latencia de Datos** | Hasta 2 horas desde la última transacción |
-| **Cálculo de Proyección** | Recálculo diario a medianoche |
+| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
 
 ## Guía de Funcionalidad
 
@@ -66,29 +91,30 @@ donde `peso_i = e^(-0.1 × distancia_en_meses)`
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Eje X** | Meses (formato YYYY-MM), con historial de 24 meses + proyección de 12 meses |
-| **Eje Y** | Valor en soles (PEN) con escala automática |
-| **Línea Sólida** | Ingresos reales históricos (color azul) |
-| **Línea Punteada** | Ingresos proyectados (color naranja) |
-| **Banda Sombreada** | Margen de incertidumbre de la proyección |
-| **Tooltip** | Muestra valor exacto, período y variación vs. período anterior |
+| **Eje X** | Meses (formato YYYY-MM), 7 puntos |
+| **Eje Y** | Valor en la moneda seleccionada |
+| **Línea Sólida** | Datos históricos (mes actual y anteriores) |
+| **Línea Punteada** | Datos proyectados (meses futuros) |
 
 ### Interactividad
 
-| Interacción | Comportamiento |
-|-------------|----------------|
-| **Hover sobre punto** | Muestra tooltip con valor exacto, fecha y variación porcentual |
-| **Click en período** | Filtra la tabla de contratos subyacente por ese mes |
-| **Zoom temporal** | Arrastrar para seleccionar rango de fechas, doble click para resetear |
-| **Cambio de moneda** | Selector para cambiar entre PEN, USD, EUR con conversión en tiempo real |
-| **Exportar** | Botón para descargar datos como CSV |
+| Interacción | Descripción |
+|-------------|-------------|
+| **Filtro por moneda** | Parámetro opcional `currency` para filtrar por PEN, USD o EUR |
+| **Tooltip** | Muestra valor exacto del punto |
 
-### Casos de Uso
+### Funcionalidades NO Implementadas
 
-1. **Planificación de flujo de caja**: Visualizar cuándo se esperan los mayores ingresos para programar pagos o inversiones.
-2. **Detección de deuda técnica**: Identificar períodos con caída de ingresos que requieren acción comercial.
-3. **Negociación con inversores**: Presentar proyección realista de ingresos futuros.
-4. **Presupuesto departamental**: Establecer metas de ingresos basadas en tendencia histórica.
+- Promedio móvil ponderado
+- Horizonte de 12 meses (solo 2 meses proyectados)
+- 24 meses históricos (solo 4 meses)
+- Banda de confianza ±15%
+- Estacionalidad
+- Tasa de renovación histórica
+- Conversión en tiempo real de monedas
+- Exportar CSV
+- Zoom temporal
+- Click para filtrar tabla de contratos
 
 ## Valor de Negocio
 
@@ -96,26 +122,23 @@ donde `peso_i = e^(-0.1 × distancia_en_meses)`
 
 | Rol | Necesidad |
 |-----|-----------|
-| **CFO** | Proyección de flujo de caja para planificación financiera |
-| **Director de Finanzas** | Análisis de tendencia de ingresos y facturación |
-| **CEO** | Visibilidad de salud financiera y crecimiento |
-| **Gerente de Ventas** | Evaluación de efectividad de cierre de contratos |
+| **CFO** | Visualización básica de ingresos |
+| **Director de Finanzas** | Análisis de tendencia |
+| **CEO** | Visibilidad de salud financiera |
 
 ### Decisiones Asociadas
 
-- Programación de inversiones de capital
-- Ajuste de presupuestos departamentales
-- Definición de metas de ventas trimestrales
-- Negociación de líneas de crédito
-- Planificación de contrataciones
+- Programación de pagos
+- Planificación de gastos operativos
+- Evaluación de ingresos por cliente
 
-### Impacto Estratégico
+### Limitaciones
 
-Este dashboard es **crítico** para la toma de decisiones financieras de alto nivel. Permite:
+Este dashboard **no incluye**:
+- Proyecciones avanzadas con algoritmos de aprendizaje automático
+- Bandas de confianza
+- Comparación inter-anual
+- Detección de estacionalidad
+- Forecasting de más de 2 meses
 
-- **Anticipar problemas de liquidez** antes de que ocurran
-- **Identificar oportunidades** de crecimiento basado en tendencias
-- **Justificar inversiones** con datos proyectados
-- **Establecer Accountability** con metas basadas en datos concretos
-
-La línea punteada de proyección proporciona una visión forward-looking que diferencia este dashboard de reportes financieros tradicionales que solo muestran datos históricos.
+> **Nota de alcance**: Esta documentación describe el estado actual del backend. El módulo dashboard expone endpoints agregados de lectura, no implementa aún exportación, drill-down, filtros avanzados, conversiones de moneda, cohortes, retención, churn ni tendencias históricas avanzadas.

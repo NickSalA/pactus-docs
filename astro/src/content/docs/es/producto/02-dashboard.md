@@ -12,20 +12,8 @@ El Dashboard se organiza en tres secciones principales:
 | Sección | Descripción |
 |---------|-------------|
 | **Bienvenida Personalizada** | Saludo con el nombre del usuario conectado |
-| **Cuadrícula de Métricas** | Indicadores clave del estado de la cartera de contratos |
 | **Tabla de Documentos Recientes** | Últimos contratos modificados con acceso rápido |
 | **Acciones Rápidas** | Botones para crear contrato o importar desde Google Drive |
-
-## Métricas del Sistema
-
-El Dashboard presenta cuatro indicadores principales que reflejan el estado de la cartera de contratos:
-
-| Métrica | Descripción | Cálculo |
-|---------|-------------|---------|
-| **Total de Contratos** | Cantidad total de contratos en la organización | Contaje de todos los documentos |
-| **Próximos a Vencer** | Contratos cuya fecha de fin está en los próximos 30 días | Filtro por estado EXPIRING |
-| **Contratos Activos** | Contratos vigentes con estado ACTIVE | Filtro por estado ACTIVE |
-| **Contratos Vencidos** | Contratos cuya fecha de fin ya pasó | Filtro por estado EXPIRED |
 
 ## Documentos Recientes
 
@@ -39,8 +27,6 @@ La tabla de documentos recientes muestra los últimos contratos modificados en l
 | **Estado** | Estado actual del contrato |
 | **Fecha de Inicio** | Fecha de inicio del contrato |
 
-La tabla soporta paginación y ordenamiento por columnas.
-
 ## Acciones Rápidas
 
 El Dashboard proporciona dos acciones rápidas principales:
@@ -52,7 +38,17 @@ El Dashboard proporciona dos acciones rápidas principales:
 
 ## Dashboards Ejecutivos
 
-El Dashboard operativo proporciona una visión general básica. Para análisis executives profundos, consulte los módulos de dashboards especializados:
+Para análisis executives profundos, el backend de ContractIA expone endpoints analíticos especializados que proporcionan:
+
+- **Área de ingresos/gasto**: Gráficos de área para proyecciones de ingresos (empresa) o gasto de planilla (trabajador)
+- **Centro de alertas**: Categorías de contratos próximos a vencer o en vigencia prolongada
+- **Contratos recientes**: Lista de los últimos contratos actualizados
+- **Top empresas**: Ranking de empresas contrapartes por volumen o valor
+- **Top servicios**: Ranking de servicios más contratados
+
+Las métricas operativas generales (total de contratos, próximos a vencer, activos, vencidos) no forman parte del módulo dashboard del backend actual.
+
+Para análisis executives profundos, consulte los módulos de dashboards especializados:
 
 | Módulo | Descripción | Destinado a |
 |--------|-------------|-------------|

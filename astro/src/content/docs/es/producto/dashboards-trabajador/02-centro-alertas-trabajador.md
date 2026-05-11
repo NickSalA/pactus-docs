@@ -1,57 +1,91 @@
 ---
 title: Centro de Alertas (Trabajadores)
-description: Sistema de alertas de vencimiento de contratos de trabajadores a 30 y 60 días.
+description: Sistema de alertas para identificar contratos laborales críticos a 30, 60 días y vigencia prolongada.
 ---
 
-El **Centro de Alertas (Trabajadores)** es un dashboard de gestión de riesgos laborales que permite a los altos cargos identificar y actuar proactivamente sobre contratos laborales que requieren renovación o finalización.
+El **Centro de Alertas (Trabajadores)** permite identificar contratos laborales que requieren atención.
 
 ## Resumen Ejecutivo
 
-Este dashboard presenta un sistema de semáforo para contratos de tipo `LABOR`, clasificándolos según su proximidad al vencimiento. Al igual que el Centro de Alertas de Empresas, permite drill-down para ver el detalle de cada contrato y gestionar la renovación oportuna de los trabajadores.
+Este dashboard presenta **3 categorías de alertas** para contratos de tipo `LABOR`. A diferencia de lo documentado anteriormente (2 tarjetas), el backend devuelve 3 categorías idénticas a las del módulo de empresa.
 
 ## Ficha Técnica
 
-### Definición de KPIs
+### Endpoint
 
-| KPI | Descripción | Fórmula |
-|-----|-------------|---------|
-| **Alertas Críticas (Rojo)** | Trabajadores con contrato por vencer en 30 días | COUNT where DATEDIFF(end_date, NOW()) <= 30 AND state=ACTIVE |
-| **Alertas Tempranas (Amarillo)** | Trabajadores con contrato entre 31 y 60 días | COUNT where DATEDIFF(end_date, NOW()) BETWEEN 31 AND 60 |
-| **Total de Alertas** | Suma de todas las alertas activas | SUM(rojo + amarillo) |
-| **Costo en Riesgo** | Remuneraciones de contratos en alerta | SUM(service_items.value) WHERE contratos en alerta |
-| **Alertas del Mes** | Contratos que vencen en el mes actual | COUNT WHERE MONTH(end_date) = MONTH(NOW()) |
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/alert_center/labor` |
+| **Rol requerido** | HR |
 
 ### Origen de Datos
 
 | Entidad | Campos Utilizados |
 |---------|-------------------|
 | `Document` | id, client, type (LABOR), state, start_date, end_date, name |
-| `ServiceItem` | value, currency |
-| `Organization` | org_id para contexto |
+| `ServiceItem` | value, currency, start_date, end_date |
 
-### Lógica de Clasificación
+### Filtros Aplicados
 
-| Color | Condición | Acción Recomendada |
-|-------|-----------|-------------------|
-| **Rojo** | `end_date` en los próximos 30 días | Entrevista de renovación inmediata |
-| **Amarillo** | `end_date` entre 31 y 60 días | Iniciar proceso de evaluación de desempeño |
-| **Verde** | Ninguna alerta | Estado normal |
+- `type = LABOR`
+- `state IN (ACTIVE, EXPIRING_SOON)`
+- `service_items.value > 0`
+
+### Categorías de Alertas
+
+| Categoría | `due_to` | Descripción |
+|-----------|----------|-------------|
+| **Vencen Próximos (30 días)** | 30 | Contratos con `end_date` entre hoy y los próximos 30 días |
+| **Vencen Próximos (60 días)** | 60 | Contratos con `end_date` entre 31 y 60 días |
+| **Vigencia Prolongada** | `null` | Contratos con `end_date` posterior a hoy + 60 días |
+
+> **Nota**: El backend devuelve las **mismas 3 categorías** que el centro de alertas de empresa.
+
+### Respuesta del Endpoint
+
+```json
+[
+  {
+    "label": "VENCEN PROXIMOS 30 DÍAS",
+    "color": { "accent": "#ef4444", "bg": "#fef2f2" },
+    "due_to": 30,
+    "count": 3,
+    "items": [
+      { "id": 10, "name": "Juan Pérez", "detail": null, "status": "ACTIVE" },
+      { "id": 11, "name": "María García", "detail": null, "status": "EXPIRING_SOON" },
+      { "id": 12, "name": "Carlos López", "detail": null, "status": "ACTIVE" }
+    ]
+  },
+  {
+    "label": "VENCEN PROXIMOS 60 DÍAS",
+    "color": { "accent": "#f59e0b", "bg": "#fffbeb" },
+    "due_to": 60,
+    "count": 5,
+    "items": [...]
+  },
+  {
+    "label": "VIGENCIA PROLONGADA",
+    "color": { "accent": "#6b7280", "bg": "#f3f4f6" },
+    "due_to": null,
+    "count": 8,
+    "items": [...]
+  }
+]
+```
 
 ### Diferencias con Alertas B2B
 
 | Aspecto | Empresas | Trabajadores |
-|---------|----------|---------|
+|---------|----------|---------------|
 | **Entidad** | client (empresa) | client (trabajador) |
-| **Impacto** | Pérdida de cliente | Pérdida de trabajador |
-| **Métrica de riesgo** | Valor en riesgo | Costo de reemplazo |
+| **Rol** | MANAGER | HR |
 
 ### Frecuencia de Actualización
 
 | Métrica | Valor |
 |---------|-------|
-| **Refresh Automático** | Cada hora |
-| **Latencia de Datos** | Tiempo real |
-| **Notificaciones** | Email diario resumen de alertas del día |
+| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
 
 ## Guía de Funcionalidad
 
@@ -59,42 +93,21 @@ Este dashboard presenta un sistema de semáforo para contratos de tipo `LABOR`, 
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Tarjetas de Semáforo** | 2 tarjetas (Rojo, Amarillo) con conteo y costo en riesgo |
-| **Lista de Trabajadores** | Tabla filtrable por color de alerta |
-| **Barra de Progreso** | Porcentaje de contratos en cada estado |
-| **Costo en Riescho** | Valor total de remuneraciones en alerta |
-| **Distribución por Modalidad** | Gráfico circular de modalidades en alerta |
+| **3 Tarjetas de Categoría** | Cada categoría muestra label, color, count y hasta 3 items |
+| **Items** | Cada item muestra id, name, detail (nullable), status |
 
-### Interactividad: Drill-Down
+> **Nota**: Los items laborales típicamente no tienen campo `detail`, salvo que venga en el resumen interno.
 
-| Nivel | Acción |
-|-------|--------|
-| **Nivel 1 (Semáforo)** | Click en tarjeta → filtra lista a alertas de ese color |
-| **Nivel 2 (Tabla)** | Click en fila → abre modal con datos del contrato |
-| **Nivel 3 (Modal)** | Ver completo del contrato, historial, documentos y acciones |
+### Funcionalidades NO Implementadas
 
-**Flujo de Drill-Down**:
-```
-Dashboard → [Click en tarjeta Roja] → Lista de trabajadores en rojo → [Click en trabajador] → Modal de detalle
-```
-
-### Funcionalidades Adicionales
-
-| Función | Descripción |
-|---------|-------------|
-| **Filtro por modalidad** | Ver alertas de tiempo completo, medio tiempo, servicios |
-| **Ordenar por costo** | Priorizar trabajadores de mayor remuneración |
-| **Acciones rápidas** | Crear renovación, agendar evaluación, enviar notificación |
-| **Exportar** | Descargar CSV de alertas |
-| **Ver calendario** | Vista de alertas por fecha específica |
-
-### Casos de Uso
-
-1. **Revisión semanal de RRHH**: El Gerente de RRHH revisa alertas cada lunes.
-2. **Planificación de reemplazos**: Identificar qué posiciones necesitan contratación.
-3. **Evaluación de desempeño**: Coordinar evaluaciones de trabajadores próximos a vencer.
-4. **Presupuesto de reemplazos**: Estimar costo de nuevas contrataciones.
-5. **Compliance**: Asegurar que todos los contratos estén vigentes o renovados.
+- Costo en riesgo (suma de valores)
+- Distribución por modalidad
+- Filtro por modalidad (tiempo completo, medio tiempo, servicios)
+- Ordenar por costo
+- Calendario de alertas
+- Acciones rápidas (crear renovación, agendar evaluación)
+- Exportar CSV
+- Email diario de alertas
 
 ## Valor de Negocio
 
@@ -103,34 +116,24 @@ Dashboard → [Click en tarjeta Roja] → Lista de trabajadores en rojo → [Cli
 | Rol | Necesidad |
 |-----|-----------|
 | **Gerente de RRHH** | Gestión de trabajadores y prevención de vacíos |
-| **Director de RRHH** | Visibilidad de riesgos laborales y planificación |
-| **Gerente Legal** | Asegurar vigencia de contratos laborales |
-| **CFO** | Costos de reemplazo y planificación presupuestaria |
+| **Director de RRHH** | Visibilidad de riesgos laborales |
+| **Gerente Legal** | Asegurar vigencia de contratos |
 
-### Decisiones Associadas
+### Decisiones Asociadas
 
 - Aprobación de renovaciones de contrato
-- Decisiones de conversión a planilla fija
 - Planificación de nuevas contrataciones
-- Asignación de presupuesto para reemplazos
-- Gestión de litigios laborales por contratos vencidos
+- Gestión de cumplimiento legal
 
-### Impacto Estratégico
+### Limitaciones
 
-Las alertas de trabajadores son **críticas para la continuidad operativa**:
+Este dashboard **no incluye**:
+- Suma de costo en riesgo
+- Distribución por modalidad
+- Drill-down a modal con detalle completo
+- Ordenamiento por costo
+- Exportación de datos
+- Notificaciones por email
+- Filtros avanzados
 
-| Métrica | Impacto |
-|---------|---------|
-| **Costo de reemplazo** | 50-200% del salario anual según posición |
-| **Pérdida de conocimiento** | Conocimiento tácito no documentado se pierde |
-| **Tiempo de vacancia** | Typically 2-4 meses para cubrir posición |
-
-Este dashboard permite:
-
-- **Prevenir vacancias** por falta de renovación oportuna
-- **Planificar reemplazo** con tiempo adecuado
-- **Preservar conocimiento** del capital intelectual
-- **Controlar costos** de rotación de personal
-- **Cumplir obligaciones legales** de vigencia contractual
-
-La diferenciación por modalidad permite además gestionar diferentes tipos de relación laboral (tiempo completo vs. servicios).
+> **Nota de alcance**: Esta documentación describe el estado actual del backend.

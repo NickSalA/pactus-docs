@@ -1,58 +1,68 @@
 ---
 title: Servicios más Contratados
-description: Gráfico de barras que muestra el volumen y valor de servicios empresarial por categoría (Cloud, Ciberseguridad, etc.).
+description: Ranking de los servicios más contratados por empresas clientes.
 ---
 
-El dashboard de **Servicios más Contratados** proporciona una visión analítica de la demanda de servicios por parte de los clientes empresariales, permitiendo identificar oportunidades de crecimiento y optimización de la cartera de servicios.
+El dashboard de **Servicios más Contratados** presenta un ranking de los servicios más demandados por las empresas clientes.
 
 ## Resumen Ejecutivo
 
-Este dashboard presenta los servicios más contratados por las empresas clientes, discriminando entre volumen (cantidad de contratos que incluyen el servicio) y valor económico (facturación total). Permite a los altos cargos tomar decisiones sobre estrategia de servicios, precios y enfocamiento comercial.
+Este dashboard muestra los servicios más contratados por clientes empresariales, discriminando entre volumen (cantidad de contratos) y valor económico.
 
 ## Ficha Técnica
 
-### Definición de KPIs
+### Endpoint
 
-| KPI | Descripción | Fórmula |
-|-----|-------------|---------|
-| **Volumen por Servicio** | Cantidad de contratos que incluyen cada servicio | COUNT(Document) JOIN ServiceItem WHERE service_id = X |
-| **Valor por Servicio** | Facturación total del servicio en el período | SUM(service_items.value) GROUP BY service_id |
-| **Valor Promedio por Contrato** | Valor medio facturado por contrato que incluye el servicio | SUM(valor) / COUNT(contratos) |
-| **Tendencia** | Variación en contratación del servicio vs. período anterior | (Volumen período actual / Volumen período anterior) - 1 |
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/top_services` |
+| **Rol requerido** | MANAGER |
+
+### Parámetros de Consulta
+
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| `currency` | string | No | Filtra por moneda (PEN, USD, EUR) |
+| `sort_by` | string | No | Criterio de ordenamiento: `volume` (default) o `value` |
 
 ### Origen de Datos
 
 | Entidad | Campos Utilizados |
 |---------|-------------------|
 | `Document` | id, type (COMPANY), state |
-| `ServiceItem` | service_id, description, value, currency, start_date, end_date |
-| **Tabla de Servicios** | Catálogo de servicios disponibles (Cloud, Ciberseguridad, etc.) |
+| `ServiceItem` | service_id, description, value, currency |
 
-### Categorías de Servicios
+### Filtros Aplicados
 
-Basado en el dominio del sistema, los servicios típicos incluyen:
+- `type = COMPANY`
+- `state IN (ACTIVE, EXPIRING_SOON)`
+- `service_items.value > 0`
 
-| Categoría | Ejemplos de Servicios |
-|-----------|----------------------|
-| **Cloud** | Hosting, servidores, almacenamiento, SaaS |
-| **Ciberseguridad** | Auditoría, pentesting, gestión de incidentes |
-| **Desarrollo** | Desarrollo web, móvil, software a medida |
-| **Consultoría** | Asesoría legal, estrategia, procesos |
-| **Infraestructura** | Redes, cableado, equipamiento |
+### Lógica de Cálculo
 
-### Lógica de Agrupación
+- **quantity**: Cantidad de contratos distintos asociados al servicio
+- **amount**: Suma de `service_items.value`
+- Retorna **máximo 5 servicios**
+- Ordenado por `sort_by` (volume o value)
 
-- Los servicios se agrupan por `service_id` o por categoría si el sistema tiene categorización
-- El gráfico muestra las 10 categorías/ servicios más contratados por volumen
-- Las barras muestran volumen (eje Y izquierdo) y valor (eje Y derecho) de forma agrupada
+### Respuesta del Endpoint
+
+```json
+[
+  { "name": "Cloud Hosting", "quantity": 15, "amount": 45000.00 },
+  { "name": "Desarrollo Web", "quantity": 12, "amount": 36000.00 },
+  { "name": "Ciberseguridad", "quantity": 8, "amount": 28000.00 },
+  { "name": "Consultoría Legal", "quantity": 5, "amount": 15000.00 },
+  { "name": "Mantenimiento", "quantity": 3, "amount": 9000.00 }
+]
+```
 
 ### Frecuencia de Actualización
 
 | Métrica | Valor |
 |---------|-------|
-| **Refresh Automático** | Diario a medianoche |
-| **Período de Análisis** | Últimos 12 meses móviles |
-| **Latencia de Datos** | Hasta 24 horas para datos de facturación |
+| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
 
 ## Guía de Funcionalidad
 
@@ -60,42 +70,28 @@ Basado en el dominio del sistema, los servicios típicos incluyen:
 
 | Elemento | Descripción |
 |----------|-------------|
-| **Gráfico de Barras Horizontales** | Dos barras por categoría: volumen (azul) y valor (naranja) |
-| **Eje Y Izquierdo** | Cantidad de contratos (volumen) |
-| **Eje Y Derecho** | Valor en soles (facturación) |
-| **Eje X** | Categorías de servicios |
-| **Leyenda** | Identifica volumen vs. valor |
-| **Orden Predeterminado** | Por volumen decreciente |
+| **Ranking de 5 servicios** | Lista ordenada por volumen o valor |
+| **Columna cantidad** | Número de contratos distintos por servicio |
+| **Columna monto** | Valor total acumulado del servicio |
 
 ### Interactividad
 
-| Interacción | Comportamiento |
-|-------------|----------------|
-| **Hover sobre barra** | Muestra tooltip con volumen, valor y tendencia |
-| **Click en barra** | Filtra lista de contratos que incluyen ese servicio |
-| **Cambiar período** | Selector de rango de fechas (trimestre, año, custom) |
-| **Ordenar por valor** | Reordenar gráfico por facturación en lugar de volumen |
-| **Ver detalle** | Click en servicio → tabla de contratos asociados |
+| Interacción | Descripción |
+|-------------|-------------|
+| **Ordenar por volumen** | Ver servicios por cantidad de contratos |
+| **Ordenar por valor** | Ver servicios por facturación total |
+| **Filtro por moneda** | Ver solo servicios en PEN, USD o EUR |
 
-### Gráfico Detallado
+### Funcionalidades NO Implementadas
 
-```
-Cloud              ████████████████████
-Ciberseguridad     ████████████████
-Desarrollo         █████████████
-Consultoría        ███████████
-Infraestructura    █████████
-                   └────────────────┴────
-                   Miles S/.
-```
-
-### Casos de Uso
-
-1. **Análisis de port folio**: Identificar qué servicios generan más ingresos para priorizarlos.
-2. **Detección de oportunidades**: Servicios con alto volumen pero bajo valor pueden indicar oportunidad de upselling.
-3. **Planificación de capacidad**: Servicios en crecimiento requieren más recursos.
-4. **Reporte a dirección**: Presentar qué servicios son los pilares del negocio.
-5. **Decisión de precios**: Analizar si los precios están alineados con el valor percibido.
+- Top 10 (solo Top 5)
+- Últimos 12 meses móviles
+- Tendencia vs. período anterior
+- Valor promedio por contrato
+- Cambio de período
+- Click para filtrar contratos
+- Gráfico de doble eje
+- Exportar CSV
 
 ## Valor de Negocio
 
@@ -103,26 +99,23 @@ Infraestructura    █████████
 
 | Rol | Necesidad |
 |-----|-----------|
-| **Director comercial** | Identificar servicios estrella y de crecimiento |
-| **Product Manager** | Decisiones sobre desarrollo de nuevos servicios |
-| **CFO** | Distribución de ingresos por línea de servicio |
-| **Gerente de Operaciones** | Planificación de recursos por servicio |
+| **Director comercial** | Identificar servicios estrellas |
+| **Product Manager** | Decisiones sobre desarrollo de servicios |
+| **CFO** | Distribución de ingresos por línea |
 
 ### Decisiones Asociadas
 
-- Desarrollo de nuevos servicios basedo en demanda
+- Desarrollo de nuevos servicios
 - Ajuste de precios por servicio
-- Asignación de presupuesto de marketing por servicio
-- Contratación de personal especializado por servicio
-- Descontinuación de servicios de bajo rendimiento
+- Asignación de presupuesto de marketing
 
-### Impacto Estratégico
+### Limitaciones
 
-Este dashboard proporciona **visibilidad sobre la composición de ingresos** por línea de servicio:
+Este dashboard **no incluye**:
+- Períodos históricos configurables
+- Tendencias temporales
+- Comparación entre períodos
+- Gráficos visuales
+- Exportación de datos
 
-- **Identificación de servicios core**: Los que generan la mayor facturación
-- **Oportunidades de cross-selling**: Servicios con alto volumen pero bajo valor medio
-- **Tendencias de mercado**: Qué servicios están creciendo o decreciendo
-- **Asignación de recursos**: Dónde invertir para maximizar retorno
-
-La doble visualización (volumen + valor) permite identificar servicios que generan muchos contratos pero bajo valor (potencial de upselling) versus servicios de alto valor pero bajo volumen (nicho premium).
+> **Nota de alcance**: Esta documentación describe el estado actual del backend.
