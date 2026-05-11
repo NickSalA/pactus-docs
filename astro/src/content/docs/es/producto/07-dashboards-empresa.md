@@ -12,7 +12,7 @@ El módulo de **Dashboards de Empresa** proporciona a los altos cargos una visi�
 | [Ingresos Proyectados](/es/producto/dashboards-empresa/01-ingresos-proyectados) | Previsión de flujo de caja con histórico y proyecciones | CFO, Director Finance |
 | [Centro de Alertas](/es/producto/dashboards-empresa/02-centro-alertas-empresas) | Sistema de semáforo para contratos críticos | Director Operations, Legal |
 | [Servicios más Contratados](/es/producto/dashboards-empresa/03-servicios-contratados) | Volumen y valor por categoría de servicio | Sales, Product Manager |
-| [Contratos Recientes](/es/producto/dashboards-empresa/05-contratos-recientes-b2b) | Log visual de últimas firmas de contratos | Legal, Operations |
+| [Contratos Recientes](/es/producto/dashboards-empresa/05-contratos-recientes-b2b) | Lista de últimos contratos empresariales actualizados | Legal, Operations |
 | [Top Empresas (Volumen)](/es/producto/dashboards-empresa/06-top-empresas) | Ranking de clientes por carga operativa | Account Manager, Sales |
 
 > **Nota**: Los dashboards de Fidelidad/Retención, Permanencia Media, Churn y Clientes en Riesgo no están implementados en el backend actual.

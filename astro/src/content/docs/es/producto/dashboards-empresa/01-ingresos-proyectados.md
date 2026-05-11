@@ -36,6 +36,8 @@ Este dashboard muestra los ingresos generados por contratos de tipo `COMPANY` (e
 
 - `type = COMPANY` (excluye contratos laborales)
 - `state IN (ACTIVE, EXPIRING_SOON)` (solo contratos vigentes o próximos a vencer)
+- `name IS NOT NULL`
+- `client IS NOT NULL`
 - `service_items.value > 0` (excluye items sin valor económico)
 
 ### Lógica de Cálculo

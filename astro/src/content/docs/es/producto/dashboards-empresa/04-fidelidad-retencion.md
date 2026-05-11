@@ -45,4 +45,4 @@ Si se desea implementar este dashboard, sería necesario desarrollar:
 3. Schema de respuesta para cohorts
 4. Integración con el módulo de dashboards
 
-> **Nota**: Este documento se mantiene por возможное uso futuro, pero no representa funcionalidad actualmente disponible en el sistema.
+> **Nota**: Este documento se mantiene por posible uso futuro, pero no representa funcionalidad actualmente disponible en el sistema.

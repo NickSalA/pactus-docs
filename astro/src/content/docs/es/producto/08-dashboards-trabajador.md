@@ -11,7 +11,7 @@ El módulo de **Dashboards de Trabajador** proporciona a los altos cargos una vi
 |-----------|-------------|------------------------|
 | [Gasto de Planilla](/es/producto/dashboards-trabajador/01-gasto-planilla) | Proyección de gasto laboral con línea de tendencia | CFO, Director de RRHH |
 | [Centro de Alertas (Trabajadores)](/es/producto/dashboards-trabajador/02-centro-alertas-trabajador) | Alertas de vencimiento de contratos de trabajadores a 30/60 días y vigencia prolongada | Gerente de RRHH, Legal |
-| [Contratos Recientes (Trabajadores)](/es/producto/dashboards-trabajador/03-contratos-recientes-trabajador) | Registro de nuevas altas por modalidad contractual | Gerente de RRHH, Operations |
+| [Contratos Recientes (Trabajadores)](/es/producto/dashboards-trabajador/03-contratos-recientes-trabajador) | Lista de últimos contratos laborales actualizados | Gerente de RRHH, Operations |
 
 > **Nota**: Los dashboards de Ranking de Retención, Antigüedad Promedio y Retención Histórica no están implementados en el backend actual.
 
@@ -22,7 +22,6 @@ El módulo de **Dashboards de Trabajador** proporciona a los altos cargos una vi
 | **Gasto Mensual de Planilla** | Suma de `service_items.value` de contratos LABOR activos (7 puntos: 4 históricos + actual + 2 futuros) |
 | **Alertas de Vencimiento** | Contratos laborales con `end_date` en ventana de 30/60 días o en vigencia prolongada (>60 días futuros) - 3 categorías |
 | **Contratos Laborales Recientes Actualizados** | Lista de los últimos 4 contratos LABOR actualizados (ordenados por updated_at) |
-| **Contratos Recientes** | Lista de los últimos 4 contratos laborales actualizados |
 
 ## Uso del Módulo
 

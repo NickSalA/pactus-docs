@@ -30,6 +30,8 @@ Este dashboard muestra los contratos de tipo `LABOR` más recientemente actualiz
 
 - `type = LABOR`
 - `state IN (ACTIVE, EXPIRING_SOON)`
+- `name IS NOT NULL`
+- `client IS NOT NULL`
 - **NO** incluye contratos PENDING_SIGNATURE
 
 ### Lógica de Cálculo
@@ -47,28 +49,28 @@ Este dashboard muestra los contratos de tipo `LABOR` más recientemente actualiz
     "title": "Contrato Tiempo Completo - Juan Pérez",
     "services": ["Desarrollo Frontend"],
     "name": "Juan Pérez",
-    "dates": "2026-05-01 - 2027-05-01"
+    "dates": "05/01/26 - 05/01/27"
   },
   {
     "id": 48,
     "title": "Contrato Servicios - María García",
     "services": ["Diseño UX"],
     "name": "María García",
-    "dates": "2026-04-15 - 2026-10-15"
+    "dates": "04/15/26 - 10/15/26"
   },
   {
     "id": 45,
     "title": "Contrato Medio Tiempo - Carlos López",
     "services": ["Soporte Técnico"],
     "name": "Carlos López",
-    "dates": "2026-04-01 - 2027-04-01"
+    "dates": "04/01/26 - 04/01/27"
   },
   {
     "id": 41,
     "title": "Contrato Tiempo Completo - Ana Torres",
     "services": ["Backend Development"],
     "name": "Ana Torres",
-    "dates": "2026-03-15 - 2027-03-15"
+    "dates": "03/15/26 - 03/15/27"
   }
 ]
 ```

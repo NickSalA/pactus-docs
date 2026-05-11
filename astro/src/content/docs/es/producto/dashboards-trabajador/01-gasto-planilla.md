@@ -36,6 +36,8 @@ Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es ese
 
 - `type = LABOR` (excluye contratos empresariales)
 - `state IN (ACTIVE, EXPIRING_SOON)` (solo contratos vigentes o próximos a vencer)
+- `name IS NOT NULL`
+- `client IS NOT NULL`
 - `service_items.value > 0` (solo items con valor económico)
 
 ### Lógica de Cálculo

@@ -30,6 +30,8 @@ Este dashboard muestra los contratos de tipo `COMPANY` más recientemente actual
 
 - `type = COMPANY`
 - `state IN (ACTIVE, EXPIRING_SOON)`
+- `name IS NOT NULL`
+- `client IS NOT NULL`
 - **NO** incluye contratos PENDING_SIGNATURE
 
 ### Lógica de Cálculo
@@ -47,28 +49,28 @@ Este dashboard muestra los contratos de tipo `COMPANY` más recientemente actual
     "title": "Contrato Marco - Acme Corp",
     "services": ["Cloud Hosting", "Desarrollo Web"],
     "name": "Acme Corporation",
-    "dates": "2026-01-15 - 2027-01-15"
+    "dates": "01/15/26 - 01/15/27"
   },
   {
     "id": 38,
     "title": "SLA - TechStart",
     "services": ["Ciberseguridad"],
     "name": "TechStart SA",
-    "dates": "2026-02-01 - 2027-02-01"
+    "dates": "02/01/26 - 02/01/27"
   },
   {
     "id": 35,
     "title": "Contrato Marco - GlobalTech",
     "services": ["Consultoría", "Infraestructura"],
     "name": "GlobalTech Inc",
-    "dates": "2025-12-01 - 2026-12-01"
+    "dates": "12/01/25 - 12/01/26"
   },
   {
     "id": 29,
     "title": "Amendment - Innova",
     "services": ["Mantenimiento"],
     "name": "Innova Solutions",
-    "dates": "2025-11-15 - 2026-11-15"
+    "dates": "11/15/25 - 11/15/26"
   }
 ]
 ```

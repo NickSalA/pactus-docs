@@ -37,7 +37,8 @@ Este dashboard ranking clasifica a los clientes de tipo `COMPANY` según su volu
 
 - `type = COMPANY`
 - `state IN (ACTIVE, EXPIRING_SOON)`
-- `service_items.value > 0`
+- `name IS NOT NULL`
+- `client IS NOT NULL`
 
 ### Lógica de Cálculo
 

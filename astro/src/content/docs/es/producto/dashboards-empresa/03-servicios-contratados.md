@@ -31,13 +31,16 @@ Este dashboard muestra los servicios más contratados por clientes empresariales
 | Entidad | Campos Utilizados |
 |---------|-------------------|
 | `Document` | id, type (COMPANY), state |
-| `ServiceItem` | service_id, description, value, currency |
+| `ServiceItem` | service_id, value, currency |
+| `ServiceTable` | name, organization_id |
 
 ### Filtros Aplicados
 
 - `type = COMPANY`
 - `state IN (ACTIVE, EXPIRING_SOON)`
-- `service_items.value > 0`
+- `name IS NOT NULL`
+- `client IS NOT NULL`
+- `ServiceTable.organization_id` igual a la organización actual
 
 ### Lógica de Cálculo
 
