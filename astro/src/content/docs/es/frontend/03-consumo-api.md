@@ -29,7 +29,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 | Tipo | Timeout | Uso |
 |------|---------|-----|
 | `AUTH` | 10,000 ms (10 seg) | Login/logout |
-| `DEFAULT` | 30,000 ms (30 seg) | Operaciones CRUD |
+| `DEFAULT` | 30,000 ms (30 seg) | Operaciones CRUD y Métricas de Dashboard |
 | `UPLOAD` | 60,000 ms (60 seg) | Subida de archivos PDF |
 | `AI` | 120,000 ms (2 min) | Interacciones con chatbot |
 
@@ -168,6 +168,45 @@ export async function getConversationById(conversationId: number): Promise<Conve
   return fetchAPI<ConversationWithContent>(`/conversations/${conversationId}`, {
     method: 'GET',
   }, TIMEOUTS.DEFAULT);
+}
+```
+### Dashboard (Analítica y Métricas)
+
+| Método | Endpoint | Descripción | Timeout |
+|--------|----------|-------------|---------|
+| GET | `/dashboard/area_chart/company` | Datos de tendencias comerciales (Manager) | DEFAULT |
+| GET | `/dashboard/area_chart/labor` | Datos de tendencias de RRHH (HR) | DEFAULT |
+| GET | `/dashboard/alert_center/company` | Alertas críticas comerciales | DEFAULT |
+| GET | `/dashboard/alert_center/labor` | Alertas críticas laborales | DEFAULT |
+| GET | `/dashboard/top_companies` | Ranking de empresas por VOL/VALOR | DEFAULT |
+| GET | `/dashboard/top_services` | Ranking de servicios más utilizados | DEFAULT |
+| GET | `/dashboard/recent_contracts/*` | Últimos movimientos por sector | DEFAULT |
+
+
+```typescript
+export interface AreaChartResponse {
+  props: {
+    title: string;
+    series: Array<{
+      name: string;
+      data: Array<{ x: string; y: number; is_forecast: boolean }>;
+    }>;
+    y_axis: { format: string; labels: number[] };
+  };
+}
+
+// Rankings y Alertas
+export interface TopCompanyResponse {
+  name: string;
+  contracts: number;
+  amount: number;
+}
+
+export interface AlertCategory {
+  label: string;
+  count: number;
+  color: { accent: string; bg: string };
+  items: Array<{ id: number; name: string; status: string }>;
 }
 ```
 
@@ -357,12 +396,12 @@ export interface DocumentCreateRequest {
 
 Cada petición debe reflejar su estado en la interfaz:
 
-| Estado | Indicador Visual | Comportamiento |
-|--------|------------------|----------------|
-| `idle` | Ninguno | Estado inicial, UI lista |
-| `loading` | Spinner / Skeleton | Deshabilitar botones |
-| `success` | Toast verde | Mostrar datos |
-| `error` | Toast rojo / Banner | Mostrar mensaje, permitir reintentar |
+| Estado | Indicador Visual | Comportamiento                                 |
+|--------|------------------|------------------------------------------------|
+| `idle` | Ninguno | Estado inicial, UI lista                       |
+| `loading` | Skeletons especializados para gráficos | Carga visual progresiva de widgets analíticos  |
+| `success` | Toast verde | Mostrar datos                                  |
+| `error` | Toast rojo / Banner | Mostrar mensaje, permitir reintentar           |
 
 ```typescript
 export type ApiStatus = 'idle' | 'loading' | 'success' | 'error';
