@@ -171,4 +171,4 @@ A continuación se presenta el listado completo de archivos de prueba organizado
 
 ## Archivo de Configuración Global
 
-El archivo `conftest.py` en la raíz del directorio `tests/` contiene la configuración global de pytest y define fixtures compartidos que pueden utilisé en todas las pruebas del proyecto. Este archivo es el punto central para gestionar el setup y teardown de las pruebas.
+El archivo `conftest.py` en la raíz del directorio `tests/` contiene la configuración global de pytest y define fixtures compartidos que pueden utilizarse en todas las pruebas del proyecto. Este archivo es el punto central para gestionar el setup y teardown de las pruebas.

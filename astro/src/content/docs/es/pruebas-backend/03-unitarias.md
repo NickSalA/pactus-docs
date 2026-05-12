@@ -87,7 +87,7 @@ El archivo `templates/domain/test_entities.py` contiene pruebas para las entidad
 |------|-------------|
 | `test_creates_valid_template` | Crea plantilla válida |
 | `test_name_stored_as_is` | Nombre se almacena correctamente |
-| `test_invalid_content_type_raises` | тип validado |
+| `test_invalid_content_type_raises` | Tipo validado |
 | `test_content_missing_required_fields_raises` | Campos requeridos validados |
 
 ### Pruebas de TemplateField
@@ -145,7 +145,7 @@ def test_creates_message_with_defaults():
 
 ## Organizations
 
-Las pruebas de organizaciones suivent le même patrón d'entités jednost.
+Las pruebas de organizaciones siguen el mismo patrón de entidades.
 
 ## Dashboard
 
