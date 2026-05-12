@@ -8,12 +8,13 @@ El frontend de ContractIA está construido con **Next.js 16** usando App Router,
 ## Stack Tecnológico
 
 | Tecnología | Versión | Propósito |
-|------------|---------|-----------|
+|----------|-------|-----------|
 | Next.js | 16.1.6 | Framework principal con App Router |
 | React | 19.2.3 | Librería UI con hooks |
 | TypeScript | 5.x | Tipado estático |
 | Tailwind CSS | 4.x | Framework de utilidades CSS |
 | Zustand | 5.0.12 | Gestión de estado global |
+| Recharts | 3.8.1 | Visualización de datos y analítica |
 | Supabase | 2.100.0 | Autenticación OAuth |
 | Lucide React | 0.577.0 | Iconografía |
 
@@ -37,7 +38,11 @@ src/
 │   └── (main)/
 │       ├── layout.tsx          # Layout con Sidebar + Header
 │       ├── dashboard/
-│       │   └── page.tsx        # Dashboard principal (/dashboard)
+│       │   ├── page.tsx        # Router dinámico (Manager/HR)
+│       │   ├── hr/
+│       │   │   └── page.tsx    # Dashboard para RRHH
+│       │   └── manager/
+│       │       └── page.tsx    # Vista para Gerencia
 │       ├── contracts/
 │       │   ├── page.tsx        # Gestión de contratos (/contracts)
 │       │   └── AddContractForm.tsx
@@ -53,8 +58,13 @@ src/
 │   └── layout/
 │       ├── Sidebar.tsx         # Barra lateral de navegación
 │       └── Header.tsx          # Header con usuario y notificaciones
-│
+├── features/
+│   └── dashboard/              # Lógica modular del Dashboard
+│       ├── components/         # Charts (Recharts) y AlertCenter
+│       ├── hooks/              # useDashboardHRPage, useDashboardManagerPage
+│       └── lib/                # Transformación de datos (dashboard-data.ts)
 ├── lib/
+│   ├── api/                    # Endpoints modularizados
 │   ├── api.ts                  # Cliente API centralizado
 │   ├── supabaseClient.ts       # Configuración de Supabase
 │   └── authUser.ts             # Utilidades de usuario
@@ -111,7 +121,10 @@ Panel principal con métricas y resumen de actividad:
 | Tarjetas de métricas | Total contratos, Por vencer, Expirados con variación mensual |
 | Tabla de documentos recientes | Últimos documentos con estado y fecha |
 | Acciones rápidas | Botones para crear contrato y consultar agente IA |
-| Paginación | Navegación entre páginas de documentos |
+| Router de Roles |Componente en `/dashboard/page.tsx` que evalúa el rol del usuario y lo redirige a la vista correspondiente (`/hr` o `/manager`). |
+| Dashboard Manager | Enfocado en métricas de contratos tipo COMPANY. Incluye rankings de empresas, servicios y tendencias financieras. |
+| Dashboard HR | Enfocado en métricas de contratos tipo LABOR. Incluye tablas de documentos recientes y alertas operativas de personal. |
+| Centro de Alertas | Widget interactivo (DashboardAlertCenter) que categoriza contratos por estado de vencimiento. |
 
 ### Contratos (`/contracts`)
 
@@ -202,5 +215,5 @@ export default function MainLayout({ children }) {
 2. Click en "Iniciar sesión" redirige a `/login`
 3. Login con Google OAuth via Supabase
 4. Callback en `/auth/callback` procesa la sesión
-5. Redirección automática a `/dashboard`
+5. Redirección por rol del usuario y lo envía automáticamente a su dashboard.
 6. Navegación interna mediante Sidebar

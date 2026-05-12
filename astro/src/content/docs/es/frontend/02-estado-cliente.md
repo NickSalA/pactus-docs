@@ -34,7 +34,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 3. Usuario autoriza la aplicación en Google
 4. Google redirige a `/auth/callback` con código de autorización
 5. `exchangeCodeForSession()` intercambia código por sesión
-6. Redirección a `/dashboard` con sesión activa
+6. Redirección dinámica según el rol del usuario con sesión activa.
 
 ### Página de Login
 
@@ -51,6 +51,14 @@ const handleGoogleLogin = async () => {
   if (error) {
     setError(error.message);
   }
+  
+  onClick={() => router.push(
+    authUser.role === "ADMIN" 
+        ? "/admin" 
+        : authUser.role === "MANAGER" 
+            ? "/dashboard/manager" 
+            : "/dashboard/hr"
+)}
 };
 ```
 
@@ -68,10 +76,12 @@ const handleAuthCallback = async () => {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (session) {
-    router.replace("/dashboard");
+  if (authUser.role === "ADMIN" || authUser.role === "Administrador") {
+    router.replace("/admin");
+  } else if (authUser.role === "MANAGER") {
+    router.replace("/dashboard/manager");
   } else {
-    router.replace("/login");
+    router.replace("/dashboard/hr");
   }
 };
 ```
@@ -159,14 +169,13 @@ export const mapSupabaseUserToAuthUser = (user: SupabaseUser): AuthDisplayUser =
   const email = user.email || "sin-email@usuario.local";
   const rawName = metadata.full_name || metadata.name || fallbackNameFromEmail(email);
   const name = toNameAndLastName(rawName);
-
-  return {
-    id: user.id,
-    name,
-    email,
-    role: "Notario",
-    avatarUrl: metadata.avatar_url || null,
-  };
+  
+return {
+  id: user.id,
+  name,
+  email,
+  role: metadata.role || "HR", // El rol ahora se extrae de la metadata
+  avatarUrl: metadata.avatar_url || null,
 };
 
 export const toNameAndLastName = (rawName: string): string => {
@@ -229,7 +238,7 @@ const handleLogout = async () => {
 
 ```typescript
 // src/types/api.types.ts
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'ADMIN' | 'MANAGER' | 'HR' | 'user';
 
 export interface User {
   id: number;
