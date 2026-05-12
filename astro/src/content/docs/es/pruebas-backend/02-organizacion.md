@@ -9,9 +9,11 @@ Las pruebas del backend siguen una estructura de directorios paralela al código
 
 El directorio principal de pruebas se encuentra en `ContractAI-Backend/tests/` y contiene subdirectorios para cada módulo del sistema:
 
-```
+```text
 tests/
 ├── conftest.py              # Configuración global de fixtures
+├── test_app_setup.py        # Pruebas generales de configuración de la app
+├── test_chatbot_prompt.py   # Pruebas globales de prompts del chatbot
 ├── users/
 │   ├── domain/
 │   ├── application/
@@ -41,15 +43,12 @@ tests/
 ├── organizations/
 │   ├── domain/
 │   ├── application/
-│   ├── infrastructure/
-│   └── api/
+│   └── infrastructure/
 ├── notifications/
-│   ├── domain/
 │   ├── application/
 │   ├── infrastructure/
 │   └── api/
 ├── integrations/
-│   ├── domain/
 │   ├── application/
 │   ├── infrastructure/
 │   └── api/
@@ -59,7 +58,7 @@ tests/
 
 Esta organización replica la estructura del código fuente en `src/`, lo que permite mantener una correspondencia clara entre el código y sus pruebas.
 
-## Convencion de Archivos
+## Convención de Archivos
 
 Los archivos de prueba siguen una convención de nombres consistente:
 
@@ -69,7 +68,7 @@ Los archivos de prueba siguen una convención de nombres consistente:
 
 ## Listado de Pruebas por Módulo
 
-A continuación se presenta el listado completo de archivos de prueba organizados por módulo:
+A continuación se presenta el listado de archivos de prueba organizados por módulo:
 
 ### Users
 
@@ -77,20 +76,20 @@ A continuación se presenta el listado completo de archivos de prueba organizado
 |---------|------|-------------|
 | `users/domain/test_entities.py` | domain | Pruebas de entidades User y Role |
 | `users/infrastructure/test_postgres_repo.py` | infrastructure | Pruebas del repositorio de usuarios |
-| `users/infrastructure/test_jwt_service.py` | infrastructure | Pruebas del servicio JWT |
+| `users/infrastructure/test_jwt_service.py` | infrastructure | Pruebas del servicio JWT/Supabase Auth |
 | `users/application/test_auth_service.py` | application | Pruebas del servicio de autenticación |
 
 ### Documents
 
 | Archivo | Capa | Descripción |
 |---------|------|-------------|
-| `documents/domain/test_entities.py` | domain | Pruebas de entidades Document |
+| `documents/domain/test_entities.py` | domain | Pruebas de entidades Document y reglas de servicios |
 | `documents/infrastructure/test_postgres_repo.py` | infrastructure | Pruebas del repositorio de documentos |
-| `documents/infrastructure/test_postgres_repo_access_matching.py` | infrastructure | Pruebas de matching de accesos |
+| `documents/infrastructure/test_postgres_repo_access_matching.py` | infrastructure | Pruebas de matching de accesos por contraparte |
 | `documents/infrastructure/test_supabase_storage.py` | infrastructure | Pruebas de almacenamiento en Supabase |
 | `documents/infrastructure/test_qdrant_repo.py` | infrastructure | Pruebas del repositorio vectorial |
 | `documents/infrastructure/test_llama_parser.py` | infrastructure | Pruebas del parseo de PDFs |
-| `documents/infrastructure/test_gemini_structured_extractor.py` | infrastructure | Pruebas del extractor estructurado |
+| `documents/infrastructure/test_gemini_structured_extractor.py` | infrastructure | Pruebas de reglas del extractor estructurado |
 | `documents/application/test_document_service.py` | application | Pruebas del servicio de documentos |
 | `documents/api/test_routers.py` | api | Pruebas de los endpoints de documentos |
 
@@ -123,14 +122,14 @@ A continuación se presenta el listado completo de archivos de prueba organizado
 | Archivo | Capa | Descripción |
 |---------|------|-------------|
 | `dashboard/domain/test_access_policy.py` | domain | Pruebas de políticas de acceso al dashboard |
-| `dashboard/infrastructure/test_postgres_repo.py` | infrastructure | Pruebas del repositorio PostgreSQL |
-| `dashboard/integration/test_dashboard_read_models.py` | integration | Pruebas de modelos de lectura |
+| `dashboard/infrastructure/test_postgres_repo.py` | infrastructure | Pruebas del repositorio PostgreSQL y construcción de consultas |
+| `dashboard/integration/test_dashboard_read_models.py` | integration | Pruebas de modelos de lectura con PostgreSQL de prueba |
 | `dashboard/application/test_dashboard_service.py` | application | Pruebas del servicio principal |
 | `dashboard/application/test_dashboard_service_rankings.py` | application | Pruebas de rankings de empresas y servicios |
 | `dashboard/application/test_dashboard_service_area_chart.py` | application | Pruebas del gráfico de área |
 | `dashboard/application/test_dashboard_service_alert_center.py` | application | Pruebas del centro de alertas |
 | `dashboard/api/test_routers.py` | api | Pruebas de los endpoints HTTP |
-| `dashboard/api/test_dashboard_auth_and_params.py` | api | Pruebas de autenticación y parámetros |
+| `dashboard/api/test_dashboard_auth_and_params.py` | api | Pruebas de permisos, errores HTTP y parámetros de consulta |
 
 ### Organizations
 

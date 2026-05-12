@@ -7,13 +7,14 @@ Las pruebas unitarias se enfocan en validar las entidades del dominio y sus regl
 
 ## Archivos de Pruebas Unitarias
 
-Las pruebas unitarias se encuentran en el directorio `domain` de cada módulo:
+Las pruebas unitarias se encuentran principalmente en el directorio `domain` de cada módulo:
 
 - `users/domain/test_entities.py`
 - `documents/domain/test_entities.py`
 - `templates/domain/test_entities.py`
 - `chatbot/domain/test_entities.py`
 - `organizations/domain/test_entities.py`
+- `dashboard/domain/test_access_policy.py`
 
 ## Users
 
@@ -24,7 +25,7 @@ El archivo `users/domain/test_entities.py` contiene pruebas para las entidades `
 | Test | Descripción |
 |------|-------------|
 | `test_user_default_role_is_worker` | Verifica que el rol por defecto sea WORKER |
-| `test_user_default_is_active` | Verifica que el usuario activos por defecto |
+| `test_user_default_is_active` | Verifica que el usuario esté activo por defecto |
 | `test_user_all_roles_accepted` | Verifica que todos los roles sean aceptados |
 | `test_user_optional_fields_default_none` | Verifica campos opcionales por defecto en None |
 
@@ -47,6 +48,7 @@ El archivo `documents/domain/test_entities.py` contiene pruebas extensas para la
 | `test_blank_name_raises` | Valida nombre no vacío |
 | `test_form_data_must_be_json_object` | Valida estructura de form_data |
 | `test_default_state_is_none` | Estado por defecto es None |
+| `test_file_path_defaults_to_none` | Ruta de archivo por defecto es None |
 | `test_all_document_types_are_accepted` | Todos los tipos aceptados |
 | `test_all_document_states_can_be_set` | Todos los estados aceptados |
 | `test_nullable_top_level_fields_are_allowed` | Campos opcionales permitidos |
@@ -59,6 +61,12 @@ El archivo `documents/domain/test_entities.py` contiene pruebas extensas para la
 | `test_negative_value_raises` | Valor debe ser positivo |
 | `test_non_positive_service_id_raises` | ID de servicio debe ser positivo |
 | `test_end_date_before_start_date_raises` | Valida rango de fechas |
+
+### Pruebas de ServiceTable
+
+| Test | Descripción |
+|------|-------------|
+| `test_service_table_requires_non_empty_name` | Valida que el nombre del servicio no esté vacío |
 
 ### Pruebas de Reglas de Negocio
 
@@ -133,7 +141,7 @@ El archivo `chatbot/domain/test_entities.py` contiene pruebas para las entidades
 | Test | Descripción |
 |------|-------------|
 | `test_creates_message_with_defaults` | Crea mensaje con valores por defecto |
-| `test_message_roles` | Roles válidos (user, bot, system) |
+| `test_message_roles` | Roles válidos: user, bot y system |
 
 ```python
 def test_creates_message_with_defaults():
@@ -145,7 +153,15 @@ def test_creates_message_with_defaults():
 
 ## Organizations
 
-Las pruebas de organizaciones siguen el mismo patrón de entidades.
+El archivo `organizations/domain/test_entities.py` contiene pruebas para la entidad `OrganizationTable`.
+
+### Pruebas de OrganizationTable
+
+| Test | Descripción |
+|------|-------------|
+| `test_organization_default_is_active` | Verifica que la organización esté activa por defecto |
+| `test_organization_name_stored` | Verifica que el nombre se almacene correctamente |
+| `test_organization_optional_fields_default_none` | Verifica que los campos opcionales sean None por defecto |
 
 ## Dashboard
 

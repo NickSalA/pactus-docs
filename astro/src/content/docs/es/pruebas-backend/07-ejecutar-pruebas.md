@@ -11,18 +11,24 @@ Las pruebas requieren las dependencias de desarrollo instaladas:
 
 ```bash
 cd ContractAI-Backend
-uv sync
+uv sync --group dev
 ```
 
-O alternativamente:
+Si ya se sincronizaron todas las dependencias del proyecto, también puede usarse:
 
 ```bash
-uv sync --group dev
+uv sync
 ```
 
 ## Ejecución Básica
 
 ### Ejecutar Todas las Pruebas
+
+```bash
+uv run pytest
+```
+
+Si el entorno virtual ya está activado, también puede ejecutarse:
 
 ```bash
 pytest
@@ -32,32 +38,36 @@ pytest
 
 ```bash
 # Usuarios
-pytest tests/users/
+uv run pytest tests/users/
 
 # Documentos
-pytest tests/documents/
+uv run pytest tests/documents/
 
 # Templates
-pytest tests/templates/
+uv run pytest tests/templates/
 
 # Chatbot
-pytest tests/chatbot/
+uv run pytest tests/chatbot/
+
+# Dashboard
+uv run pytest tests/dashboard/
 
 # Organizations
-pytest tests/organizations/
+uv run pytest tests/organizations/
 
 # Notifications
-pytest tests/notifications/
+uv run pytest tests/notifications/
 
 # Integrations
-pytest tests/integrations/
+uv run pytest tests/integrations/
 ```
 
 ### Ejecutar un Archivo Específico
 
 ```bash
-pytest tests/users/domain/test_entities.py
-pytest documents/api/test_routers.py
+uv run pytest tests/users/domain/test_entities.py
+uv run pytest tests/documents/api/test_routers.py
+uv run pytest tests/dashboard/api/test_dashboard_auth_and_params.py
 ```
 
 ## Opciones de Pytest
@@ -65,65 +75,100 @@ pytest documents/api/test_routers.py
 ### Modo Verbose
 
 ```bash
-pytest -v
+uv run pytest -v
 ```
 
 ### Mostrar Salida Estándar
 
 ```bash
-pytest -s
+uv run pytest -s
 ```
 
 ### Detener en el Primer Error
 
 ```bash
-pytest -x
+uv run pytest -x
 ```
 
 ### Ejecutar Pruebas por Patrón
 
 ```bash
-pytest -k "test_user"
-pytest -k "test_create"
+uv run pytest -k "test_user"
+uv run pytest -k "test_create"
 ```
 
-### Mostrar Diff en Fallos
+### Ejecutar Solo Pruebas que Fallaron
 
 ```bash
-pytest --lf  # Ejecutar solo pruebas que fallaron
+uv run pytest --lf
+```
+
+## Pruebas por Capa
+
+### Pruebas de Dominio
+
+```bash
+uv run pytest tests/users/domain tests/documents/domain tests/templates/domain tests/chatbot/domain tests/organizations/domain tests/dashboard/domain
+```
+
+### Pruebas de API
+
+```bash
+uv run pytest tests/documents/api tests/chatbot/api tests/dashboard/api tests/integrations/api
+```
+
+### Pruebas de Dashboard
+
+```bash
+uv run pytest tests/dashboard -q
+```
+
+### Pruebas de Integración del Dashboard con PostgreSQL de Prueba
+
+Estas pruebas usan una base PostgreSQL temporal definida en `docker-compose.test.yml`. Si PostgreSQL no está levantado en `localhost:5433`, las pruebas se saltan automáticamente.
+
+```bash
+docker compose -f docker-compose.test.yml up -d
+uv run pytest tests/dashboard/integration -q
+docker compose -f docker-compose.test.yml down -v
 ```
 
 ## Cobertura de Código
 
-### Instalar Coverage
+La cobertura es opcional. Si se desea usar `coverage`, primero debe instalarse como dependencia de desarrollo:
 
 ```bash
-pip install coverage
+uv add --dev coverage
 ```
 
 ### Ejecutar con Cobertura
 
 ```bash
-coverage run -m pytest
+uv run coverage run -m pytest
 ```
 
 ### Reporte de Cobertura en Terminal
 
 ```bash
-coverage report
+uv run coverage report
 ```
 
 ### Reporte de Cobertura en HTML
 
 ```bash
-coverage html
-# Abrir htmlcov/index.html en el navegador
+uv run coverage html
+```
+
+Luego se puede abrir:
+
+```text
+htmlcov/index.html
 ```
 
 ### Mostrar Líneas Descubiertas
 
 ```bash
-coverage report --show-missing
+uv run coverage report --show-missing
 ```
 
 ## Configuración de Pytest
@@ -138,45 +183,53 @@ testpaths = ["tests"]
 
 ## Scripts de Conveniencia
 
-### Ejecutar Todas las Pruebas Unitarias
+### Ejecutar Todas las Pruebas Unitarias de Dominio
 
 ```bash
-pytest tests/ -k "domain"
+uv run pytest tests/users/domain tests/documents/domain tests/templates/domain tests/chatbot/domain tests/organizations/domain tests/dashboard/domain
 ```
 
 ### Ejecutar Todas las Pruebas de API
 
 ```bash
-pytest tests/ -k "api"
+uv run pytest tests/documents/api tests/chatbot/api tests/dashboard/api tests/integrations/api
 ```
 
-### Ejecutar con Timeout
+### Ejecutar Solo Pruebas que Coincidan con un Nombre
 
 ```bash
-pytest --timeout=30
+uv run pytest -k "dashboard"
+uv run pytest -k "area_chart"
+uv run pytest -k "forbidden"
 ```
 
 ## Integración Continua
 
-Las pruebas se ejecutan automáticamente en CI/CD. El flujo típico es:
+El flujo típico de CI/CD puede ser:
 
 ```bash
 # Instalar dependencias
-uv sync
+uv sync --group dev
 
-# Verificar con lint
-ruff check .
+# Verificar lint
+uv run ruff check .
 
 # Ejecutar pruebas
-pytest
+uv run pytest
+```
 
-# Verificar cobertura (si está configurado)
-coverage report --fail-under=80
+Si se configura cobertura, también podría incluirse:
+
+```bash
+uv run coverage run -m pytest
+uv run coverage report --fail-under=80
 ```
 
 ## Solución de Problemas
 
 ### Error: "No module named 'pytest'"
+
+Instalar dependencias de desarrollo:
 
 ```bash
 uv sync --group dev
@@ -184,17 +237,30 @@ uv sync --group dev
 
 ### Error: "asyncpg pool limit reached"
 
-Las pruebas de integración utilizan mocks. Si ves este error, revise que los mocks estén configurados correctamente.
+Este error puede aparecer si una prueba usa accidentalmente una conexión real a PostgreSQL o si una sesión no se cierra correctamente. Verifica que las pruebas unitarias usen mocks cuando corresponda y que las pruebas de integración usen la base temporal esperada.
+
+### Pruebas de Integración del Dashboard Aparecen como Skipped
+
+Esto es esperado si PostgreSQL de prueba no está levantado.
+
+Para ejecutarlas realmente:
+
+```bash
+docker compose -f docker-compose.test.yml up -d
+uv run pytest tests/dashboard/integration -q
+docker compose -f docker-compose.test.yml down -v
+```
 
 ### Warnings de Deprecación
 
 ```bash
-pytest -W ignore::DeprecationWarning
+uv run pytest -W ignore::DeprecationWarning
 ```
 
 ## Buenas Prácticas
 
-1. **Ejecutar pruebas antes de commit**: `pytest`
-2. **Verificar cobertura regularmente**: `coverage report`
-3. **Ejecutar pruebas específicas**: pytest con `-k` para filtrar
-4. **Mantener pruebas rápidas**: Las pruebas unitarias deben ejecutarse en segundos
+1. **Ejecutar pruebas antes de commit**: `uv run pytest`.
+2. **Ejecutar pruebas específicas durante desarrollo**: usar rutas o `-k` para filtrar.
+3. **Mantener pruebas rápidas**: las pruebas unitarias deben ejecutarse en segundos.
+4. **Separar integración real de mocks**: las pruebas que requieren PostgreSQL temporal deben mantenerse en directorios `integration/`.
+5. **No depender de datos reales**: las pruebas deben usar datos controlados o mocks.
