@@ -13,7 +13,9 @@ El esquema `public` concentra las tablas que modelan el dominio principal de Con
 | `users` | Usuario funcional asociado a una organizacion | `id` |
 | `documents` | Cabecera documental y referencia al archivo | `id` |
 | `services` | Catálogo de servicios por organización | `id` |
-| `documents_services` | Detalle económico y temporal por documento/servicio | `id` |
+| `company_contracts` | Extension corporativa para contratos de tipo COMPANY | `id` |
+| `labor_contracts` | Extension laboral para contratos de tipo LABOR | `id` |
+| `company_contract_services` | Lineas de servicio para contratos corporativos | `id` |
 | `conversations` | Historial conversacional visible para la aplicacion | `id` |
 | `document_templates` | Plantillas usadas para generacion documental | `id` |
 | `template_formats` | Catálogo de formatos de plantilla | `id` |
@@ -98,7 +100,7 @@ Conserva el usuario funcional del sistema. Complementa a `auth.users` con inform
 
 ## `public.documents`
 
-Guarda la cabecera del documento y la referencia al archivo asociado. El detalle económico principal se persiste por separado en `documents_services`.
+Guarda la cabecera del documento y la referencia al archivo asociado. Los contratos corporativos guardan su extension en `company_contracts` y los laborales en `labor_contracts`.
 
 **Clave primaria:** `id`
 
@@ -111,9 +113,7 @@ Guarda la cabecera del documento y la referencia al archivo asociado. El detalle
 |---------|------|---------|
 | `id` | `bigint` | Identidad del documento |
 | `organization_id` | `bigint` | Organización propietaria |
-| `name` | `varchar` | Nombre del contrato |
-| `client` | `varchar` | Contraparte o cliente asociado |
-| `type` | `document_type` | Tipo documental: `COMPANY`, `LABOR` |
+| `type` | `text` | Tipo documental: `COMPANY` o `LABOR` |
 | `start_date` | `date` | Inicio del periodo contractual |
 | `end_date` | `date` | Fin del periodo contractual |
 | `form_data` | `jsonb` | Datos estructurados extraídos o capturados del contrato |
@@ -145,7 +145,7 @@ Guarda la cabecera del documento y la referencia al archivo asociado. El detalle
 - guardar campos variables del contrato que no justifican una tabla propia
 - conservar claves resumidas que el backend usa para filtros y rankings, como `value` y `currency`
 
-Por eso, aunque el detalle económico formal viva en `documents_services`, parte de la metadata económica puede reaparecer resumida en este JSONB.
+Por eso, aunque el detalle económico formal viva en `company_contract_services` y `labor_contracts`, parte de la metadata económica puede reaparecer resumida en este JSONB.
 
 ## `public.services`
 
@@ -157,6 +157,12 @@ Contiene el catálogo de servicios de cada organización. Su objetivo es reutili
 
 - `organization_id -> organizations.id`
 
+**Relaciones entrantes:**
+
+- `company_contract_services.service_id -> services.id`
+
+Un servicio del catálogo puede aparecer en varias líneas de contrato corporativo. Esto evita redefinir el mismo concepto contractual en cada documento.
+
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad del servicio |
@@ -166,33 +172,71 @@ Contiene el catálogo de servicios de cada organización. Su objetivo es reutili
 | `created_at` | `timestamptz` | Fecha de creación |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
-## `public.documents_services`
+## `public.company_contracts`
 
-Es la tabla que enlaza documentos y servicios, pero además conserva la información económica y temporal de cada línea contractual.
+Extension para contratos corporativos (tipo `COMPANY`). Almacena el RUC y el nombre del cliente asociado al contrato.
 
 **Clave primaria:** `id`
 
 **Claves foráneas:**
 
-- `document_id -> documents.id`
+- `document_id -> documents.id` (único)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del registro |
+| `document_id` | `bigint` | Documento corporativo asociado |
+| `ruc` | `varchar` | Identificador tributario del cliente |
+| `client` | `varchar` | Nombre o razon social del cliente |
+| `created_at` | `timestamptz` | Fecha de creacion |
+| `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+## `public.labor_contracts`
+
+Extension para contratos laborales (tipo `LABOR`). Almacena los datos del trabajador y las condiciones salariales.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `document_id -> documents.id` (único)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del registro |
+| `document_id` | `bigint` | Documento laboral asociado |
+| `worker_name` | `varchar` | Nombre completo del trabajador |
+| `worker_document_number` | `varchar` | Numero de documento de identidad |
+| `position` | `varchar` | Cargo o puesto |
+| `salary_value` | `float8` | Monto del salario |
+| `salary_currency` | `currency_type` | Moneda: `PEN`, `USD`, `EUR` |
+| `salary_periodicity` | `text` | Periodicidad del pago |
+| `contract_modality` | `text` | Modalidad del contrato |
+| `created_at` | `timestamptz` | Fecha de creacion |
+| `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+## `public.company_contract_services`
+
+Lineas de servicio para contratos corporativos. Enlaza un contrato de empresa con servicios del catálogo y persiste la información económica de cada línea.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `company_contract_id -> company_contracts.id`
 - `service_id -> services.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad del registro |
-| `document_id` | `bigint` | Documento asociado |
-| `service_id` | `bigint` | Servicio asociado |
-| `description` | `text` | Descripción de la línea contractual |
+| `company_contract_id` | `bigint` | Contrato corporativo asociado |
+| `service_id` | `bigint` | Servicio del catálogo |
+| `description` | `text` | Descripcion de la línea contractual |
 | `value` | `float8` | Valor monetario de la línea |
 | `currency` | `currency_type` | Moneda utilizada: `PEN`, `USD`, `EUR` |
 | `start_date` | `date` | Inicio del periodo de la línea |
 | `end_date` | `date` | Fin del periodo de la línea |
-
-El backend valida adicionalmente que:
-
-- no se repita el mismo `service_id` dentro del mismo contrato
-- todas las líneas usen la misma moneda
-- las fechas de cada linea queden dentro del rango del documento padre
+| `created_at` | `timestamptz` | Fecha de creacion |
 
 ## `public.conversations`
 

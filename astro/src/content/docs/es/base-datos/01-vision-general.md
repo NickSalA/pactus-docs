@@ -28,7 +28,9 @@ Las tablas relacionales actualmente relevantes para el producto son las siguient
 | `users` | Usuario funcional vinculado a Auth |
 | `documents` | Cabecera documental y referencia al archivo |
 | `services` | Catálogo de servicios por organización |
-| `documents_services` | Lineas economicas y temporales por contrato |
+| `company_contracts` | Extension corporativa para contratos de empresa |
+| `labor_contracts` | Extension laboral para contratos de trabajo |
+| `company_contract_services` | Lineas de servicio por contrato corporativo |
 | `conversations` | Historial visible del chat del producto |
 | `document_templates` | Plantillas por organizacion |
 | `template_formats` | Catálogo de formatos de plantilla |
@@ -55,7 +57,9 @@ La vinculación entre ambas capas se hace con `public.users.supabase_user_id`, l
 El sistema no concentra toda la información contractual en una sola tabla:
 
 - `public.documents` guarda la cabecera del contrato
-- `public.documents_services` guarda el detalle económico por línea de servicio
+- `public.company_contracts` guarda la extensión corporativa (RUC, cliente)
+- `public.labor_contracts` guarda la extensión laboral (trabajador, salario, posición)
+- `public.company_contract_services` guarda el detalle económico por línea de servicio (solo para contratos corporativos)
 - `public.services` define el catálogo reutilizable
 - `public.document_folders` clasifica documentos por rol
 - `storage` conserva el archivo binario asociado
@@ -86,7 +90,7 @@ El flujo relacional principal de la aplicación puede leerse así:
 2. Supabase gestiona identidad y sesión en `auth`.
 3. La aplicación vincula esa identidad con `public.users` y su `organization_id`.
 4. Las carpetas y el catálogo de servicios se resuelven dentro de la organización actual.
-5. Los contratos se registran en `public.documents` y sus líneas viven en `public.documents_services`.
+5. Los contratos se registran en `public.documents`. Los contratos corporativos tienen extension en `public.company_contracts` y lineas de servicio en `public.company_contract_services`. Los contratos laborales tienen extension en `public.labor_contracts`.
 6. El archivo del contrato se guarda en Supabase Storage y queda referenciado desde `file_path` y `file_name`.
 7. Las plantillas viven en `public.document_templates` y se relacionan opcionalmente con `public.template_formats`.
 8. Las reglas de alerta viven en `public.notification_rules` y el historial de envíos en `public.notification_send_logs`.
@@ -99,7 +103,8 @@ La API no expone siempre las tablas exactamente como se persisten. En varios cas
 Los ajustes más importantes son estos:
 
 - los enums documentales se almacenan en inglés: `COMPANY`, `LABOR`, `DRAFT`, `ACTIVE`, etc.
-- el detalle económico principal vive en `documents_services`, no en `documents`
+- el detalle económico de contratos corporativos vive en `company_contract_services`, no en `documents`
+- los contratos laborales guardan su información salarial en `labor_contracts`
 - el backend también conserva información resumida dentro de `documents.form_data` para ciertas consultas
 - `document_templates.content` guarda una estructura rica de plantilla, incluyendo `fields`, `operational_fields` y, cuando aplica, `contract_date_mapping`
 - el archivo del contrato no se entrega de forma directa desde Storage; el backend genera URLs firmadas temporales
