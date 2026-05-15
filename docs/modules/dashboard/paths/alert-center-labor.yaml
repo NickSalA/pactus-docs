@@ -1,0 +1,26 @@
+get:
+  tags:
+    - Dashboards
+  summary: Obtener centro de alertas de contratos laborales
+  operationId: getLaborAlertCenter
+  responses:
+    '200':
+      description: Categorías de alertas para contratos laborales.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/AlertCategory'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Sin permisos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

@@ -1,0 +1,152 @@
+TopRankingSortBy:
+  type: string
+  enum:
+    - volume
+    - value
+  description: Criterio de ordenamiento para rankings.
+
+AreaChartYAxis:
+  type: object
+  description: Metadatos del eje Y consumidos por el gráfico del frontend.
+  properties:
+    format:
+      type: string
+      default: currency
+    labels:
+      type: array
+      items:
+        type: number
+        format: float
+
+AreaChartPoint:
+  type: object
+  description: Un punto del gráfico para datos históricos o forecast.
+  properties:
+    x:
+      type: string
+    y:
+      type: number
+      format: float
+    is_forecast:
+      type: boolean
+      default: false
+
+AreaChartSeries:
+  type: object
+  description: Una serie de datos del gráfico.
+  properties:
+    currency:
+      type: string
+    name:
+      type: string
+    data:
+      type: array
+      items:
+        $ref: '#/AreaChartPoint'
+
+AreaChartProps:
+  type: object
+  description: Propiedades del gráfico retornadas en un solo payload.
+  properties:
+    title:
+      type: string
+    subtitle:
+      type: string
+    y_axis:
+      $ref: '#/AreaChartYAxis'
+    threshold_date:
+      type: string
+      format: date-time
+    series:
+      type: array
+      items:
+        $ref: '#/AreaChartSeries'
+
+AreaChartResponse:
+  type: object
+  description: Respuesta para endpoints de gráficos de área.
+  properties:
+    props:
+      $ref: '#/AreaChartProps'
+
+AlertColor:
+  type: object
+  description: Colores visuales para una categoría de alerta.
+  properties:
+    accent:
+      type: string
+    bg:
+      type: string
+
+AlertItem:
+  type: object
+  description: Contrato mostrado bajo una categoría de alerta.
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    detail:
+      type: string
+      nullable: true
+    status:
+      type: string
+
+AlertCategory:
+  type: object
+  description: Categoría de alerta con contador y lista de previsualización.
+  properties:
+    label:
+      type: string
+    color:
+      $ref: '#/AlertColor'
+    due_to:
+      type: integer
+      nullable: true
+    count:
+      type: integer
+    items:
+      type: array
+      items:
+        $ref: '#/AlertItem'
+
+RecentContractResponse:
+  type: object
+  description: Tarjeta de contrato reciente.
+  properties:
+    id:
+      type: integer
+    title:
+      type: string
+    services:
+      type: array
+      items:
+        type: string
+    name:
+      type: string
+    dates:
+      type: string
+
+TopCompanyResponse:
+  type: object
+  description: Fila del ranking de empresas.
+  properties:
+    name:
+      type: string
+    contracts:
+      type: integer
+    amount:
+      type: number
+      format: float
+
+TopServiceResponse:
+  type: object
+  description: Fila del ranking de servicios.
+  properties:
+    name:
+      type: string
+    quantity:
+      type: integer
+    amount:
+      type: number
+      format: float

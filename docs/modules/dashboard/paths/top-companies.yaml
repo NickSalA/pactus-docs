@@ -1,0 +1,39 @@
+get:
+  tags:
+    - Dashboards
+  summary: Obtener ranking de empresas contrapartes
+  operationId: getTopCompanies
+  parameters:
+    - name: currency
+      in: query
+      required: false
+      schema:
+        $ref: '../../documents/schemas/schema.yaml#/CurrencyType'
+      description: Filtrar ranking por una moneda específica.
+    - name: sort_by
+      in: query
+      required: false
+      schema:
+        $ref: '../schemas/schema.yaml#/TopRankingSortBy'
+      description: Criterio de ordenamiento (volume o value).
+  responses:
+    '200':
+      description: Ranking de empresas contrapartes.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/TopCompanyResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Sin permisos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
