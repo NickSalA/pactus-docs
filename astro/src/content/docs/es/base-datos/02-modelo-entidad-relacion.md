@@ -15,27 +15,30 @@ La imagen del MER puede actualizarse por separado. La vista textual y las relaci
 
 <div style="display: flex; justify-content: center;">
   <pre style="display: inline-block; text-align: left; white-space: pre; overflow-x: auto;"><code>                    auth.users
-                        |
-                        | relacion logica: public.users.supabase_user_id
-                        v
-                  public.users ---------> public.conversations
-                      |
-                      +-----------------> public.document_folders
-                      |
-                      v
-                public.organizations
-          +------------+-----------+-----------+-----------+-----------+
-          |            |           |           |           |           |
-          v            v           v           v           v           v
-    public.documents  public.services  public.document_templates  public.notification_rules  public.notification_send_logs
-          |                |                     ^
-          |                |                     |
-          v                +-------> public.documents_services
-    public.document_folders
+                         |
+                         | relacion logica: public.users.supabase_user_id
+                         v
+                   public.users ---------> public.conversations
+                       |
+                       +-----------------> public.document_folders
+                       |
+                       v
+                 public.organizations
+           +------------+-----------+-----------+-----------+-----------+
+           |            |           |           |           |           |
+           v            v           v           v           v           v
+     public.documents  public.services  public.document_templates  public.notification_rules  public.notification_send_logs
+           |
+           +-------------> public.company_contracts (type=COMPANY)
+           |                        |
+           |                        v
+           |                public.company_contract_services
+           |
+           +-------------> public.labor_contracts (type=LABOR)
 
-    public.template_formats --------> public.document_templates
-    public.documents --------------> storage.objects (relacion por file_path)
-  </code></pre>
+     public.template_formats --------> public.document_templates
+     public.documents --------------> storage.objects (relacion por file_path)
+   </code></pre>
 </div>
 
 ## Relaciones Principales
@@ -65,18 +68,17 @@ Cada carpeta registra en `created_by` el usuario que la creó. Esto permite most
 
 La relación es opcional mediante `documents.folder_id`. Un contrato puede quedar sin carpeta o asignarse a una carpeta visible para el rol propietario de esa carpeta.
 
-### `documents` -> `documents_services`
+### `documents` -> `company_contracts`
 
-`documents_services` es una tabla intermedia enriquecida. No solo enlaza un documento con un servicio, sino que también persiste:
+`company_contracts` es la tabla de extension para contratos corporativos. Almacena el RUC y el nombre del cliente asociado con un contrato de tipo `COMPANY`. La relación es uno a uno mediante `document_id`.
 
-- descripción de la línea
-- valor monetario
-- moneda
-- fechas propias de esa línea contractual
+### `documents` -> `labor_contracts`
 
-### `services` -> `documents_services`
+`labor_contracts` es la tabla de extension para contratos laborales. Almacena el nombre del trabajador, su documento, el cargo, el salario y la modalidad contractual. La relación es uno a uno mediante `document_id`.
 
-Un servicio del catálogo puede aparecer en varios contratos. Esto evita redefinir el mismo concepto contractual en cada documento.
+### `company_contracts` -> `company_contract_services`
+
+`company_contract_services` enlaza un contrato corporativo con servicios del catálogo. Además de la referencia, persiste la descripción, el valor monetario, la moneda y las fechas propias de cada línea contractual.
 
 ### `template_formats` -> `document_templates`
 
@@ -106,7 +108,7 @@ No hay foreign key física entre negocio y Storage. La aplicación enlaza ambas 
 
 - `public.documents.file_path`
 - `public.documents.file_name`
-- bucket `contracts`
+- bucket `documents`
 
 ### `notification_rules` + `documents` -> `sync_document_states()`
 

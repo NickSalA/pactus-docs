@@ -44,12 +44,12 @@ En startup se ejecutan tres tareas principales:
 
 1. `configure_embedding()` para preparar la capa de embeddings.
 2. `build_http_client()` para disponer de un cliente HTTP reutilizable.
-3. `init_checkpointer()` para inicializar el pool asociado a la persistencia conversacional del agente.
+3. `init_checkpointer()` para inicializar el pool de persistencia del agente.
 
 En shutdown se liberan los recursos abiertos:
 
 - cierre del cliente HTTP compartido
-- cierre del pool del checkpointer
+- cierre del pool de persistencia
 
 ## Dependencias Operativas del Sistema
 

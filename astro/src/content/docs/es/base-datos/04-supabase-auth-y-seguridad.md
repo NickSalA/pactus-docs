@@ -88,30 +88,6 @@ El acceso a los recursos de la aplicacion se organiza a partir de:
 
 Este enfoque permite que la aplicación no dependa solo del proveedor de autenticación para decidir qué puede hacer un usuario dentro del sistema.
 
-## Estado Actual de RLS
-
-En la implementación actual, las tablas de negocio del esquema `public` **no tienen Row Level Security habilitado**.
-
-Las tablas afectadas dentro del dominio documentado son:
-
-- `organizations`
-- `users`
-- `documents`
-- `services`
-- `documents_services`
-- `conversations`
-- `document_templates`
-- `template_formats`
-- `document_folders`
-- `notification_rules`
-- `notification_send_logs`
-
-Esto significa que, en esta versión, el aislamiento de negocio depende principalmente de la lógica del backend y de la asociación del usuario con su `organization_id`.
-
-### Implicancia operativa
-
-Mientras no existan políticas RLS, el diseño asume que el acceso a la información del dominio pasa por el backend y no por acceso directo del cliente a las tablas expuestas por Supabase.
-
 ## Estado de la Configuración Actual
 
 En la implementación actual:
@@ -120,7 +96,7 @@ En la implementación actual:
 - las tablas de negocio viven en `public`
 - la vinculación entre `auth.users` y `public.users` se hace con `supabase_user_id`
 - el control de permisos de negocio se resuelve en backend
-- no hay políticas RLS activas para las tablas del dominio documentado
+- el acceso a archivos usa URLs firmadas temporales generadas por el backend
 
 ## Criterio de Diseño
 
@@ -132,4 +108,4 @@ Con esa base, ContractIA puede:
 - asociar cada usuario a una organización
 - controlar roles de aplicación sin depender del esquema interno de Auth
 - decidir si un usuario recibe alertas contractuales con `receives_notifications`
-- mantener una estructura lista para endurecer el control de acceso con RLS en iteraciones posteriores
+- controlar el acceso a los recursos de negocio desde el backend, usando URLs firmadas para archivos documentales
