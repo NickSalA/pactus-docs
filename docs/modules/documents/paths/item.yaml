@@ -27,7 +27,7 @@ get:
 
 patch:
   summary: Actualizar un documento
-  description: Recibe un campo form-data `document` con JSON serializado y opcionalmente un nuevo archivo.
+  description: Recibe un campo form-data `document` con JSON serializado y opcionalmente un nuevo archivo. Los datos específicos deben enviarse en `company_contract` o `labor_contract` según el `contract_type`.
   operationId: updateDocument
   tags:
     - Documentos

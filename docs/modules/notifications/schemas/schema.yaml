@@ -95,4 +95,14 @@ SendEmailAlertsResponse:
 
 CronSendEmailsResponse:
   type: object
-  additionalProperties: true
+  properties:
+    emails_sent:
+      type: integer
+    orgs_processed:
+      type: integer
+    orgs_skipped:
+      type: integer
+  required:
+    - emails_sent
+    - orgs_processed
+    - orgs_skipped

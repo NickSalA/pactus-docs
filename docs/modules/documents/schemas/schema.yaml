@@ -3,7 +3,7 @@ DocumentType:
   enum:
     - COMPANY
     - LABOR
-  description: Tipo de documento permitido por el backend.
+  description: Tipo funcional de contrato usado para permisos y ruteo.
 
 DocumentState:
   type: string
@@ -25,6 +25,7 @@ CurrencyType:
 
 DocumentServiceItemRequest:
   type: object
+  description: Servicio asociado a un contrato de empresa.
   properties:
     service_id:
       type: integer
@@ -61,19 +62,112 @@ DocumentServiceItemResponse:
       required:
         - id
 
-CreateDocumentDraftRequest:
+CompanyContractRequest:
   type: object
+  description: Datos específicos de contratos de empresa.
   properties:
-    name:
+    ruc:
       type: string
       nullable: true
+      description: RUC de la contraparte empresa.
     client:
       type: string
       nullable: true
+      description: Nombre de la contraparte empresa.
+
+CompanyContractResponse:
+  allOf:
+    - $ref: '#/CompanyContractRequest'
+    - type: object
+      properties:
+        id:
+          type: integer
+        document_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - document_id
+        - created_at
+        - updated_at
+
+LaborContractRequest:
+  type: object
+  description: Datos específicos de contratos laborales.
+  properties:
+    worker_name:
+      type: string
+      nullable: true
+    worker_document_number:
+      type: string
+      nullable: true
+    position:
+      type: string
+      nullable: true
+    salary_value:
+      type: number
+      format: float
+      minimum: 0
+      nullable: true
+    salary_currency:
+      allOf:
+        - $ref: '#/CurrencyType'
+      nullable: true
+    salary_periodicity:
+      type: string
+      nullable: true
+    contract_modality:
+      type: string
+      nullable: true
+
+LaborContractResponse:
+  allOf:
+    - $ref: '#/LaborContractRequest'
+    - type: object
+      properties:
+        id:
+          type: integer
+        document_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - document_id
+        - created_at
+        - updated_at
+
+CreateDocumentDraftRequest:
+  type: object
+  properties:
     type:
+      type: string
+      nullable: true
+      description: Tipo técnico/origen del documento, por ejemplo manual_upload o template.
+    contract_type:
       allOf:
         - $ref: '#/DocumentType'
       nullable: true
+      description: Tipo funcional de contrato usado para permisos y clasificación.
+    name:
+      type: string
+      nullable: true
+      deprecated: true
+      description: Campo legacy aceptado durante la transición.
+    client:
+      type: string
+      nullable: true
+      deprecated: true
+      description: Campo legacy aceptado durante la transición.
     start_date:
       type: string
       format: date
@@ -86,6 +180,14 @@ CreateDocumentDraftRequest:
       type: object
       additionalProperties: true
       default: {}
+    company_contract:
+      allOf:
+        - $ref: '#/CompanyContractRequest'
+      nullable: true
+    labor_contract:
+      allOf:
+        - $ref: '#/LaborContractRequest'
+      nullable: true
     state:
       allOf:
         - $ref: '#/DocumentState'
@@ -96,6 +198,7 @@ CreateDocumentDraftRequest:
       nullable: true
     service_items:
       type: array
+      description: Servicios asociados al contrato de empresa. No aplica para contratos laborales.
       items:
         $ref: '#/DocumentServiceItemRequest'
       default: []
@@ -109,7 +212,7 @@ DocumentMultipartCreateRequest:
     document:
       type: string
       description: JSON serializado con la forma de CreateDocumentDraftRequest.
-      example: '{"name":"Contrato Alpha","client":"Acme","type":"COMPANY","form_data":{}}'
+      example: '{"contract_type":"COMPANY","company_contract":{"client":"Acme S.A.C.","ruc":"20600000001"},"form_data":{"value":1200,"currency":"PEN"}}'
   required:
     - file
 
@@ -123,22 +226,29 @@ DocumentMultipartUpdateRequest:
     document:
       type: string
       description: JSON serializado con campos parciales de UpdateDocumentRequest.
+      example: '{"contract_type":"LABOR","labor_contract":{"worker_name":"Ana Perez","position":"Analista"}}'
   required:
     - document
 
 UpdateDocumentRequest:
   type: object
   properties:
-    name:
-      type: string
-      nullable: true
-    client:
-      type: string
-      nullable: true
     type:
+      type: string
+      nullable: true
+      description: Tipo técnico/origen del documento.
+    contract_type:
       allOf:
         - $ref: '#/DocumentType'
       nullable: true
+    name:
+      type: string
+      nullable: true
+      deprecated: true
+    client:
+      type: string
+      nullable: true
+      deprecated: true
     start_date:
       type: string
       format: date
@@ -164,22 +274,24 @@ UpdateDocumentRequest:
       nullable: true
       items:
         $ref: '#/DocumentServiceItemRequest'
+    company_contract:
+      allOf:
+        - $ref: '#/CompanyContractRequest'
+      nullable: true
+    labor_contract:
+      allOf:
+        - $ref: '#/LaborContractRequest'
+      nullable: true
 
 DocumentResponse:
   type: object
   properties:
     id:
       type: integer
-    name:
-      type: string
-      nullable: true
-    client:
-      type: string
-      nullable: true
     type:
-      allOf:
-        - $ref: '#/DocumentType'
+      type: string
       nullable: true
+      description: Tipo técnico/origen del documento.
     start_date:
       type: string
       format: date
@@ -208,6 +320,14 @@ DocumentResponse:
       type: array
       items:
         $ref: '#/DocumentServiceItemResponse'
+    company_contract:
+      allOf:
+        - $ref: '#/CompanyContractResponse'
+      nullable: true
+    labor_contract:
+      allOf:
+        - $ref: '#/LaborContractResponse'
+      nullable: true
     created_at:
       type: string
       format: date-time
@@ -216,17 +336,6 @@ DocumentResponse:
       format: date-time
   required:
     - id
-    - name
-    - client
-    - type
-    - start_date
-    - end_date
-    - form_data
-    - state
-    - folder_id
-    - file_path
-    - file_name
-    - service_items
     - created_at
     - updated_at
 

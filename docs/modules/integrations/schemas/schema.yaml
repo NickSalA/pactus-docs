@@ -50,8 +50,19 @@ DriveImportFile:
       minLength: 1
     document:
       $ref: '../../documents/schemas/schema.yaml#/CreateDocumentDraftRequest'
+      description: Metadata de creación alineada al endpoint de documentos. Puede incluir `contract_type`, `company_contract` o `labor_contract`.
   required:
     - file_id
+  example:
+    file_id: google-drive-file-id
+    document:
+      contract_type: COMPANY
+      company_contract:
+        client: Acme S.A.C.
+        ruc: '20600000001'
+      form_data:
+        value: 1200
+        currency: PEN
 
 ImportRequest:
   type: object
