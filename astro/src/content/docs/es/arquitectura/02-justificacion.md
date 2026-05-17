@@ -27,7 +27,7 @@ A continuación, se detalla la justificación técnica de cada componente de la 
 
 ## Capa de Persistencia
 
-* **PostgreSQL:** Desplegado como base de datos relacional central. Es la tecnología que mejor se integra actualmente con los ecosistemas de IA, ofreciendo la fiabilidad necesaria para almacenar la gestión de usuarios, metadatos y los *checkpoints* de LangGraph.
+* **PostgreSQL:** Desplegado como base de datos relacional central. Es la tecnología que mejor se integra actualmente con los ecosistemas de IA, ofreciendo la fiabilidad necesaria para almacenar la gestión de usuarios y metadatos.
 * **Qdrant Cloud:** Seleccionada por ser la base de datos vectorial más robusta y eficiente para entornos de producción, encargada de almacenar los vectores de Voyage AI y ejecutar las búsquedas semánticas de las cláusulas a alta velocidad.
 
 ### Alternativas Evaluadas y Descartadas

@@ -215,7 +215,7 @@ Extension para contratos laborales (tipo `LABOR`). Almacena los datos del trabaj
 | `salary_value` | `float8` | Monto del salario |
 | `salary_currency` | `currency_type` | Moneda: `PEN`, `USD`, `EUR` |
 | `salary_periodicity` | `varchar` | Periodicidad del pago |
-| `contract_modality` | `text` | Modalidad del contrato |
+| `contract_modality` | `varchar` | Modalidad del contrato |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
@@ -378,8 +378,7 @@ La base de datos restringe `owner_role` a los valores `HR` y `MANAGER`. El backe
 
 ### Restricciones relevantes
 
-- Unicidad por `organization_id` + nombre normalizado de carpeta
-- Unicidad por `organization_id` + `owner_role` + nombre normalizado
+- Unicidad por `organization_id` + `owner_role` + `lower(name)`
 
 ## `public.notification_rules`
 
@@ -415,8 +414,9 @@ Además, la función `public.sync_document_states` usa la ventana activa más am
 ### Restricciones relevantes
 
 - `days_before_due` > 0
-- Unicidad por `organization_id` + `document_id` cuando `document_id` no es null (regla por contrato)
-- Unicidad por `organization_id` cuando `document_id` es null (regla organizacional)
+- Unicidad por `document_id` + `days_before_due` cuando `document_id` IS NOT NULL (regla por contrato)
+- Unicidad por `organization_id` + `days_before_due` cuando `document_id` IS NULL (regla organizacional)
+- Unicidad calculada: `organization_id` + `coalesce(document_id, 0)` + `days_before_due`
 
 ## `public.notification_send_logs`
 
