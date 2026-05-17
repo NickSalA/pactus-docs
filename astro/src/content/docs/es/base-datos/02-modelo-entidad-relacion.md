@@ -70,7 +70,7 @@ La relación es opcional mediante `documents.folder_id`. Un contrato puede queda
 
 ### `documents` -> `company_contracts`
 
-`company_contracts` es la tabla de extension para contratos corporativos. Almacena el RUC y el nombre del cliente associated con un contrato de tipo `COMPANY`. La relación es uno a uno mediante `document_id`.
+`company_contracts` es la tabla de extension para contratos corporativos. Almacena el RUC y el nombre del cliente asociado con un contrato de tipo `COMPANY`. La relación es uno a uno mediante `document_id`.
 
 ### `documents` -> `labor_contracts`
 
@@ -108,7 +108,7 @@ No hay foreign key física entre negocio y Storage. La aplicación enlaza ambas 
 
 - `public.documents.file_path`
 - `public.documents.file_name`
-- bucket `contracts`
+- bucket `documents`
 
 ### `notification_rules` + `documents` -> `sync_document_states()`
 

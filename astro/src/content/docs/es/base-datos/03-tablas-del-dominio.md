@@ -172,6 +172,10 @@ Un servicio del catálogo puede aparecer en varias líneas de contrato corporati
 | `created_at` | `timestamptz` | Fecha de creación |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
+### Restricciones relevantes
+
+- Unicidad por `organization_id` + nombre normalizado de servicio
+
 ## `public.company_contracts`
 
 Extension para contratos corporativos (tipo `COMPANY`). Almacena el RUC y el nombre del cliente asociado al contrato.
@@ -210,7 +214,7 @@ Extension para contratos laborales (tipo `LABOR`). Almacena los datos del trabaj
 | `position` | `varchar` | Cargo o puesto |
 | `salary_value` | `float8` | Monto del salario |
 | `salary_currency` | `currency_type` | Moneda: `PEN`, `USD`, `EUR` |
-| `salary_periodicity` | `text` | Periodicidad del pago |
+| `salary_periodicity` | `varchar` | Periodicidad del pago |
 | `contract_modality` | `text` | Modalidad del contrato |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
@@ -237,6 +241,13 @@ Lineas de servicio para contratos corporativos. Enlaza un contrato de empresa co
 | `start_date` | `date` | Inicio del periodo de la línea |
 | `end_date` | `date` | Fin del periodo de la línea |
 | `created_at` | `timestamptz` | Fecha de creacion |
+| `updated_at` | `timestamptz` | Fecha de actualizacion |
+
+### Restricciones relevantes
+
+- `value` >= 0
+- `end_date` >= `start_date`
+- Unicidad por `company_contract_id` + `service_id`
 
 ## `public.conversations`
 
@@ -365,6 +376,11 @@ Representa carpetas documentales por organización y por rol propietario. Sirve 
 
 La base de datos restringe `owner_role` a los valores `HR` y `MANAGER`. El backend usa ese dato para controlar visibilidad y administración de carpetas.
 
+### Restricciones relevantes
+
+- Unicidad por `organization_id` + nombre normalizado de carpeta
+- Unicidad por `organization_id` + `owner_role` + nombre normalizado
+
 ## `public.notification_rules`
 
 Define las ventanas de alerta de vencimiento para una organización o para un contrato puntual.
@@ -395,6 +411,12 @@ El backend resuelve las alertas con este orden:
 3. fallback operativo si no existe configuración
 
 Además, la función `public.sync_document_states` usa la ventana activa más amplia para decidir cuándo un contrato pasa a `EXPIRING_SOON`.
+
+### Restricciones relevantes
+
+- `days_before_due` > 0
+- Unicidad por `organization_id` + `document_id` cuando `document_id` no es null (regla por contrato)
+- Unicidad por `organization_id` cuando `document_id` es null (regla organizacional)
 
 ## `public.notification_send_logs`
 
