@@ -1,7 +1,22 @@
 ConversationMessage:
   type: object
-  additionalProperties: true
-  description: Mensaje persistido en la conversación. El contenido exacto depende del flujo del agente.
+  properties:
+    role:
+      type: string
+      enum:
+        - user
+        - bot
+    content:
+      type: string
+    timestamp:
+      type: string
+      format: date-time
+  required:
+    - role
+    - content
+    - timestamp
+
+
 
 ConversationRead:
   type: object
