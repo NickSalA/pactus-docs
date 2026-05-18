@@ -221,6 +221,7 @@ TemplateDraftMultipartRequest:
     request:
       type: string
       description: JSON serializado con la forma de GenerateTemplateDraftRequest.
+      example: '{"name": "Mi Contrato", "format_code": "management"}'
   required:
     - request
 
@@ -245,6 +246,44 @@ PersistedTemplateDraftResponse:
     - warnings
     - source
     - usage
+  example:
+    template:
+      id: 72
+      organization_id: 2
+      name: "Mi Primer Contrato"
+      description: "Contrato de prueba"
+      document_type: "COMPANY"
+      template_format_id: 1
+      format_code: "management"
+      format_label: "Contrato de Management"
+      content:
+        body_md: "## CONTRATO DE MANAGEMENT\n\nConste por el presente documento..."
+        fields:
+          - key: "representante_cargo"
+            label: "Cargo del representante"
+            type: "text"
+            required: true
+            placeholder: "Ej. Gerente General"
+        operational_fields: []
+        version: "1.0"
+        contract_date_mapping:
+          start_date_field: "fecha_inicio_contrato"
+          end_date_field: "fecha_fin_contrato"
+      created_at: "2026-05-18T01:18:08.619Z"
+      state: "DRAFT"
+    warnings:
+      - "Cláusulas de referencia no preservadas: CUARTA, QUINTA, SEXTA..."
+    source:
+      mode: "file_reference"
+      filename: "contrato 003.pdf"
+      generation_mode: "adaptive"
+      reference_mode: "compact"
+      detected_document_type: "COMPANY"
+      clause_count: 10
+    usage:
+      input_tokens: 3268
+      output_tokens: 9284
+      total_tokens: 12552
 
 PreviewTemplateRequest:
   type: object

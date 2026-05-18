@@ -2,6 +2,13 @@ post:
   tags:
     - Plantillas
   summary: Generar y guardar borrador de plantilla
+  description: |
+    Genera una nueva plantilla (en estado DRAFT) de forma dinámica, utilizando un archivo de base (ej. PDF/Word). 
+    El backend procesa este archivo y extrae automáticamente la estructura, el texto y las variables clave del contrato, creando los `fields` de la plantilla.
+    
+    El resultado en `content.body_md` incluirá referencias a variables (ej. `{{ representante_cargo }}`). 
+    En `content.fields` encontrarás el listado dinámico de los campos detectados, listos para ser utilizados por el frontend para renderizar un formulario. 
+    Además, la respuesta contiene los detalles de la extracción en el objeto `source` y cualquier advertencia en `warnings`.
   operationId: generateTemplateDraft
   requestBody:
     required: true

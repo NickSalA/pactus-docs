@@ -8,6 +8,15 @@ parameters:
 
 post:
   summary: Generar contrato a partir de plantilla
+  description: |
+    Genera el documento final del contrato a partir de una plantilla dada.
+    
+    El `requestBody` de este endpoint es altamente dinámico. En lugar de recibir un esquema fijo, 
+    espera un objeto JSON plano donde las llaves (`key`) corresponden a los identificadores 
+    definidos en `content.fields` de la plantilla (ej: `"representante_cargo": "Gerente General"`). 
+    
+    El backend toma estos valores dinámicos y los inyecta en el `body_md` de la plantilla para 
+    crear el archivo PDF del contrato, retornando la ruta del documento generado y los `form_data` resueltos.
   operationId: generateTemplateDocument
   tags:
     - Plantillas
@@ -19,6 +28,18 @@ post:
           type: object
           additionalProperties: true
           description: Datos de formulario usados para renderizar la plantilla.
+          example:
+            empleador_razon_social: "Mi Empresa S.A."
+            empleador_ruc: "20123456789"
+            empleador_domicilio: "Av. Principal 123, Lima"
+            representante_cargo: "Gerente General"
+            representante_nombre: "Juan Pérez López"
+            representante_dni: "12345678"
+            consultor_razon_social: "Consultores GM S.A.C."
+            consultor_ruc: "20123456790"
+            duracion_contrato_anos: "3"
+            fecha_inicio_contrato: "2026-06-01"
+            monto_retribucion_mensual: "8000"
   responses:
     '201':
       description: Documento generado.
@@ -26,6 +47,20 @@ post:
         application/json:
           schema:
             $ref: '../schemas/schema.yaml#/GeneratedDocumentResponse'
+          example:
+            id: 182
+            type: "management"
+            start_date: "2026-06-01"
+            end_date: "2029-05-31"
+            form_data:
+              representante_cargo: "Gerente General"
+              consultor_ruc: "20123456790"
+              empleador_ruc: "20111111111"
+              monto_retribucion_mensual: "8000"
+            state: "PENDING_SIGNATURE"
+            file_path: "orgs/2/company/docs/182/mi_primer_contrato_cliente_1779133792.pdf"
+            file_name: "mi_primer_contrato_cliente_1779133792.pdf"
+            created_at: "2026-05-18T19:50:39.947730Z"
     '400':
       description: Datos inválidos para la plantilla.
       content:
