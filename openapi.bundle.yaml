@@ -1014,6 +1014,13 @@ paths:
       tags:
         - Plantillas
       summary: Generar y guardar borrador de plantilla
+      description: |
+        Genera una nueva plantilla (en estado DRAFT) de forma dinámica, utilizando un archivo de base (ej. PDF/Word). 
+        El backend procesa este archivo y extrae automáticamente la estructura, el texto y las variables clave del contrato, creando los `fields` de la plantilla.
+
+        El resultado en `content.body_md` incluirá referencias a variables (ej. `{{ representante_cargo }}`). 
+        En `content.fields` encontrarás el listado dinámico de los campos detectados, listos para ser utilizados por el frontend para renderizar un formulario. 
+        Además, la respuesta contiene los detalles de la extracción en el objeto `source` y cualquier advertencia en `warnings`.
       operationId: generateTemplateDraft
       requestBody:
         required: true
@@ -1119,6 +1126,15 @@ paths:
         description: ID de la plantilla.
     post:
       summary: Generar contrato a partir de plantilla
+      description: |
+        Genera el documento final del contrato a partir de una plantilla dada.
+
+        El `requestBody` de este endpoint es altamente dinámico. En lugar de recibir un esquema fijo, 
+        espera un objeto JSON plano donde las llaves (`key`) corresponden a los identificadores 
+        definidos en `content.fields` de la plantilla (ej: `"representante_cargo": "Gerente General"`). 
+
+        El backend toma estos valores dinámicos y los inyecta en el `body_md` de la plantilla para 
+        crear el archivo PDF del contrato, retornando la ruta del documento generado y los `form_data` resueltos.
       operationId: generateTemplateDocument
       tags:
         - Plantillas
@@ -1130,6 +1146,18 @@ paths:
               type: object
               additionalProperties: true
               description: Datos de formulario usados para renderizar la plantilla.
+              example:
+                empleador_razon_social: Mi Empresa S.A.
+                empleador_ruc: '20123456789'
+                empleador_domicilio: Av. Principal 123, Lima
+                representante_cargo: Gerente General
+                representante_nombre: Juan Pérez López
+                representante_dni: '12345678'
+                consultor_razon_social: Consultores GM S.A.C.
+                consultor_ruc: '20123456790'
+                duracion_contrato_anos: '3'
+                fecha_inicio_contrato: '2026-06-01'
+                monto_retribucion_mensual: '8000'
       responses:
         '201':
           description: Documento generado.
@@ -1137,6 +1165,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DocumentResponse'
+              example:
+                id: 182
+                type: management
+                start_date: '2026-06-01'
+                end_date: '2029-05-31'
+                form_data:
+                  representante_cargo: Gerente General
+                  consultor_ruc: '20123456790'
+                  empleador_ruc: '20111111111'
+                  monto_retribucion_mensual: '8000'
+                state: PENDING_SIGNATURE
+                file_path: orgs/2/company/docs/182/mi_primer_contrato_cliente_1779133792.pdf
+                file_name: mi_primer_contrato_cliente_1779133792.pdf
+                created_at: '2026-05-18T19:50:39.947730Z'
         '400':
           description: Datos inválidos para la plantilla.
           content:
@@ -1602,8 +1644,21 @@ components:
         - created_at
     ConversationMessage:
       type: object
-      additionalProperties: true
-      description: Mensaje persistido en la conversación. El contenido exacto depende del flujo del agente.
+      properties:
+        role:
+          type: string
+          enum:
+            - user
+            - bot
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - role
+        - content
+        - timestamp
     ConversationRead:
       type: object
       properties:
@@ -2402,6 +2457,7 @@ components:
         request:
           type: string
           description: JSON serializado con la forma de GenerateTemplateDraftRequest.
+          example: '{"name": "Mi Contrato", "format_code": "management"}'
       required:
         - request
     TemplateUsage:
@@ -2437,6 +2493,47 @@ components:
         - warnings
         - source
         - usage
+      example:
+        template:
+          id: 72
+          organization_id: 2
+          name: Mi Primer Contrato
+          description: Contrato de prueba
+          document_type: COMPANY
+          template_format_id: 1
+          format_code: management
+          format_label: Contrato de Management
+          content:
+            body_md: |-
+              ## CONTRATO DE MANAGEMENT
+
+              Conste por el presente documento...
+            fields:
+              - key: representante_cargo
+                label: Cargo del representante
+                type: text
+                required: true
+                placeholder: Ej. Gerente General
+            operational_fields: []
+            version: '1.0'
+            contract_date_mapping:
+              start_date_field: fecha_inicio_contrato
+              end_date_field: fecha_fin_contrato
+          created_at: '2026-05-18T01:18:08.619Z'
+          state: DRAFT
+        warnings:
+          - 'Cláusulas de referencia no preservadas: CUARTA, QUINTA, SEXTA...'
+        source:
+          mode: file_reference
+          filename: contrato 003.pdf
+          generation_mode: adaptive
+          reference_mode: compact
+          detected_document_type: COMPANY
+          clause_count: 10
+        usage:
+          input_tokens: 3268
+          output_tokens: 9284
+          total_tokens: 12552
     PreviewTemplateRequest:
       type: object
       properties:
