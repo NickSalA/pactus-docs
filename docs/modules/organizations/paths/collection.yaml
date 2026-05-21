@@ -1,0 +1,102 @@
+get:
+  summary: Listar organizaciones
+  description: Lista todas las organizaciones. Solo accesible por administradores.
+  operationId: listOrganizations
+  tags:
+    - Organizaciones
+  parameters:
+    - name: is_active
+      in: query
+      required: false
+      description: Filtrar por estado de actividad.
+      schema:
+        type: boolean
+        nullable: true
+    - name: name
+      in: query
+      required: false
+      description: Filtrar por nombre.
+      schema:
+        type: string
+        nullable: true
+    - name: ruc
+      in: query
+      required: false
+      description: Filtrar por RUC.
+      schema:
+        type: string
+        nullable: true
+    - name: limit
+      in: query
+      required: false
+      description: Máximo de organizaciones a retornar.
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 1000
+        default: 1000
+    - name: offset
+      in: query
+      required: false
+      description: Número de organizaciones a omitir.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+  responses:
+    '200':
+      description: Organizaciones obtenidas satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationListResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado. Se requiere rol de administrador.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+
+post:
+  summary: Crear una organización
+  description: Crea una nueva organización. Solo accesible por administradores.
+  operationId: createOrganization
+  tags:
+    - Organizaciones
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/OrganizationCreateRequest'
+  responses:
+    '201':
+      description: Organización creada satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationResponse'
+    '400':
+      description: Datos inválidos o nombre duplicado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado. Se requiere rol de administrador.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'

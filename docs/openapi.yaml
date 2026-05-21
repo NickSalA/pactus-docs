@@ -103,6 +103,10 @@ paths:
     $ref: 'modules/integrations/paths/download.yaml'
   /integrations/drive/import:
     $ref: 'modules/integrations/paths/import.yaml'
+  /organizations/:
+    $ref: 'modules/organizations/paths/collection.yaml'
+  /organizations/{organization_id}:
+    $ref: 'modules/organizations/paths/item.yaml'
   /organizations/me/members:
     $ref: 'modules/organizations/paths/members.yaml'
   /organizations/me/members/{member_id}/role:

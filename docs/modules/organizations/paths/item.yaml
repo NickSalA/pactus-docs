@@ -1,0 +1,111 @@
+parameters:
+  - name: organization_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID de la organización.
+
+get:
+  summary: Obtener una organización por ID
+  description: Obtiene los detalles de una organización. Los usuarios no administradores solo pueden acceder a su propia organización.
+  operationId: getOrganization
+  tags:
+    - Organizaciones
+  responses:
+    '200':
+      description: Organización obtenida satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado para acceder a esta organización.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+    '404':
+      description: Organización no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
+
+patch:
+  summary: Actualizar una organización
+  description: Actualiza los datos de una organización. Solo accesible por administradores.
+  operationId: updateOrganization
+  tags:
+    - Organizaciones
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/OrganizationUpdateRequest'
+  responses:
+    '200':
+      description: Organización actualizada satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OrganizationResponse'
+    '400':
+      description: Datos inválidos o nombre duplicado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado. Se requiere rol de administrador.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+    '404':
+      description: Organización no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
+
+delete:
+  summary: Eliminar una organización
+  description: Elimina (desactiva) una organización. Solo accesible por administradores.
+  operationId: deleteOrganization
+  tags:
+    - Organizaciones
+  responses:
+    '204':
+      description: Organización eliminada satisfactoriamente.
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado. Se requiere rol de administrador.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+    '404':
+      description: Organización no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/NotFoundError'
