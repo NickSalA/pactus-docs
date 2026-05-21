@@ -9,14 +9,14 @@ post:
     content:
       application/json:
         schema:
-          $ref: 'schemas/schema.yaml#/ChatRequest'
+          $ref: '../schemas/schema.yaml#/ChatRequest'
   responses:
     '200':
       description: Respuesta exitosa.
       content:
         application/json:
           schema:
-            $ref: 'schemas/schema.yaml#/ChatResponse'
+            $ref: '../schemas/schema.yaml#/ChatResponse'
     '401':
       description: No autenticado.
       content:

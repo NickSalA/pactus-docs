@@ -1,0 +1,29 @@
+get:
+  summary: Listar servicios documentales
+  description: Alias de compatibilidad para consumidores legacy del endpoint /documents/services. Devuelve los servicios de catálogo disponibles para la organización del usuario autenticado.
+  operationId: listDocumentServices
+  tags:
+    - Documentos
+  parameters:
+    - name: include_inactive
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+      description: Solo los administradores pueden incluir servicios inactivos.
+  responses:
+    '200':
+      description: Servicios obtenidos satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/DocumentCatalogServiceResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
