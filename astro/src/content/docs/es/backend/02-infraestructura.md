@@ -86,16 +86,16 @@ Esta centralización simplifica la operación porque evita distribuir la configu
 
 Aunque `Settings` define `GLOBAL_PREFIX`, la aplicación actual no lo aplica al registrar routers. Por eso, las rutas reales se montan directamente en raíz:
 
-- `/documents`
-- `/services`
-- `/folders`
 - `/chatbot`
-- `/conversations`
+- `/documents`
+- `/catalog`
+- `/folders`
+- `/users`
 - `/integrations`
 - `/organizations`
 - `/notifications`
 - `/templates`
-- `/user`
+- `/dashboard`
 
 Este detalle es importante porque afecta tanto a OpenAPI como a cualquier consumidor externo de la API.
 

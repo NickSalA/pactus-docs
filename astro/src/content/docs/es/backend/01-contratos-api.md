@@ -30,7 +30,7 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/organizations`
 - `/notifications`
 - `/templates`
-- `/user`
+- `/users`
 
 Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se aplica hoy sobre los routers montados por la aplicación.
 
@@ -38,7 +38,7 @@ Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se a
 
 ### Usuario autenticado
 
-- `GET /user/me`
+- `GET /users/me`
   Devuelve el perfil del usuario autenticado a partir del token Bearer validado contra Supabase.
 
 Respuesta típica:
@@ -174,10 +174,10 @@ Response típica de documento:
 
 ### Conversaciones
 
-- `GET /conversations/user/{user_id}`
+- `GET /chatbot/conversations/user/{user_id}`
   Lista las conversaciones de un usuario concreto. El backend valida que `user_id` coincida con el usuario autenticado.
 
-- `GET /conversations/{conversation_id}`
+- `GET /chatbot/conversations/{conversation_id}`
   Devuelve el detalle de una conversación concreta.
 
 La respuesta real del historial conversacional utiliza mensajes con esta estructura:
@@ -215,16 +215,16 @@ El payload de importación permite adjuntar metadata documental rica, porque cad
 
 ### Catálogo de Servicios
 
-- `GET /services`
+- `GET /catalog`
   Lista el catálogo de servicios de la organización actual.
 
-- `POST /services`
+- `POST /catalog`
   Crea un nuevo servicio de catálogo.
 
-- `PATCH /services/{service_id}`
+- `PATCH /catalog/{service_id}`
   Actualiza un servicio existente.
 
-- `DELETE /services/{service_id}`
+- `DELETE /catalog/{service_id}`
   Elimina un servicio del catálogo.
 
 ### Carpetas
@@ -241,6 +241,23 @@ El payload de importación permite adjuntar metadata documental rica, porque cad
 - `DELETE /folders/{folder_id}`
   Elimina una carpeta si no tiene contratos asociados y si el usuario puede administrarla.
 
+### Organizaciones
+
+- `GET /organizations`
+  Lista todas las organizaciones. Solo accesible por administradores. Soporta filtros por `is_active`, `name`, `ruc` y paginación con `limit`/`offset`.
+
+- `POST /organizations`
+  Crea una nueva organización. Solo accesible por administradores.
+
+- `GET /organizations/{organization_id}`
+  Obtiene los detalles de una organización. Administradores acceden a cualquier organización; usuarios regulares solo a la suya.
+
+- `PATCH /organizations/{organization_id}`
+  Actualiza los datos de una organización. Solo accesible por administradores.
+
+- `DELETE /organizations/{organization_id}`
+  Elimina (desactiva) una organización. Solo accesible por administradores. Retorna 204.
+
 ### Miembros de la Organización
 
 - `GET /organizations/me/members`
@@ -254,6 +271,8 @@ El payload de importación permite adjuntar metadata documental rica, porque cad
 
 - `PATCH /organizations/me/members/{member_id}/notifications`
   Actualiza si un miembro debe recibir alertas contractuales.
+
+> **Documentación completa**: Para flujos de uso, payloads con ejemplos y matriz de permisos, ver [Gestión de Organizaciones](/es/producto/09-organizaciones).
 
 ### Notificaciones
 

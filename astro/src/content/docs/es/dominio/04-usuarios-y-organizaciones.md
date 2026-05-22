@@ -51,11 +51,13 @@ El frontend define `OrganizationMember` como alias de `User`. Los miembros se ad
 | Metodo  | Ruta                                                  | Uso                                        |
 | ------- | ----------------------------------------------------- | ------------------------------------------ |
 | `GET`   | `/organizations/me/members`                           | Listar miembros de la organizacion actual. |
-| `POST`  | `/organizations/me/members`                           | Agregar miembro por email y rol.           |
-| `PATCH` | `/organizations/me/members/{member_id}/role`          | Actualizar rol.                            |
+| `POST`  | `/organizations/me/members`                          | Agregar miembro por email y rol.           |
+| `PATCH` | `/organizations/me/members/{member_id}/role`         | Actualizar rol.                            |
 | `PATCH` | `/organizations/me/members/{member_id}/notifications` | Activar o desactivar alertas por usuario.  |
 
 El cliente frontend usa estos endpoints desde `src/lib/api/organizations.ts`.
+
+> **Documentación completa**: Para el CRUD de organizaciones con payloads, flujos de uso y matriz de permisos, ver [Gestión de Organizaciones](/es/producto/09-organizaciones).
 
 ## Preferencia de Notificaciones
 
