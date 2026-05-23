@@ -26,4 +26,9 @@ jobs:
       - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 👇 Agrega estas líneas modificándolas con tus datos
+          GIT_AUTHOR_NAME: "Matt Garman"
+          GIT_AUTHOR_EMAIL: "matt.garman.broke@gmail.com"
+          GIT_COMMITTER_NAME: "Matt Garman"
+          GIT_COMMITTER_EMAIL: "matt.garman.broke@gmail.com"
         run: npx semantic-release
