@@ -21,9 +21,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Install semantic-release
+      - name: Cache Node modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install semantic-release plugins
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm install -D @semantic-release/changelog @semantic-release/git
       - name: Run semantic-release
         env:
