@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/NickSalA/ContractAI-Docs/compare/v1.0.2...v1.0.3) (2026-05-23)
+
+
+### Bug Fixes
+
+* remove package.json as it is no longer needed for development dependencies ([e4c2811](https://github.com/NickSalA/ContractAI-Docs/commit/e4c2811465f335fd4443a07b327d815a3916ff1e))
+
 ## [1.0.2](https://github.com/NickSalA/ContractAI-Docs/compare/v1.0.1...v1.0.2) (2026-05-23)
 
 
