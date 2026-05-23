@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/NickSalA/ContractAI-Docs/compare/v1.0.3...v1.0.4) (2026-05-23)
+
+
+### Bug Fixes
+
+* update GIT_AUTHOR_EMAIL and GIT_COMMITTER_EMAIL in release workflow ([c8c7344](https://github.com/NickSalA/ContractAI-Docs/commit/c8c7344920f2d5c252df088ecec3fa102d9dc636))
+
 ## [1.0.3](https://github.com/NickSalA/ContractAI-Docs/compare/v1.0.2...v1.0.3) (2026-05-23)
 
 
