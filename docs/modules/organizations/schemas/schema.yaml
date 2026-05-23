@@ -15,6 +15,7 @@ OrganizationResponse:
       format: date-time
     ruc:
       type: string
+      pattern: '^\d{11}$'
       nullable: true
     address:
       type: string
@@ -30,6 +31,7 @@ OrganizationResponse:
       nullable: true
     legal_rep_dni:
       type: string
+      pattern: '^\d{8}$'
       nullable: true
     jurisdiction:
       type: string
@@ -53,6 +55,7 @@ OrganizationResponse:
       nullable: true
     phone:
       type: string
+      pattern: '^\d{9}$'
       nullable: true
   required:
     - id
@@ -61,66 +64,32 @@ OrganizationResponse:
     - created_at
     - updated_at
 
-OrganizationCreateRequest:
+OrganizationProvisionRequest:
   type: object
   properties:
     name:
       type: string
-    ruc:
-      type: string
-      nullable: true
-    address:
-      type: string
-      nullable: true
-    company_type:
-      type: string
-      nullable: true
-    objeto_social:
-      type: string
-      nullable: true
-    legal_rep_name:
-      type: string
-      nullable: true
-    legal_rep_dni:
-      type: string
-      nullable: true
-    jurisdiction:
-      type: string
-      nullable: true
-    city:
-      type: string
-      nullable: true
-    autorizacion_entidad:
-      type: string
-      nullable: true
-    autorizacion_fecha:
-      type: string
-      format: date
-      nullable: true
-    autorizacion_emitida_por:
-      type: string
-      nullable: true
-    email:
+      minLength: 1
+    admin_email:
       type: string
       format: email
-      nullable: true
-    phone:
-      type: string
-      nullable: true
   required:
     - name
+    - admin_email
 
 OrganizationUpdateRequest:
   type: object
   properties:
     name:
       type: string
+      minLength: 1
       nullable: true
     is_active:
       type: boolean
       nullable: true
     ruc:
       type: string
+      pattern: '^\d{11}$'
       nullable: true
     address:
       type: string
@@ -136,6 +105,7 @@ OrganizationUpdateRequest:
       nullable: true
     legal_rep_dni:
       type: string
+      pattern: '^\d{8}$'
       nullable: true
     jurisdiction:
       type: string
@@ -159,6 +129,7 @@ OrganizationUpdateRequest:
       nullable: true
     phone:
       type: string
+      pattern: '^\d{9}$'
       nullable: true
 
 OrganizationListResponse:

@@ -1,6 +1,6 @@
 get:
   summary: Listar organizaciones
-  description: Lista todas las organizaciones. Solo accesible por administradores.
+  description: Lista organizaciones según el alcance del usuario. ADMIN obtiene solo su organización; SUPERADMIN puede listar todas con filtros.
   operationId: listOrganizations
   tags:
     - Organizaciones
@@ -57,15 +57,15 @@ get:
           schema:
             $ref: '../../../schemas/errors.yaml#/ErrorResponse'
     '403':
-      description: No autorizado. Se requiere rol de administrador.
+      description: No autorizado. Solo ADMIN o SUPERADMIN pueden listar organizaciones.
       content:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/ForbiddenError'
 
 post:
-  summary: Crear una organización
-  description: Crea una nueva organización. Solo accesible por administradores.
+  summary: Crear una organización con administrador inicial
+  description: Crea una nueva organización y registra su primer usuario ADMIN local. Solo accesible por SUPERADMIN.
   operationId: createOrganization
   tags:
     - Organizaciones
@@ -74,7 +74,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: '../schemas/schema.yaml#/OrganizationCreateRequest'
+          $ref: '../schemas/schema.yaml#/OrganizationProvisionRequest'
   responses:
     '201':
       description: Organización creada satisfactoriamente.
@@ -83,7 +83,7 @@ post:
           schema:
             $ref: '../schemas/schema.yaml#/OrganizationResponse'
     '400':
-      description: Datos inválidos o nombre duplicado.
+      description: Datos inválidos, organización duplicada o correo de administrador duplicado.
       content:
         application/json:
           schema:
@@ -95,7 +95,7 @@ post:
           schema:
             $ref: '../../../schemas/errors.yaml#/ErrorResponse'
     '403':
-      description: No autorizado. Se requiere rol de administrador.
+      description: No autorizado. Se requiere rol SUPERADMIN.
       content:
         application/json:
           schema:

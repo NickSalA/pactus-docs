@@ -1,6 +1,7 @@
 UserRole:
   type: string
   enum:
+    - SUPERADMIN
     - ADMIN
     - HR
     - MANAGER

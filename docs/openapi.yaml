@@ -103,16 +103,18 @@ paths:
     $ref: 'modules/integrations/paths/download.yaml'
   /integrations/drive/import:
     $ref: 'modules/integrations/paths/import.yaml'
-  /organizations/:
+  /organizations:
     $ref: 'modules/organizations/paths/collection.yaml'
-  /organizations/{organization_id}:
-    $ref: 'modules/organizations/paths/item.yaml'
+  /organizations/me:
+    $ref: 'modules/organizations/paths/me.yaml'
   /organizations/me/members:
     $ref: 'modules/organizations/paths/members.yaml'
   /organizations/me/members/{member_id}/role:
     $ref: 'modules/organizations/paths/member-role.yaml'
   /organizations/me/members/{member_id}/notifications:
     $ref: 'modules/organizations/paths/member-notifications.yaml'
+  /organizations/{organization_id}:
+    $ref: 'modules/organizations/paths/item.yaml'
   /notifications/:
     $ref: 'modules/notifications/paths/collection.yaml'
   /notifications/send-email-alerts:

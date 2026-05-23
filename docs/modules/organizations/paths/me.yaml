@@ -1,15 +1,7 @@
-parameters:
-  - name: organization_id
-    in: path
-    required: true
-    schema:
-      type: integer
-    description: ID de la organización.
-
 get:
-  summary: Obtener una organización por ID
-  description: Obtiene los detalles de una organización. SUPERADMIN puede acceder a cualquier organización; ADMIN solo a su propia organización.
-  operationId: getOrganization
+  summary: Obtener mi organización
+  description: Obtiene la organización asociada al usuario ADMIN autenticado. SUPERADMIN no usa este endpoint para gestión global.
+  operationId: getMyOrganization
   tags:
     - Organizaciones
   responses:
@@ -26,7 +18,7 @@ get:
           schema:
             $ref: '../../../schemas/errors.yaml#/ErrorResponse'
     '403':
-      description: No autorizado para acceder a esta organización.
+      description: No autorizado. Se requiere rol ADMIN.
       content:
         application/json:
           schema:
@@ -39,9 +31,9 @@ get:
             $ref: '../../../schemas/errors.yaml#/NotFoundError'
 
 patch:
-  summary: Actualizar una organización
-  description: Actualiza los datos de una organización. SUPERADMIN puede editar cualquier organización; ADMIN solo puede editar su propia organización.
-  operationId: updateOrganization
+  summary: Actualizar mi organización
+  description: Actualiza la organización asociada al usuario ADMIN autenticado.
+  operationId: updateMyOrganization
   tags:
     - Organizaciones
   requestBody:
@@ -58,7 +50,7 @@ patch:
           schema:
             $ref: '../schemas/schema.yaml#/OrganizationResponse'
     '400':
-      description: Datos inválidos o nombre duplicado.
+      description: Datos inválidos, nombre duplicado o RUC duplicado.
       content:
         application/json:
           schema:
@@ -70,35 +62,7 @@ patch:
           schema:
             $ref: '../../../schemas/errors.yaml#/ErrorResponse'
     '403':
-      description: No autorizado para editar esta organización.
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
-    '404':
-      description: Organización no encontrada.
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/NotFoundError'
-
-delete:
-  summary: Eliminar una organización
-  description: Desactiva una organización mediante soft delete, estableciendo is_active en false. Solo accesible por SUPERADMIN.
-  operationId: deleteOrganization
-  tags:
-    - Organizaciones
-  responses:
-    '204':
-      description: Organización eliminada satisfactoriamente.
-    '401':
-      description: No autenticado.
-      content:
-        application/json:
-          schema:
-            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
-    '403':
-      description: No autorizado. Se requiere rol SUPERADMIN.
+      description: No autorizado. Se requiere rol ADMIN.
       content:
         application/json:
           schema:
