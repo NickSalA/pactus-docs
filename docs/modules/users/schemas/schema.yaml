@@ -42,10 +42,7 @@ UserResponse:
   required:
     - id
     - organization_id
-    - supabase_user_id
     - email
-    - full_name
-    - avatar_url
     - role
     - receives_notifications
     - is_active
