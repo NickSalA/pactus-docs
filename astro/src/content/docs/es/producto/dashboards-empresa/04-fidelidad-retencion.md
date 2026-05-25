@@ -7,6 +7,48 @@ El dashboard de **Fidelidad y Retención B2B** analiza la recurrencia contractua
 
 Este módulo es fundamental para el equipo comercial, ya que permite identificar de forma rápida qué cuentas comerciales tienen relaciones estables, cuáles son clientes de legado, y cuáles presentan riesgo de abandono (Churn).
 
+## Ficha Técnica
+
+### Endpoint
+
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/loyalty/company` |
+| **Rol requerido** | MANAGER, WORKER |
+
+### Lógica de Cálculo
+- **Tasa de Retención Activa:** Clientes B2B con >1 contrato / Total de clientes
+- **Socios de Legado (Key Accounts):** Cuentas con 4 o más contratos acumulados
+- **Riesgo (Churn):** Evalúa la diferencia entre `latest_contract_end` y hoy.
+
+### Respuesta del Endpoint (Ejemplo)
+```json
+{
+  "kpis": {
+    "active_retention_rate": 66.67,
+    "total_unique_clients": 12,
+    "avg_contracts_per_client": 2.83
+  },
+  "tenure_distribution": [
+    { "contracts_count": 1, "clients_count": 4 },
+    { "contracts_count": 4, "clients_count": 2 }
+  ],
+  "renewal_trend": [
+    { "month": "Abr 26", "renewal_rate": 85.71, "total_expired": 7, "total_renewed": 6 }
+  ],
+  "details": [
+    {
+      "client_name": "Globex Corporation",
+      "ruc": "20556677881",
+      "contracts_count": 6,
+      "first_contract_start": "2023-01-15",
+      "latest_contract_end": "2026-12-31"
+    }
+  ]
+}
+```
+
 ## Métricas y KPIs Clave
 
 El dashboard presenta un panel superior con indicadores del estado general del portafolio comercial:

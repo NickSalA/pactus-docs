@@ -7,6 +7,48 @@ El dashboard de **Retención de Talento Laboral** analiza la permanencia de los 
 
 Este módulo provee al área de Recursos Humanos una perspectiva clara sobre las dinámicas de contratación, renovación y fidelidad del personal interno a corto y largo plazo.
 
+## Ficha Técnica
+
+### Endpoint
+
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/retention/labor` |
+| **Rol requerido** | HR |
+
+### Lógica de Cálculo
+- **Tasa de Retención Activa:** Trabajadores con >1 contrato / Total de trabajadores
+- **Antigüedad:** Diferencia entre `first_contract_start` y `latest_contract_end`
+- **Legacy Worker:** Trabajador con antigüedad superior a 2 años
+
+### Respuesta del Endpoint (Ejemplo)
+```json
+{
+  "kpis": {
+    "active_retention_rate": 83.33,
+    "total_unique_workers": 12,
+    "avg_contracts_per_worker": 2.25
+  },
+  "tenure_distribution": [
+    { "contracts_count": 1, "workers_count": 5 },
+    { "contracts_count": 3, "workers_count": 2 }
+  ],
+  "renewal_trend": [
+    { "month": "Dic 25", "renewal_rate": 80.0, "total_expired": 5, "total_renewed": 4 }
+  ],
+  "details": [
+    {
+      "worker_name": "Juan Pérez",
+      "worker_document_number": "12345678",
+      "contracts_count": 3,
+      "first_contract_start": "2024-01-15",
+      "latest_contract_end": "2026-06-30"
+    }
+  ]
+}
+```
+
 ## Métricas y KPIs Clave
 
 El panel principal expone los siguientes indicadores de salud organizacional:

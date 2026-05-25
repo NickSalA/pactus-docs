@@ -7,6 +7,32 @@ El dashboard de **Distribución de Origen de Contratos** visualiza la procedenci
 
 Su objetivo principal es medir la adopción tecnológica y operativa del sistema, contrastando la carga manual frente al uso de automatizaciones.
 
+## Ficha Técnica
+
+### Endpoint
+
+| Propiedad | Valor |
+|-----------|-------|
+| **Método** | GET |
+| **Path** | `/dashboard/origin/labor` |
+| **Rol requerido** | HR |
+
+### Lógica de Cálculo
+- Evalúa el campo de origen/tipo asociado a la entidad del documento.
+- Consolida las subidas manuales, plantillas internas e importaciones desde nubes externas.
+
+### Respuesta del Endpoint (Ejemplo)
+```json
+{
+  "total_contracts": 25,
+  "distribution": [
+    { "origin_type": "Plantilla: Plazo Fijo", "count": 12, "percentage": 48.0 },
+    { "origin_type": "Carga Manual", "count": 8, "percentage": 32.0 },
+    { "origin_type": "Importación: Google Drive", "count": 5, "percentage": 20.0 }
+  ]
+}
+```
+
 ## Métrica Principal y Distribución
 
 El panel despliega el **Total de Contratos** administrados y una gráfica detallada (Donut Chart) que desglosa su procedencia en tres grandes categorías:
