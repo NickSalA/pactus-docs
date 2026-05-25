@@ -56,7 +56,7 @@ Para análisis executives profundos, consulte los módulos de dashboards especia
 | [Dashboards de Trabajador](/es/producto/08-dashboards-trabajador) | Gestión de RRHH, gasto de planilla y alertas | Director RRHH, CFO, Gerente Legal |
 
 Estos módulos proporcionan Ficha Técnica, Guía de Funcionalidad y Valor de Negocio para la toma de decisiones estratégicas.
-
+      
 ## Flujo de Navegación
 
 ```

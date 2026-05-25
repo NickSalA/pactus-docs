@@ -193,3 +193,194 @@ TopServiceResponse:
     - name
     - quantity
     - amount
+
+RetentionKPIs:
+  type: object
+  properties:
+    active_retention_rate:
+      type: number
+      format: float
+    total_unique_workers:
+      type: integer
+    avg_contracts_per_worker:
+      type: number
+      format: float
+  required:
+    - active_retention_rate
+    - total_unique_workers
+    - avg_contracts_per_worker
+
+TenureDistributionPoint:
+  type: object
+  properties:
+    contracts_count:
+      type: integer
+    workers_count:
+      type: integer
+  required:
+    - contracts_count
+    - workers_count
+
+RenewalTrendPoint:
+  type: object
+  properties:
+    month:
+      type: string
+    renewal_rate:
+      type: number
+      format: float
+    total_expired:
+      type: integer
+    total_renewed:
+      type: integer
+  required:
+    - month
+    - renewal_rate
+    - total_expired
+    - total_renewed
+
+RetentionDetail:
+  type: object
+  properties:
+    worker_name:
+      type: string
+    worker_document_number:
+      type: string
+    contracts_count:
+      type: integer
+    first_contract_start:
+      type: string
+      format: date
+    latest_contract_end:
+      type: string
+      format: date
+  required:
+    - worker_name
+    - worker_document_number
+    - contracts_count
+    - first_contract_start
+    - latest_contract_end
+
+RetentionDashboardResponse:
+  type: object
+  properties:
+    kpis:
+      $ref: '#/RetentionKPIs'
+    tenure_distribution:
+      type: array
+      items:
+        $ref: '#/TenureDistributionPoint'
+    renewal_trend:
+      type: array
+      items:
+        $ref: '#/RenewalTrendPoint'
+    details:
+      type: array
+      items:
+        $ref: '#/RetentionDetail'
+  required:
+    - kpis
+    - tenure_distribution
+    - renewal_trend
+    - details
+
+OriginDistributionPoint:
+  type: object
+  properties:
+    origin_type:
+      type: string
+    count:
+      type: integer
+    percentage:
+      type: number
+      format: float
+  required:
+    - origin_type
+    - count
+    - percentage
+
+OriginDashboardResponse:
+  type: object
+  properties:
+    total_contracts:
+      type: integer
+    distribution:
+      type: array
+      items:
+        $ref: '#/OriginDistributionPoint'
+  required:
+    - total_contracts
+    - distribution
+
+LoyaltyKPIs:
+  type: object
+  properties:
+    active_retention_rate:
+      type: number
+      format: float
+    total_unique_clients:
+      type: integer
+    avg_contracts_per_client:
+      type: number
+      format: float
+  required:
+    - active_retention_rate
+    - total_unique_clients
+    - avg_contracts_per_client
+
+LoyaltyTenureDistributionPoint:
+  type: object
+  properties:
+    contracts_count:
+      type: integer
+    clients_count:
+      type: integer
+  required:
+    - contracts_count
+    - clients_count
+
+LoyaltyDetail:
+  type: object
+  properties:
+    client_name:
+      type: string
+    ruc:
+      type: string
+      nullable: true
+    contracts_count:
+      type: integer
+    first_contract_start:
+      type: string
+      format: date
+    latest_contract_end:
+      type: string
+      format: date
+  required:
+    - client_name
+    - ruc
+    - contracts_count
+    - first_contract_start
+    - latest_contract_end
+
+LoyaltyDashboardResponse:
+  type: object
+  properties:
+    kpis:
+      $ref: '#/LoyaltyKPIs'
+    tenure_distribution:
+      type: array
+      items:
+        $ref: '#/LoyaltyTenureDistributionPoint'
+    renewal_trend:
+      type: array
+      items:
+        $ref: '#/RenewalTrendPoint'
+    details:
+      type: array
+      items:
+        $ref: '#/LoyaltyDetail'
+  required:
+    - kpis
+    - tenure_distribution
+    - renewal_trend
+    - details

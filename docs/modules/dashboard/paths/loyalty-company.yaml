@@ -1,0 +1,24 @@
+get:
+  tags:
+    - Dashboards
+  summary: Analíticas de fidelidad comercial B2B
+  operationId: getDashboardLoyaltyCompany
+  responses:
+    '200':
+      description: Dashboard de fidelidad de clientes B2B (Company).
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/LoyaltyDashboardResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Sin permisos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

@@ -1,0 +1,24 @@
+get:
+  tags:
+    - Dashboards
+  summary: Distribución de origen de contratos laborales
+  operationId: getDashboardOriginLabor
+  responses:
+    '200':
+      description: Dashboard de distribución de origen de contratos (HR).
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/OriginDashboardResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Sin permisos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

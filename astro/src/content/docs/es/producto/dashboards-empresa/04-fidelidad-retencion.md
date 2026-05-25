@@ -3,46 +3,35 @@ title: Fidelidad (Retención)
 description: Dashboard de métricas de permanencia y retención de clientes empresariales.
 ---
 
-> **Estado: No implementado en backend actual**
+El dashboard de **Fidelidad y Retención B2B** analiza la recurrencia contractual y longevidad de nuestras relaciones con empresas clientes (contrapartes de tipo COMPANY).
 
-El dashboard de **Fidelidad (Retención)** mediría la permanencia de los clientes empresariales en el tiempo. Sin embargo, **actualmente no existe ningún endpoint backend** para este dashboard.
+Este módulo es fundamental para el equipo comercial, ya que permite identificar de forma rápida qué cuentas comerciales tienen relaciones estables, cuáles son clientes de legado, y cuáles presentan riesgo de abandono (Churn).
 
-## Estado Actual
+## Métricas y KPIs Clave
 
-| Componente | Estado |
-|------------|--------|
-| Endpoint backend | ❌ No existe |
-| Servicio | ❌ No existe |
-| Repositorio | ❌ No existe |
-| Schema | ❌ No existe |
+El dashboard presenta un panel superior con indicadores del estado general del portafolio comercial:
 
-## Funcionalidades NO Implementadas
+| KPI | Descripción |
+|-----|-------------|
+| **Tasa de Retención Activa** | Porcentaje de clientes activos que tienen múltiples contratos firmados con la empresa. Representa la solidez de las renovaciones. |
+| **Clientes Únicos** | Cantidad total de clientes recurrentes dentro del portafolio analizado. |
+| **Contratos Promedio por Cliente** | Promedio de contratos generados por cada contraparte B2B. |
 
-Las siguientes métricas **no están disponibles** en el backend actual:
+## Distribución de Permanencia (Cohortes)
 
-- Permanencia media por cliente
-- Tasa de retención
-- Distribución de cohorts
-- Clientes en riesgo
-- Churn rate
-- Heatmap de riesgo
-- Historial completo de permanencia
+El sistema clasifica la madurez de cada cliente según la cantidad de contratos consecutivos que mantienen con la empresa.
+A través de un gráfico especializado (por ejemplo, gráfico de barras apiladas o embudo), el equipo comercial puede visualizar el volumen de cuentas en cada fase.
 
-## Equivalentes en el Sistema
+Los clientes con **4 o más contratos** son automáticamente catalogados por el sistema como **"Socios de Legado"** (Key Accounts), facilitando estrategias de fidelización VIP.
 
-El módulo dashboard actual solo proporciona:
+## Semáforo de Riesgo (Churn Risk)
 
-- [Ingresos Proyectados](/es/producto/dashboards-empresa/01-ingresos-proyectados) - Análisis de ingresos
-- [Centro de Alertas](/es/producto/dashboards-empresa/02-centro-alertas-empresas) - Contratos próximos a vencer
-- [Top Empresas](/es/producto/dashboards-empresa/06-top-empresas) - Ranking de empresas por volumen/valor
+El dashboard cuenta con un listado interactivo de todas las cuentas comerciales que expone el nivel de riesgo de pérdida (churn) a través de un semáforo visual:
 
-## Próximos Pasos
+- 🟢 **Verde (Activo):** El último contrato del cliente caduca en más de 60 días. La relación comercial se considera estable.
+- 🟡 **Ámbar (En Riesgo de Vencer):** El contrato finalizará dentro de los próximos 60 días. Se activa una **alerta preventiva** para que el Account Manager inicie el proceso de renovación inmediata.
+- 🔴 **Rojo (Inactivo):** El contrato ha expirado sin una renovación inmediata. Representa una cuenta potencialmente perdida.
 
-Si se desea implementar este dashboard, sería necesario desarrollar:
+## Valor de Negocio
 
-1. Nuevo endpoint(s) backend para calcular permanencia
-2. Lógica de detección de churn
-3. Schema de respuesta para cohorts
-4. Integración con el módulo de dashboards
-
-> **Nota**: Este documento se mantiene por posible uso futuro, pero no representa funcionalidad actualmente disponible en el sistema.
+La implementación de este dashboard otorga al equipo directivo y comercial una herramienta predictiva para proteger el flujo de ingresos. Permite cambiar de una postura reactiva a una **gestión proactiva** enfocada en prolongar el ciclo de vida del cliente B2B y maximizar su valor (LTV).

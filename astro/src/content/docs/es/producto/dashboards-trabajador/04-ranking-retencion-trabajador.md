@@ -1,49 +1,32 @@
 ---
-title: Ranking de Retención (Trabajadores)
+title: Retención de Talento (Trabajadores)
 description: Dashboard de métricas de antigüedad y retención de trabajadores.
 ---
 
-> **Estado: No implementado en backend actual**
+El dashboard de **Retención de Talento Laboral** analiza la permanencia de los trabajadores mediante la acumulación de sus contratos firmados a lo largo del tiempo. 
 
-El dashboard de **Ranking de Retención (Trabajadores)** mediría la antigüedad y permanencia de los trabajadores en la organización. Sin embargo, **actualmente no existe ningún endpoint backend** para este dashboard.
+Este módulo provee al área de Recursos Humanos una perspectiva clara sobre las dinámicas de contratación, renovación y fidelidad del personal interno a corto y largo plazo.
 
-## Estado Actual
+## Métricas y KPIs Clave
 
-| Componente | Estado |
-|------------|--------|
-| Endpoint backend | ❌ No existe |
-| Servicio | ❌ No existe |
-| Repositorio | ❌ No existe |
-| Schema | ❌ No existe |
+El panel principal expone los siguientes indicadores de salud organizacional:
 
-## Funcionalidades NO Implementadas
+| KPI | Descripción |
+|-----|-------------|
+| **Tasa de Retención Activa** | Porcentaje del total de trabajadores vigentes que cuentan con un historial de 2 o más contratos. |
+| **Total de Trabajadores Únicos** | Volumen neto de talento humano administrado en el periodo de análisis. |
+| **Contratos Promedio** | Media de contratos generados por trabajador en la plataforma. |
 
-Las siguientes métricas **no están disponibles** en el backend actual:
+## Tendencia de Renovación Mensual
 
-- Antigüedad promedio por trabajador
-- Ranking por antigüedad
-- Tasa de retención histórica
-- Trabajadores con más de 2 años
-- Riesgo de conocimiento
-- Distribución por cohorts
-- Timeline de retención
-- Notificaciones de aniversario
+Un gráfico evolutivo que permite contrastar la **tasa de renovación mensual** con el volumen neto de contratos que han expirado frente a aquellos que se han renovado de forma exitosa. Ayuda a Recursos Humanos a medir periodos de alta rotación (ej. fin de año o términos de temporada).
 
-## Equivalentes en el Sistema
+## Distribución de Permanencia y Antigüedad
 
-El módulo dashboard actual solo proporciona:
+Clasifica a la plantilla según la cantidad de contratos firmados. El sistema realiza además un cálculo dinámico de la antigüedad de la relación (comparando el primer inicio de labores con la fecha de término más reciente). 
 
-- [Gasto de Planilla](/es/producto/dashboards-trabajador/01-gasto-planilla) - Análisis de gasto laboral
-- [Centro de Alertas](/es/producto/dashboards-trabajador/02-centro-alertas-trabajador) - Contratos próximos a vencer
-- [Contratos Recientes](/es/producto/dashboards-trabajador/03-contratos-recientes-trabajador) - Últimos contratos laborales
+Los trabajadores con una antigüedad mayor a 2 años reciben el distintivo de **"Legacy Worker"**, facilitando políticas de beneficios e incentivos al talento clave.
 
-## Próximos Pasos
+## Valor de Negocio
 
-Si se desea implementar este dashboard, sería necesario desarrollar:
-
-1. Nuevo endpoint(s) backend para calcular antigüedad
-2. Lógica de detección de riesgo de conocimiento
-3. Schema de respuesta para ranking de trabajadores
-4. Integración con el módulo de dashboards
-
-> **Nota**: Este documento se mantiene por posible uso futuro, pero no representa funcionalidad actualmente disponible en el sistema.
+El análisis de retención provee certidumbre sobre el clima laboral y el impacto de los procesos de contratación. Permite a los directores de RRHH identificar rápidamente desviaciones en la tasa de renovación y enfocar sus esfuerzos en la retención del talento antes de que expire su relación contractual.

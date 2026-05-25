@@ -157,3 +157,9 @@ paths:
     $ref: 'modules/dashboard/paths/top-companies.yaml'
   /dashboard/top_services:
     $ref: 'modules/dashboard/paths/top-services.yaml'
+  /dashboard/retention/labor:
+    $ref: 'modules/dashboard/paths/retention-labor.yaml'
+  /dashboard/origin/labor:
+    $ref: 'modules/dashboard/paths/origin-labor.yaml'
+  /dashboard/loyalty/company:
+    $ref: 'modules/dashboard/paths/loyalty-company.yaml'
