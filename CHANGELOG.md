@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/NickSalA/pactus-docs/compare/v1.0.4...v1.1.0) (2026-05-25)
+
+
+### Features
+
+* update database and organization docu ([1ed23f4](https://github.com/NickSalA/pactus-docs/commit/1ed23f46fe2fea260c0de35dcf028240d44c31bc))
+
 ## [1.0.4](https://github.com/NickSalA/ContractAI-Docs/compare/v1.0.3...v1.0.4) (2026-05-23)
 
 
