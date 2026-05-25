@@ -208,11 +208,11 @@ En el dashboard de Vercel (Settings → Environment Variables):
 
 | Tipo | Convención | Ejemplo |
 |------|------------|---------|
-| Componentes | PascalCase | `Sidebar.tsx`, `AddContractForm.tsx` |
+| Componentes | PascalCase | `Sidebar.tsx`, `DashboardAreaChart.tsx` |
 | Funciones/Variables | camelCase | `handleSubmit`, `isLoading` |
 | Constantes | UPPER_SNAKE_CASE | `API_BASE_URL`, `TIMEOUTS` |
-| Archivos de página | page.tsx | `src/app/dashboard/page.tsx` |
-| Tipos/Interfaces | PascalCase | `User`, `Document`, `ChatRequest` |
+| Archivos de página | page.tsx | `src/app/(main)/dashboard/manager/page.tsx` |
+| Tipos/Interfaces | PascalCase | `User`, `AreaChartResponse`, `Template` |
 
 ### Estructura de Componentes
 
@@ -285,6 +285,7 @@ npm run dev
 | react-dom | 19.2.3 | Renderizado DOM |
 | @supabase/supabase-js | 2.100.0 | Autenticación OAuth |
 | zustand | 5.0.12 | Gestión de estado |
+| recharts | 3.8.1 | Visualización de datos y analítica |
 | lucide-react | 0.577.0 | Iconos |
 
 ### Desarrollo

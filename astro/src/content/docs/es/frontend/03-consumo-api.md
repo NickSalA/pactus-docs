@@ -221,6 +221,7 @@ export interface AlertCategory {
 | PATCH | `/documents/{id}` | Actualizar | UPLOAD |
 | DELETE | `/documents/{id}` | Eliminar | AUTH |
 
+
 ```typescript
 export async function uploadDocument(data: DocumentCreateRequest): Promise<Document> {
   const formData = new FormData();
@@ -366,6 +367,7 @@ export interface DocumentDraftPayload {
   form_data: Record<string, unknown>;
   state?: DocumentState | null;
   folder_id?: number | null;
+  template_id?: string | null;
   service_items?: DocumentServiceItem[];
 }
 
@@ -391,7 +393,51 @@ export interface DocumentCreateRequest {
   document: DocumentDraftPayload;
 }
 ```
+### Plantillas (Templates)
 
+| Método | Endpoint | Descripción | Timeout |
+|--------|----------|-------------|---------|
+| GET | `/templates` | Listar plantillas disponibles | DEFAULT |
+| GET | `/templates/{id}` | Obtener detalles de una plantilla | DEFAULT |
+| POST | `/templates` | Crear nueva plantilla | DEFAULT |
+| PATCH | `/templates/{id}` | Actualizar plantilla existente | DEFAULT |
+| DELETE | `/templates/{id}` | Eliminar o archivar plantilla | AUTH |
+
+### Administración y Configuración
+
+| Método | Endpoint | Descripción | Timeout |
+|--------|----------|-------------|---------|
+| GET | `/admin/users` | Listar usuarios y roles de la organización | DEFAULT |
+| PATCH | `/admin/users/{id}/role` | Actualizar rol de un usuario | AUTH |
+| GET | `/admin/catalogs` | Obtener catálogos del sistema (servicios, carpetas) | DEFAULT |
+| POST | `/admin/notifications/rules` | Configurar reglas del centro de alertas | DEFAULT |
+
+```typescript
+// Plantillas (Templates)
+export type TemplateState = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type TemplateFieldType = 'text' | 'number' | 'date' | 'time' | 'boolean';
+export type TemplateGenerationMode = 'adaptive' | 'strict';
+
+export interface TemplateField {
+  key: string;
+  type: TemplateFieldType;
+  label: string;
+  required: boolean;
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  description?: string;
+  content: string; // Contenido en Markdown
+  state: TemplateState;
+  generation_mode: TemplateGenerationMode;
+  fields: TemplateField[];
+  created_at: string;
+  updated_at: string;
+}
+
+```
 ## Manejo de Estados en la UI
 
 Cada petición debe reflejar su estado en la interfaz:

@@ -1,4 +1,4 @@
----
+ahora ---
 title: "Implementación de Dashboards Analíticos"
 description: "Documentación técnica sobre la arquitectura de paneles segmentados, visualización con Recharts y lógica de negocio para Manager y HR."
 ---
@@ -58,15 +58,19 @@ Incluye funciones de utilidad como `buildRecentDocumentsFromAPI` que normalizan 
 ## Enrutamiento y Seguridad
 
 ### Redirección por Rol
-El archivo `src/app/(main)/dashboard/page.tsx` no renderiza contenido, sino que actúa como un guardia de navegación:
+El archivo `src/app/(main)/dashboard/page.tsx` no renderiza contenido, sino que actúa como un guardia de navegación (router dinámico) que evalúa los permisos, incluyendo el acceso a la consola de administración:
 
 ```typescript
 useEffect(() => {
-  if (user.role === "MANAGER") {
+  if (!user?.role) return;
+
+  if (user.role === "ADMIN" || user.role === "Administrador") {
+    router.replace("/admin");
+  } else if (user.role === "MANAGER") {
     router.replace("/dashboard/manager");
   } else {
     router.replace("/dashboard/hr");
   }
-}, [user?.role]);
+}, [user?.role, router]);
 ```
 

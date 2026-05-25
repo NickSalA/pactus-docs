@@ -16,7 +16,8 @@ ContractIA utiliza **Vercel Cron** para ejecutar tareas programadas, como el env
 
 ### Propósito
 
-El endpoint `/api/cron/send-emails` envía notificaciones por email a los usuarios sobre contratos próximos a vencer. Se ejecuta diariamente a las 8:00 AM (hora de Lima).
+El endpoint `/api/cron/send-emails` envía notificaciones por email a los usuarios sobre contratos próximos a vencer. Se ejecuta diariamente a las 8:00 AM (hora de Lima). 
+Las alertas enviadas por este proceso ahora respetan las **Reglas de Notificación** dinámicas (tiempos de pre-aviso, destinatarios) configuradas centralizadamente desde el **Panel de Administración** (`/admin/notifications/rules`).
 
 ### Programación
 
@@ -113,6 +114,10 @@ export async function GET(request: Request) {
 ```
 
 ## Seguridad
+
+### Header X-Cron-Secret
+
+El frontend reenvía el secreto al backend mediante el header `X-Cron-Secret`, permitiendo que el backend autorice la petición internamente sin requerir un token JWT de usuario.
 
 ### Variables de Entorno
 

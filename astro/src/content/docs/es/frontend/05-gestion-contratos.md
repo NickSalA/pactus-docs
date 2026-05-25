@@ -10,8 +10,9 @@ La gestión de contratos en ContractIA evolucionó para incluir capacidades avan
 El sistema de gestión de contratos se compone de varios componentes que trabajan juntos:
 
 - `TableBulkActionBar`: Barra de acciones masivas
-- `ContractsTable`: Tabla con selección múltiple
+- `ContractsTable`: Tabla con selección múltiple (ajusta su contenido dinámicamente según el rol: `COMPANY` para Manager, `LABOR` para HR).
 - `ContractsActionsBar`: Acciones sobre contratos
+- `AddContractWizard`: Formulario modal asistido para crear contratos a partir de plantillas con vista previa del PDF.
 - `useContractsFilters`: Hook de filtros y paginación
 - `useContractsPage`: Hook de gestión de página
 
@@ -182,13 +183,22 @@ type ContractsActionsBarProps = {
 5. Sistema elimina cada contrato
 6. Actualiza la tabla
 
+## Creación de Contratos (Wizard)
+
+El flujo de creación de contratos se ha modernizado. Además de la subida tradicional de archivos PDF, los usuarios ahora utilizan un flujo asistido (**Wizard**) integrado con el sistema de plantillas:
+
+1. **Selección de Plantilla:** El usuario elige una plantilla predefinida y activa.
+2. **Llenado de Datos:** Se renderiza un formulario dinámico basado en los campos requeridos por la plantilla (ej. nombre, montos, fechas).
+3. **Previsualización:** El sistema genera una vista previa del documento en tiempo real antes de confirmarlo.
+4. **Generación:** Al guardar, se envía el `template_id` y el `form_data` al backend para crear el contrato estructurado.
+
 ## Integración con la API
 
 ### Endpoints Utilizados
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| `GET` | `/documents` | Lista de documentos |
+| `GET` | `/documents` | Lista de documentos  |
 | `POST` | `/documents` | Crear documento |
 | `PATCH` | `/documents/{id}` | Actualizar documento |
 | `DELETE` | `/documents/{id}` | Eliminar documento |
