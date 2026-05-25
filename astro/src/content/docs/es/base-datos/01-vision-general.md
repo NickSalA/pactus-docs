@@ -40,6 +40,8 @@ Las tablas relacionales actualmente relevantes para el producto son las siguient
 
 La tabla legacy `public.empresas` ya no forma parte del modelo vigente.
 
+> Las tablas `checkpoint_*` (checkpoint_migrations, checkpoints, checkpoint_blobs, checkpoint_writes) son internas del motor de workflows y no forman parte del dominio documental.
+
 ## Criterios del Modelo
 
 ### 1. Aislamiento por organización

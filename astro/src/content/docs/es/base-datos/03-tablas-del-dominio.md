@@ -85,7 +85,7 @@ Conserva el usuario funcional del sistema. Complementa a `auth.users` con inform
 | `email` | `varchar` | Correo del usuario |
 | `full_name` | `varchar` | Nombre mostrado en la aplicación |
 | `avatar_url` | `text` | Referencia visual del usuario |
-| `role` | `user_role` | Rol de aplicación: `WORKER`, `HR`, `MANAGER`, `ADMIN` |
+| `role` | `user_role` | Rol de aplicación: `WORKER`, `HR`, `MANAGER`, `ADMIN`, `SUPERADMIN` |
 | `is_active` | `boolean` | Estado logico del usuario |
 | `receives_notifications` | `boolean` | Indica si el usuario recibe alertas de vencimiento |
 | `created_at` | `timestamptz` | Fecha de creacion |
@@ -97,6 +97,7 @@ Conserva el usuario funcional del sistema. Complementa a `auth.users` con inform
 - `HR`: usuario de recursos humanos
 - `MANAGER`: usuario de gestión contractual
 - `ADMIN`: usuario con control total de la organización
+- `SUPERADMIN`: superadministrador con acceso global a todas las organizaciones
 
 ## `public.documents`
 
