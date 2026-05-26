@@ -3,11 +3,9 @@ title: Top Empresas (Volumen)
 description: Ranking de las principales empresas clientes por volumen o valor.
 ---
 
-El dashboard de **Top Empresas (Volumen)** presenta un ranking de los clientes empresariales más importantes.
+El dashboard de **Top Empresas** permite a la directiva identificar de un vistazo cuáles son los clientes estratégicos que sustentan la operativa y rentabilidad del negocio.
 
-## Resumen Ejecutivo
-
-Este dashboard ranking clasifica a los clientes de tipo `COMPANY` según su volumen de contratos o valor total de facturación.
+Clasifica a las empresas del portafolio comercial según la cantidad de contratos activos (carga operativa) o el valor total facturado, revelando la concentración de la cartera.
 
 ## Ficha Técnica
 
@@ -23,33 +21,16 @@ Este dashboard ranking clasifica a los clientes de tipo `COMPANY` según su volu
 
 | Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|-----------|-------------|
-| `currency` | string | No | Filtra por moneda (PEN, USD, EUR) |
-| `sort_by` | string | No | Criterio: `volume` (default) o `value` |
-
-### Origen de Datos
-
-| Entidad | Campos Utilizados |
-|---------|-------------------|
-| `Document` | id, client, type (COMPANY), state |
-| `ServiceItem` | value, currency |
-
-### Filtros Aplicados
-
-- `type = COMPANY`
-- `state IN (ACTIVE, EXPIRING_SOON)`
-- `name IS NOT NULL`
-- `client IS NOT NULL`
+| `currency` | string | No | Filtra resultados por moneda (PEN, USD, EUR). |
+| `sort_by` | string | No | Criterio de clasificación: `volume` (por cantidad de contratos) o `value` (por monto económico acumulado). |
 
 ### Lógica de Cálculo
+- Filtra las relaciones contractuales corporativas (B2B) actualmente vigentes.
+- Agrupa los registros bajo un mismo cliente (empresa matriz).
+- Consolida y suma tanto el conteo de contratos únicos como el aporte financiero de los mismos.
+- Retorna el top 5 de cuentas más críticas de la organización.
 
-- **contracts**: Cantidad de contratos distintos por cliente
-- **amount**: Suma de `service_items.value`
-- Retorna **máximo 5 empresas**
-- Si `sort_by = volume`: ordena por `contracts` descendente
-- Si `sort_by = value`: ordena por `amount` descendente
-
-### Respuesta del Endpoint
-
+### Respuesta del Endpoint (Ejemplo)
 ```json
 [
   { "name": "Acme Corporation", "contracts": 12, "amount": 450000.00 },
@@ -60,65 +41,8 @@ Este dashboard ranking clasifica a los clientes de tipo `COMPANY` según su volu
 ]
 ```
 
-### Frecuencia de Actualización
-
-| Métrica | Valor |
-|---------|-------|
-| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
-
-## Guía de Funcionalidad
-
-### Comportamiento Visual
-
-| Elemento | Descripción |
-|----------|-------------|
-| **Ranking de 5 empresas** | Lista ordenada por volumen o valor |
-| **Columna contratos** | Cantidad de contratos distintos |
-| **Columna monto** | Valor total acumulado |
-
-### Interactividad
-
-| Interacción | Descripción |
-|-------------|-------------|
-| **Ordenar por volumen** | Ver empresas por cantidad de contratos |
-| **Ordenar por valor** | Ver empresas por facturación total |
-| **Filtro por moneda** | Ver solo empresas en PEN, USD o EUR |
-
-### Funcionalidades NO Implementadas
-
-- Top 20 (solo Top 5)
-- Carga operativa compuesta
-- Cantidad de servicios activos
-- Promedio por contrato
-- Sparklines de tendencia
-- Badge de riesgo
-- Comparar clientes
-- Detalle individual del cliente
-- Exportar CSV
-
 ## Valor de Negocio
 
-### Stakeholder Objetivo
+Para un **CEO** o **Director Comercial**, conocer la dependencia económica respecto a ciertas cuentas clave es esencial para la gestión de riesgos (por ejemplo, riesgo de concentración).
 
-| Rol | Necesidad |
-|-----|-----------|
-| **CEO** | Identificar clientes más importantes |
-| **Director Comercial** | Gestión de cuentas clave |
-| **CFO** | Concentración de ingresos |
-
-### Decisiones Associadas
-
-- Asignación de Account Managers a cuentas clave
-- Identificación de riesgo por concentración
-- Desarrollo de programas de fidelización
-
-### Limitaciones
-
-Este dashboard **no incluye**:
-- Más de 5 empresas
-- Métricas de tendencia histórica
-- Comparación entre clientes
-- Detalle de contratos por empresa
-- Exportación de datos
-
-> **Nota de alcance**: Esta documentación describe el estado actual del backend.
+Si unas pocas empresas concentran el grueso de los contratos o ingresos, la gerencia puede destinar *Account Managers* dedicados y desarrollar programas de fidelización exclusivos (VIP) para blindar esas cuentas y proteger los flujos futuros de caja.

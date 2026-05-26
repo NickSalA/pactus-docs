@@ -3,11 +3,9 @@ title: Gasto de Planilla
 description: Gráfico de área para visualización del gasto laboral histórico y proyectado.
 ---
 
-El dashboard de **Gasto de Planilla** proporciona una visión del gasto total en contratos laborales mediante un gráfico de área.
+El dashboard de **Gasto de Planilla** proporciona una visión panorámica y evolutiva de los costos asociados a las contrataciones de talento humano.
 
-## Resumen Ejecutivo
-
-Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es esencial para la planificación presupuestaria básica.
+Presentado a través de un gráfico de área interactivo, permite a la gerencia comparar los costos laborales recientes y estimar el impacto financiero de la planilla a corto plazo, facilitando la planificación presupuestaria de Recursos Humanos.
 
 ## Ficha Técnica
 
@@ -23,43 +21,22 @@ Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es ese
 
 | Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|-----------|-------------|
-| `currency` | string | No | Filtra por moneda (PEN, USD, EUR). Si no se envía, devuelve "ALL" |
-
-### Origen de Datos
-
-| Entidad | Campos Utilizados |
-|---------|-------------------|
-| `Document` | id, client, type (LABOR), state, start_date, end_date |
-| `ServiceItem` | value, currency, start_date, end_date |
-
-### Filtros Aplicados
-
-- `type = LABOR` (excluye contratos empresariales)
-- `state IN (ACTIVE, EXPIRING_SOON)` (solo contratos vigentes o próximos a vencer)
-- `name IS NOT NULL`
-- `client IS NOT NULL`
-- `service_items.value > 0` (solo items con valor económico)
+| `currency` | string | No | Filtra por moneda (PEN, USD, EUR). Si se omite, consolida todas bajo la etiqueta "ALL". |
 
 ### Lógica de Cálculo
+- Filtra exclusivamente los contratos laborales vigentes o próximos a vencer que representen un costo económico.
+- Agrupa los gastos según la permanencia mensual de cada recurso dentro del periodo del contrato.
+- Devuelve **7 puntos de datos** temporales: 4 meses de historial consolidado, el mes actual y 2 meses futuros como proyección (`is_forecast: true`).
 
-1. Suma los valores de servicios vigentes por mes
-2. Devuelve **7 puntos de datos**:
-   - 4 meses históricos
-   - Mes actual
-   - 2 meses futuros
-3. Los meses futuros tienen `is_forecast = true`
-4. **El backend no calcula reducción neta ni renovación proyectada**; solo suma servicios vigentes por mes
-
-### Respuesta del Endpoint
-
+### Respuesta del Endpoint (Ejemplo)
 ```json
 {
   "props": {
     "title": "Gasto de Planilla",
-    "subtitle": "Costo historico y reduccion por fin de contratos",
+    "subtitle": "Costo histórico y reducción por fin de contratos",
     "y_axis": {
       "format": "currency",
-      "labels": [5000, 10000, 15000, ...]
+      "labels": [5000, 10000, 15000]
     },
     "threshold_date": "2026-05-01T00:00:00",
     "series": [
@@ -69,9 +46,6 @@ Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es ese
         "data": [
           { "x": "Ene", "y": 45000, "is_forecast": false },
           { "x": "Feb", "y": 48000, "is_forecast": false },
-          { "x": "Mar", "y": 46000, "is_forecast": false },
-          { "x": "Abr", "y": 50000, "is_forecast": false },
-          { "x": "May", "y": 52000, "is_forecast": false },
           { "x": "Jun", "y": 51000, "is_forecast": true },
           { "x": "Jul", "y": 53000, "is_forecast": true }
         ]
@@ -81,65 +55,8 @@ Este dashboard muestra el gasto mensual de contratos laborales (`LABOR`). Es ese
 }
 ```
 
-### Frecuencia de Actualización
-
-| Métrica | Valor |
-|---------|-------|
-| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
-
-## Guía de Funcionalidad
-
-### Comportamiento Visual
-
-| Elemento | Descripción |
-|----------|-------------|
-| **Eje X** | Meses en formato corto (Ene, Feb, Mar, etc.), 7 puntos |
-| **Eje Y** | Valor en la moneda seleccionada |
-| **Línea Sólida** | Datos históricos (mes actual y anteriores) |
-| **Línea Punteada** | Datos proyectados (meses futuros) |
-
-### Interactividad
-
-| Interacción | Descripción |
-|-------------|-------------|
-| **Filtro por moneda** | Parámetro opcional `currency` para filtrar por PEN, USD o EUR |
-| **Tooltip** | Muestra valor exacto del punto |
-
-### Funcionalidades NO Implementadas
-
-- Horizonte de 6 meses (solo 2 meses proyectados)
-- Lógica de reducción esperada
-- Tasa de renovación 70%
-- Comparación contra ingresos B2B
-- Presupuesto vs. real
-- Conversión en tiempo real de monedas
-- Área sombreada de reducción esperada
-- Exportar CSV
-- Zoom temporal
-
 ## Valor de Negocio
 
-### Stakeholder Objetivo
+Este análisis es esencial para el **CFO** y el **Director de Recursos Humanos** al momento de validar la eficiencia del gasto de personal y auditar desviaciones.
 
-| Rol | Necesidad |
-|-----|-----------|
-| **CFO** | Visualización básica de gasto de planilla |
-| **Director de RRHH** | Gestión de costos laborales |
-| **Gerente de Finanzas** | Control de gastos |
-
-### Decisiones Asociadas
-
-- Planificación de presupuesto de personal
-- Evaluación de capacidad de nuevas contrataciones
-- Control de gasto operativo
-
-### Limitaciones
-
-Este dashboard **no incluye**:
-- Proyecciones de reducción por contratos que finalizan
-- Comparación con presupuesto
-- Análisis de proporción vs. ingresos
-- Detección de tendencias de renovación
-- Forecasting avanzado
-
-> **Nota de alcance**: Esta documentación describe el estado actual del backend. El módulo dashboard expone endpoints agregados de lectura, no implementa aún exportación, drill-down, filtros avanzados, conversiones de moneda, cohortes, retención, churn ni tendencias históricas avanzadas.
+Al proyectar el gasto base de la planilla para los próximos meses considerando los contratos que caducan, la gerencia puede evaluar anticipadamente su capacidad para realizar nuevas contrataciones, otorgar bonos de desempeño o aplicar recortes, manteniendo los costos dentro de los márgenes presupuestados.

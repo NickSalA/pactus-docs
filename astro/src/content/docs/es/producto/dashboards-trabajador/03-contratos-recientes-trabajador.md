@@ -3,11 +3,9 @@ title: Contratos Recientes (Trabajadores)
 description: Lista de los últimos contratos laborales actualizados.
 ---
 
-El dashboard de **Contratos Recientes (Trabajadores)** presenta un registro de los últimos contratos laborales modificados.
+El dashboard de **Contratos Recientes (Trabajadores)** funge como un log operativo del reclutamiento y mantenimiento de personal, exponiendo los registros laborales recién formalizados o renovados.
 
-## Resumen Ejecutivo
-
-Este dashboard muestra los contratos de tipo `LABOR` más recientemente actualizados, ordenados por fecha de modificación.
+Aporta visibilidad constante de la rotación y el flujo de talento dentro del sistema, sin necesidad de realizar búsquedas filtradas.
 
 ## Ficha Técnica
 
@@ -19,29 +17,13 @@ Este dashboard muestra los contratos de tipo `LABOR` más recientemente actualiz
 | **Path** | `/dashboard/recent_contracts/labor` |
 | **Rol requerido** | HR |
 
-### Origen de Datos
-
-| Entidad | Campos Utilizados |
-|---------|-------------------|
-| `Document` | id, name, client, type (LABOR), state, start_date, end_date, created_at, updated_at |
-| `ServiceItem` | service_id (para lista de servicios) |
-
-### Filtros Aplicados
-
-- `type = LABOR`
-- `state IN (ACTIVE, EXPIRING_SOON)`
-- `name IS NOT NULL`
-- `client IS NOT NULL`
-- **NO** incluye contratos PENDING_SIGNATURE
-
 ### Lógica de Cálculo
+- Filtra todos los acuerdos en estado de borrador o pendientes de aceptación.
+- Obtiene los registros estrictamente laborales (LABOR) que están activos.
+- Los organiza bajo un criterio cronológico estricto, priorizando los que han sufrido modificaciones en el periodo más reciente.
+- Despliega información resumen de los últimos 4 eventos contractuales.
 
-- Retorna **máximo 4 contratos**
-- Ordenado por `updated_at DESC`, luego `created_at DESC`
-- Cada item incluye: `id`, `title`, `services`, `name`, `dates`
-
-### Respuesta del Endpoint
-
+### Respuesta del Endpoint (Ejemplo)
 ```json
 [
   {
@@ -57,74 +39,12 @@ Este dashboard muestra los contratos de tipo `LABOR` más recientemente actualiz
     "services": ["Diseño UX"],
     "name": "María García",
     "dates": "04/15/26 - 10/15/26"
-  },
-  {
-    "id": 45,
-    "title": "Contrato Medio Tiempo - Carlos López",
-    "services": ["Soporte Técnico"],
-    "name": "Carlos López",
-    "dates": "04/01/26 - 04/01/27"
-  },
-  {
-    "id": 41,
-    "title": "Contrato Tiempo Completo - Ana Torres",
-    "services": ["Backend Development"],
-    "name": "Ana Torres",
-    "dates": "03/15/26 - 03/15/27"
   }
 ]
 ```
 
-### Frecuencia de Actualización
-
-| Métrica | Valor |
-|---------|-------|
-| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
-
-## Guía de Funcionalidad
-
-### Comportamiento Visual
-
-| Elemento | Descripción |
-|----------|-------------|
-| **Lista de 4 contratos** | Los más recientemente actualizados |
-| **Título** | Nombre del contrato |
-| **Servicios** | Array de nombres de servicios asociados |
-| **Trabajador** | Nombre del trabajador |
-| **Fechas** | Período del contrato (start - end) |
-
-### Funcionalidades NO Implementadas
-
-- Altas recientes en 30 días como KPI separado
-- Distribución por modalidad (pie chart)
-- Inversión en nuevas altas
-- Tasa de contratación
-- Modalidad predominante
-- Últimos 100 contratos o 90 días (solo 4)
-- Metas vs. real
-- Filtros por modalidad, fecha
-- Búsqueda por nombre
-- Exportar CSV
-- Comparación de períodos
-- Notificaciones
-
 ## Valor de Negocio
 
-### Stakeholder Objetivo
+Para un **Especialista en Atracción de Talento** o un **Gerente de RRHH**, este dashboard confirma que los *onboardings* recientes, como nuevas contrataciones o firmas de ascensos y adendas, han culminado su proceso y ya forman parte del universo activo de la empresa.
 
-| Rol | Necesidad |
-|-----|-----------|
-| **Gerente de RRHH** | Visibilidad de contratos recientes |
-| **Director de RRHH** | Seguimiento de contrataciones |
-| **Gerente de Finanzas** | Control de gasto laboral |
-
-### Limitaciones
-
-Este dashboard **no incluye**:
-- Métricas de altas recientes
-- Distribución por modalidad
-- Comparación con períodos anteriores
-- Filtros o búsqueda
-- Exportación de datos
-
-> **Nota de alcance**: Esta documentación describe el estado actual del backend.
+Ofrece una visión general de dónde se está inyectando capital de talento recientemente y qué perfiles acaban de incorporarse a sus nuevas funciones.
