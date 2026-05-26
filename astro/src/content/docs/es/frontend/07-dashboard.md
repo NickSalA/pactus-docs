@@ -1,4 +1,4 @@
-ahora ---
+---
 title: "Implementación de Dashboards Analíticos"
 description: "Documentación técnica sobre la arquitectura de paneles segmentados, visualización con Recharts y lógica de negocio para Manager y HR."
 ---
