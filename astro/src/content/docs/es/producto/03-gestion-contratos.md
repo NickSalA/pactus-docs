@@ -1,13 +1,13 @@
 ---
 title: Gestión de Contratos
-description: Funcionalidades completas para crear, editar, visualizar y gestionar contratos en ContractIA.
+description: Funcionalidades completas para crear, editar, visualizar y gestionar contratos en Pactus.
 ---
 
-El módulo de **Gestión de Contratos** es el núcleo operativo de ContractIA. Permite administrar el ciclo de vida completo de los contratos legales mediante una interfaz intuitiva con tabla paginada, filtros avanzados y herramientas de importación.
+El módulo de **Gestión de Contratos** es el núcleo operativo de Pactus. Permite administrar el ciclo de vida completo de los contratos legales mediante una interfaz intuitiva con tabla paginada, filtros avanzados y herramientas de importación.
 
 ## Tipos de Contrato
 
-ContractIA soporta dos tipos fundamentales de contratos:
+Pactus soporta dos tipos fundamentales de contratos:
 
 | Tipo | Código | Descripción | Roles con Acceso |
 |------|--------|-------------|------------------|
@@ -96,7 +96,7 @@ Al subir un PDF, el sistema utiliza **Gemini** para extraer automáticamente:
 
 ## Importación desde Google Drive
 
-ContractIA permite importar contratos directamente desde Google Drive:
+Pactus permite importar contratos directamente desde Google Drive:
 
 ### Flujo de Importación
 

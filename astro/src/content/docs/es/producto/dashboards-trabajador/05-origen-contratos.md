@@ -37,7 +37,7 @@ Su objetivo principal es medir la adopción tecnológica y operativa del sistema
 
 El panel despliega el **Total de Contratos** administrados y una gráfica detallada (Donut Chart) que desglosa su procedencia en tres grandes categorías:
 
-1. **Uso de Plantillas del Sistema:** Contratos que fueron generados y estandarizados internamente a través de las plantillas de ContractIA (ej. "Plantilla: Plazo Fijo"). Denotan alto control y cumplimiento legal.
+1. **Uso de Plantillas del Sistema:** Contratos que fueron generados y estandarizados internamente a través de las plantillas de Pactus (ej. "Plantilla: Plazo Fijo"). Denotan alto control y cumplimiento legal.
 2. **Carga Manual:** Documentos que han sido subidos manualmente a la plataforma desde fuentes externas locales.
 3. **Importaciones Automatizadas (Cloud):** Contratos sincronizados directamente desde servicios de almacenamiento en la nube, tales como Google Drive, OneDrive o Dropbox.
 

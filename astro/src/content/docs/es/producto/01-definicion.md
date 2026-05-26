@@ -1,9 +1,9 @@
 ---
 title: Definición del Producto
-description: Resumen detallado de ContractIA, objetivos, AQT y funcionalidades técnicas.
+description: Resumen detallado de Pactus, objetivos, AQT y funcionalidades técnicas.
 ---
 
-**ContractIA** es una plataforma integral de gestión y análisis legal diseñada para automatizar el ciclo de vida de los contratos mediante Inteligencia Artificial avanzada. El sistema permite desde la ingesta de documentos hasta el análisis interactivo y la generación automática de contratos basados en estándares organizacionales.
+**Pactus** es una plataforma integral de gestión y análisis legal diseñada para automatizar el ciclo de vida de los contratos mediante Inteligencia Artificial avanzada. El sistema permite desde la ingesta de documentos hasta el análisis interactivo y la generación automática de contratos basados en estándares organizacionales.
 
 ## Arquitectura de Calidad Técnica (AQT)
 
@@ -19,7 +19,7 @@ La **Arquitectura de Calidad Técnica (AQT)** define los pilares fundamentales q
 
 ## Stack Tecnológico
 
-ContractIA utiliza las siguientes tecnologías en sus componentes principales:
+Pactus utiliza las siguientes tecnologías en sus componentes principales:
 
 | Componente | Tecnología |
 |------------|------------|
@@ -32,7 +32,7 @@ ContractIA utiliza las siguientes tecnologías en sus componentes principales:
 
 ## Funcionalidades Principales
 
-ContractIA se articula en torno a los siguientes módulos funcionales:
+Pactus se articula en torno a los siguientes módulos funcionales:
 
 ### Módulos del Sistema
 

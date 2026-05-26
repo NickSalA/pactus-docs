@@ -1,16 +1,16 @@
 ---
 title: Infraestructura del Backend
-description: Cómo se compone la aplicación FastAPI de ContractIA y qué dependencias operativas necesita para funcionar.
+description: Cómo se compone la aplicación FastAPI de Pactus y qué dependencias operativas necesita para funcionar.
 ---
 
-El backend de **ContractIA** está construido sobre **FastAPI** y organizado por módulos de negocio. La aplicación no es un archivo monolítico que concentra toda la lógica, sino una composición de routers, servicios, repositorios y dependencias compartidas.
+El backend de **Pactus** está construido sobre **FastAPI** y organizado por módulos de negocio. La aplicación no es un archivo monolítico que concentra toda la lógica, sino una composición de routers, servicios, repositorios y dependencias compartidas.
 
 ## Punto de Entrada de la Aplicación
 
 La inicialización principal vive en estos archivos:
 
-- `ContractAI-Backend/src/contractai_backend/main.py`
-- `ContractAI-Backend/src/contractai_backend/factory.py`
+- `Pactus-Backend/src/pactus_backend/main.py`
+- `Pactus-Backend/src/pactus_backend/factory.py`
 
 `main.py` se limita a preparar logging, construir la app y ejecutar Uvicorn. La verdadera composición de la API ocurre en `factory.py`.
 

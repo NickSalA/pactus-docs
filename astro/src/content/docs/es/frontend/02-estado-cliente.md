@@ -3,7 +3,7 @@ title: Autenticación y Estado del Cliente
 description: Sistema de autenticación con Supabase OAuth y gestión de estado global con Zustand
 ---
 
-ContractIA implementa autenticación mediante **Supabase Auth** con Google OAuth como proveedor principal, y gestiona el estado global de la aplicación con **Zustand**.
+Pactus implementa autenticación mediante **Supabase Auth** con Google OAuth como proveedor principal, y gestiona el estado global de la aplicación con **Zustand**.
 
 ## Roles del Sistema
 

@@ -3,7 +3,7 @@ title: Justificación Técnica del Stack
 description: Razonamiento detrás de la elección de tecnologías y diseño arquitectónico.
 ---
 
-La selección de tecnologías para **ContractIA** se basó en la necesidad de procesar documentos legales con extrema precisión, mantener un estado conversacional fluido y garantizar el despliegue escalable del sistema.
+La selección de tecnologías para **Pactus** se basó en la necesidad de procesar documentos legales con extrema precisión, mantener un estado conversacional fluido y garantizar el despliegue escalable del sistema.
 
 A continuación, se detalla la justificación técnica de cada componente de la infraestructura:
 

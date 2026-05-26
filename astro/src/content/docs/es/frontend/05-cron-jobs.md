@@ -3,7 +3,7 @@ title: "Cron Jobs"
 description: "Endpoints de cron jobs para notificaciones periódicas y warmup de la aplicación."
 ---
 
-ContractIA utiliza **Vercel Cron** para ejecutar tareas programadas. Estos endpoints actúa como proxy seguro entre Vercel y el backend FastAPI.
+Pactus utiliza **Vercel Cron** para ejecutar tareas programadas. Estos endpoints actúa como proxy seguro entre Vercel y el backend FastAPI.
 
 ## Cron Jobs Disponibles
 

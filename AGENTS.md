@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Repository Shape
-- This is a documentation-only repo for ContractIA, not the main application codebase.
+- This is a documentation-only repo for Pactus, not the main application codebase.
 - The root `docs/` tree contains the OpenAPI contract; `docs/openapi.yaml` is the entrypoint and references module files under `docs/modules/` plus shared errors in `docs/schemas/errors.yaml`.
 - The documentation site is the Astro/Starlight project in `astro/`; there is no root `package.json`.
 - Starlight content lives under `astro/src/content/docs/es/`, with Spanish as the configured default and only locale.

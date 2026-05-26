@@ -3,7 +3,7 @@ title: Seguridad y CORS
 description: Cómo se autentica el backend, qué endpoints son públicos y cuál es el estado real de la configuración CORS.
 ---
 
-La seguridad HTTP del backend de **ContractIA** se apoya en dos mecanismos distintos:
+La seguridad HTTP del backend de **Pactus** se apoya en dos mecanismos distintos:
 
 - autenticación Bearer JWT para la mayor parte de la API
 - validación por secreto de cron en un endpoint operativo específico
@@ -12,7 +12,7 @@ La seguridad HTTP del backend de **ContractIA** se apoya en dos mecanismos disti
 
 La dependencia global de seguridad vive en:
 
-- `ContractAI-Backend/src/contractai_backend/shared/api/dependencies/security.py`
+- `Pactus-Backend/src/pactus_backend/shared/api/dependencies/security.py`
 
 El flujo es el siguiente:
 
@@ -110,7 +110,7 @@ Este punto no reemplaza la seguridad, pero sí mejora la trazabilidad operativa 
 
 ## Criterio Documental
 
-Cuando se documente la seguridad del backend de ContractIA, conviene separar siempre tres niveles:
+Cuando se documente la seguridad del backend de Pactus, conviene separar siempre tres niveles:
 
 1. cómo se autentica el request
 2. cómo se autoriza la operación en términos de negocio

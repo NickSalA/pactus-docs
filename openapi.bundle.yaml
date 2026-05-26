@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
-  title: ContractIA
+  title: Pactus
   description: API para la gestión de contratos, usuarios, plantillas, integraciones y chatbot.
   version: 1.0.0
   license:
     name: Proprietary - All Rights Reserved
-    url: https://github.com/NickSalA/ContractIA/blob/main/LICENSE
+    url: https://github.com/NickSalA/Pactus/blob/main/LICENSE
   contact:
     name: NickSalA
-    url: https://github.com/NickSalA/ContractIA
+    url: https://github.com/NickSalA/Pactus
     email: contact@example.com
 servers:
   - url: http://localhost:8000

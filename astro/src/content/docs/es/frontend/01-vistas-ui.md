@@ -1,9 +1,9 @@
 ---
 title: Stack tecnológico y Jerarquía de páginas
-description: Stack tecnológico y estructura de páginas del frontend de ContractIA
+description: Stack tecnológico y estructura de páginas del frontend de Pactus
 ---
 
-El frontend de ContractIA está construido con **Next.js 16** usando App Router.
+El frontend de Pactus está construido con **Next.js 16** usando App Router.
 
 ## Stack Tecnológico
 
