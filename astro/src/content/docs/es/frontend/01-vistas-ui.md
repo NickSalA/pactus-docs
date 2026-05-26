@@ -35,6 +35,12 @@ src/
 │   │   └── callback/
 │   │       └── page.tsx        # Callback OAuth (/auth/callback)
 │   │
+│   ├── (legal)/
+│   │   ├── privacy-policy/
+│   │   │   └── page.tsx        # Política de Privacidad
+│   │   └── terms-of-service/
+│   │       └── page.tsx        # Términos de Servicio
+│   │
 │   └── (main)/
 │       ├── layout.tsx          # Layout con Sidebar + Header
 │       ├── dashboard/
@@ -46,6 +52,8 @@ src/
 │       ├── contracts/
 │       │   ├── page.tsx        # Gestión de contratos (/contracts)
 │       │   └── AddContractForm.tsx
+│       ├── templates/
+│       │   └── page.tsx        # Gestión y autoría de plantillas (/templates)
 │       ├── ai-agent/
 │       │   └── page.tsx        # Chat con IA (/ai-agent)
 │       └── profile/
@@ -59,10 +67,10 @@ src/
 │       ├── Sidebar.tsx         # Barra lateral de navegación
 │       └── Header.tsx          # Header con usuario y notificaciones
 ├── features/
-│   └── dashboard/              # Lógica modular del Dashboard
-│       ├── components/         # Charts (Recharts) y AlertCenter
-│       ├── hooks/              # useDashboardHRPage, useDashboardManagerPage
-│       └── lib/                # Transformación de datos (dashboard-data.ts)
+│   ├── admin/                  # Lógica del panel de administración (alertas, roles, catálogos)
+│   ├── contracts/              # Componentes de contratos y utilidades de filtros
+│   ├── dashboard/              # Lógica modular del Dashboard (Charts, AlertCenter)
+│   └── templates/              # Editor de plantillas, asistentes y previsualización
 ├── lib/
 │   ├── api/                    # Endpoints modularizados
 │   ├── api.ts                  # Cliente API centralizado
@@ -86,10 +94,11 @@ src/
 
 Next.js App Router permite agrupar rutas sin afectar la URL usando paréntesis:
 
-| Route Group | Descripción | Rutas |
-|-------------|-------------|-------|
-| `(auth)` | Páginas de autenticación sin layout principal | `/login` |
-| `(main)` | Páginas protegidas con Sidebar y Header | `/dashboard`, `/contracts`, `/ai-agent`, `/profile` |
+| Route Group     | Descripción | Rutas |
+|-----------------|-------------|-------|
+| `(auth)`        | Páginas de autenticación sin layout principal | `/login` |
+| `(legal)`           | Páginas legales y políticas de la empresa | `/privacy-policy, /terms-of-service` |
+| `(main)`        | Páginas protegidas con Sidebar y Header | `/dashboard`, `/contracts`, `/ai-agent`, `/profile` |
 | `auth/callback` | Manejo de callback OAuth | `/auth/callback` |
 
 ## Páginas de la Aplicación
@@ -98,8 +107,9 @@ Next.js App Router permite agrupar rutas sin afectar la URL usando paréntesis:
 
 Página pública de presentación del sistema:
 - Navbar con logo y nombre de la aplicación
-- Hero section con propuesta de valor
+- Hero section con propuesta de valor actualizada
 - Imagen ilustrativa del producto
+- Enlaces a las páginas legales (Términos de servicio y Privacidad)
 - Call-to-action para iniciar sesión
 
 ### Login (`/login`)
@@ -107,6 +117,7 @@ Página pública de presentación del sistema:
 Página de autenticación con diseño moderno:
 - Logo y branding de ContractIA
 - Botón de autenticación con Google OAuth
+- Enlaces a Términos de Servicio y Política de Privacidad al pie del formulario
 - Estado de carga durante autenticación
 - Manejo de errores con mensajes informativos
 - Si ya está autenticado, muestra opción para ir al dashboard
@@ -130,7 +141,7 @@ Panel principal con métricas y resumen de actividad:
 
 Gestión completa del ciclo de vida de contratos:
 - Tabla con todos los contratos del sistema
-- Filtrado por estado según el modelo vigente del backend
+- Múltiples filtros: estado, rango de fechas (Desde/Hasta) y ordenamiento cronológico.
 - Búsqueda por nombre, cliente o ID
 - Acciones: Ver documento PDF, Editar, Eliminar
 - Formulario modal para crear nuevos contratos
@@ -167,16 +178,25 @@ Interfaz de chat para interactuar con el chatbot:
 Barra lateral de navegación colapsable:
 
 ```typescript
-const menuItems = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Contratos", href: "/contracts", icon: FileText },
-  { name: "Agente IA", href: "/ai-agent", icon: Bot },
-];
+const buildMainMenuItems = (hasTemplateAuthoringAccess: boolean): MenuItem[] => {
+  const items: MenuItem[] = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Contratos", href: "/contracts", icon: FileText },
+  ];
+
+  if (hasTemplateAuthoringAccess) {
+    items.push({ name: "Plantillas", href: "/templates", icon: FileStack, match: "prefix" });
+  }
+
+  items.push({ name: "Agente IA", href: "/ai-agent", icon: Bot });
+  return items;
+};
 ```
 
 Características:
 - Logo con toggle para colapsar/expandir
 - Indicador visual de ruta activa
+- Reacciona a permisos para mostrar menús especiales
 - Gradiente de fondo azul
 - Tooltips en modo colapsado
 - Estado persistido con Zustand
@@ -211,9 +231,9 @@ export default function MainLayout({ children }) {
 
 ## Flujo de Navegación
 
-1. Usuario accede a la landing page (`/`)
-2. Click en "Iniciar sesión" redirige a `/login`
-3. Login con Google OAuth via Supabase
-4. Callback en `/auth/callback` procesa la sesión
-5. Redirección por rol del usuario y lo envía automáticamente a su dashboard.
-6. Navegación interna mediante Sidebar
+1. Usuario accede a la landing page (/)
+2. Click en "Iniciar sesión" redirige a /login 
+3. Login con Google OAuth via Supabase 
+4. Callback en /auth/callback procesa la sesión 
+5. Redirección dinámica por rol del usuario y lo envía automáticamente a su dashboard o consola de administrador. 
+6. Navegación interna mediante el Sidebar que adapta sus botones basados en el nivel de acceso.

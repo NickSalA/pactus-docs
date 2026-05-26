@@ -34,7 +34,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 3. Usuario autoriza la aplicación en Google
 4. Google redirige a `/auth/callback` con código de autorización
 5. `exchangeCodeForSession()` intercambia código por sesión
-6. Redirección dinámica según el rol del usuario con sesión activa.
+6. Redirección dinámica según el rol del usuario (ADMIN, MANAGER o HR) con sesión activa
 
 ### Página de Login
 
@@ -51,15 +51,8 @@ const handleGoogleLogin = async () => {
   if (error) {
     setError(error.message);
   }
-  
-  onClick={() => router.push(
-    authUser.role === "ADMIN" 
-        ? "/admin" 
-        : authUser.role === "MANAGER" 
-            ? "/dashboard/manager" 
-            : "/dashboard/hr"
-)}
 };
+
 ```
 
 ### Callback de Autenticación
@@ -76,12 +69,17 @@ const handleAuthCallback = async () => {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (authUser.role === "ADMIN" || authUser.role === "Administrador") {
-    router.replace("/admin");
-  } else if (authUser.role === "MANAGER") {
-    router.replace("/dashboard/manager");
+  if (session) {
+      const authUser = mapSupabaseUserToAuthUser(session.user);
+      if (authUser.role === "ADMIN" || authUser.role === "Administrador") {
+        router.replace("/admin");
+      } else if (authUser.role === "MANAGER") {
+        router.replace("/dashboard/manager");
+      } else {
+        router.replace("/dashboard/hr");
+      }
   } else {
-    router.replace("/dashboard/hr");
+      router.replace("/login");
   }
 };
 ```
@@ -170,12 +168,13 @@ export const mapSupabaseUserToAuthUser = (user: SupabaseUser): AuthDisplayUser =
   const rawName = metadata.full_name || metadata.name || fallbackNameFromEmail(email);
   const name = toNameAndLastName(rawName);
   
-return {
-  id: user.id,
-  name,
-  email,
-  role: metadata.role || "HR", // El rol ahora se extrae de la metadata
-  avatarUrl: metadata.avatar_url || null,
+  return {
+    id: user.id,
+    name,
+    email,
+    role: metadata.role || "HR", // Asignación de rol desde la metadata con fallback a HR
+    avatarUrl: metadata.avatar_url || null,
+  };
 };
 
 export const toNameAndLastName = (rawName: string): string => {

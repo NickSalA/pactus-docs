@@ -9,8 +9,8 @@ ContractIA incluye páginas legales para cumplir con requisitos legales y de tra
 
 | Ruta | Título | Descripción |
 |-----|--------|-------------|
-| `/terminos` | Términos de Servicio | Condiciones de uso de la plataforma |
-| `/privacidad` | Política de Privacidad | Manejo de datos personales |
+| `/terms-of-service` | Términos de Servicio | Condiciones de uso de la plataforma |
+| `/privacy-policy` | Política de Privacidad | Manejo de datos personales |
 
 ## Términos de Servicio
 
@@ -82,8 +82,8 @@ Las páginas legales tienen enlaces accesibles desde la página de login:
 
 ```typescript
 // En la página de login
-<Link href="/terminos">Términos de Servicio</Link>
-<Link href="/privacidad">Política de Privacidad</Link>
+<Link href="/terms-of-service">Términos de Servicio</Link>
+<Link href="/privacy-policy">Política de Privacidad</Link>
 ```
 
 ## Estilo de las Páginas
@@ -129,8 +129,8 @@ Desde otras páginas se puede enlazar:
 ```typescript
 import Link from "next/link";
 
-<Link href="/terminos">Términos de Servicio</Link>
-<Link href="/privacidad">Política de Privacidad</Link>
+<Link href="/terms-of-service">Términos de Servicio</Link>
+<Link href="/privacy-policy">Política de Privacidad</Link>
 ```
 
 ## Consideraciones Legales
