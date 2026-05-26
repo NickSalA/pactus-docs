@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/NickSalA/pactus-docs/compare/v1.1.0...v1.2.0) (2026-05-26)
+
+
+### Features
+
+* add OpenAPI schemas and paths for retention, origin, and loyalty dashboards along with updated technical documentation. ([b8e8907](https://github.com/NickSalA/pactus-docs/commit/b8e890718dae2aa6ebe09dac586e6585accabdbe))
+* Merge pull request [#10](https://github.com/NickSalA/pactus-docs/issues/10) from NickSalA/SCRUM-23-Refactorización-del-módulo-organizations ([c17d3de](https://github.com/NickSalA/pactus-docs/commit/c17d3deb8acf56ba87353df35f4d8c44e5021d63))
+
 # [1.1.0](https://github.com/NickSalA/pactus-docs/compare/v1.0.4...v1.1.0) (2026-05-25)
 
 
