@@ -1,70 +1,111 @@
 ---
 title: "Implementación de Dashboards Analíticos"
-description: "Documentación técnica sobre la arquitectura de paneles segmentados, visualización con Recharts y lógica de negocio para Manager y HR."
+description: "Arquitectura de dashboards segmentados por rol con Recharts, widgets y hooks de datos."
 ---
 
-El sistema de dashboards de ContractIA ha sido rediseñado para ofrecer una experiencia analítica profunda basada en el rol del usuario. Utiliza **Recharts** para la visualización de datos y una estructura de hooks personalizados para gestionar múltiples fuentes de datos de forma eficiente.
+El sistema de dashboards consume endpoints diferenciados según el tipo de contrato (COMPANY vs LABOR).
 
-## Arquitectura de Dashboards
+## Dashboards por Rol
 
-La plataforma implementa dos vistas principales que consumen endpoints diferenciados según el tipo de contrato (Comercial vs. Laboral).
+### Manager Dashboard (`/manager/dashboard`)
 
-### 1. Dashboard Manager (`/dashboard/manager`)
-Especializado en la gestión de contratos de tipo **COMPANY**. Proporciona una visión macro del rendimiento comercial y rankings de clientes.
+Usa `useDashboardManagerPage` con **5 queries simultáneas**:
 
-### 2. Dashboard HR (`/dashboard/hr`)
-Especializado en contratos de tipo **LABOR**. Se enfoca en el seguimiento de documentos operativos de recursos humanos y estados de vigencia de personal.
+```typescript
+const {
+  areaChart,        // useAreaChartCompany
+  alerts,           // useAlertCenterCompany
+  recentContracts,  // useRecentContractsCompany
+  topCompanies,     // useTopCompanies
+  topServices,       // useTopServices
+  isLoading,
+  error,
+  reload            // invalidateQueries({ queryKey: ['dashboard'] })
+} = useDashboardManagerPage();
+```
 
----
+**Widgets:** AreaChart, AlertCenter, RecentDocuments, TopCompanies, TopServices
 
-## Componentes de Visualización (Recharts)
+### HR Dashboard (`/hr/dashboard`)
 
-Se utiliza **Recharts (v3.8.1)** como motor de renderizado. Los componentes están diseñados para ser responsivos y manejar estados de carga mediante *Skeletons*.
+Usa `useDashboardHRPage` con **3 queries simultáneas**:
+
+```typescript
+const {
+  areaChart,        // useAreaChartLabor
+  alerts,           // useAlertCenterLabor
+  recentContracts,  // useRecentContractsLabor
+  isLoading,
+  error,
+  reload
+} = useDashboardHRPage();
+```
+
+**Widgets:** AreaChart, AlertCenter, RecentDocuments
+
+## Widgets
 
 ### DashboardAreaChart
-Gráfico de áreas que visualiza tendencias temporales y proyecciones.
-- **Proyecciones:** Implementa líneas punteadas para datos donde `is_forecast` es verdadero.
-- **Dinamicidad:** Cambia de paleta de colores según el `documentType` (Emerald para Company, Red para Labor).
-- **Formateo:** Soporte para moneda dual (PEN/USD) en el Tooltip.
 
-### Rankings (Top Companies & Services)
-Gráficos de barras verticales que permiten comparar volumen y valor monetario.
-- **Métricas:** Botones de control para alternar entre `VOL` (cantidad de contratos) y `VALOR` (monto total).
-- **Jerarquía:** Aplicación de degradados de opacidad (`fillOpacity`) basados en la posición del ranking.
+Gráfico de áreas con Recharts para visualizar tendencias temporales.
+
+**Props:**
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `data` | `ApiDashboardAreaChartResponse` | Datos del gráfico |
+| `isLoading` | `boolean` | Estado de carga |
+| `documentType` | `ApiDocumentType` | COMPANY o LABOR |
+
+**Características:**
+- Línea punteada para datos con `is_forecast: true`
+- Paleta de colores según documentType (emerald para COMPANY, red para LABOR)
+- Tooltip con formato de moneda (PEN/USD)
+- Gradient fill bajo la línea
 
 ### DashboardAlertCenter
-Widget de gestión de estados críticos.
-- **Categorización:** Pestañas dinámicas basadas en la proximidad de vencimiento (`due_to`).
-- **Interactividad:** Navegación directa a la gestión de contratos al hacer clic en una alerta específica.
 
----
+Widget de alertas por estado de vencimiento.
 
-## Lógica de Datos y Hooks
+**Props:**
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `alerts` | `ApiDashboardAlertCategory[]` | Categorías de alertas |
+| `isLoading` | `boolean` | Estado de carga |
 
-La carga de datos se gestiona mediante hooks especializados que utilizan `Promise.all` para optimizar las peticiones al backend.
+**Características:**
+- Tabs dinámicos por proximidad de vencimiento (`due_to`)
+- Navegación directa a gestión de contratos al hacer clic
 
-### Hooks de Página
-- **`useDashboardManagerPage`**: Centraliza 5 peticiones simultáneas (AreaChart, Alerts, Recent, TopCompanies, TopServices).
-- **`useDashboardHRPage`**: Orquesta la carga de 3 fuentes principales enfocadas en el sector laboral.
+### DashboardTopCompanies y DashboardTopServices
 
-### Transformación de Datos (`dashboard-data.ts`)
-Incluye funciones de utilidad como `buildRecentDocumentsFromAPI` que normalizan las respuestas crudas del servidor para que coincidan con la interfaz de usuario, manejando:
-- Formateo de fechas relativas.
-- Mapeo de estados de contratos.
-- Asignación de etiquetas de subtítulos por defecto.
+Gráficos de barras verticales para rankings.
 
----
+**Características:**
+- Botones para alternar entre `VOL` (cantidad) y `VALOR` (monto)
+- Degradados de opacidad basados en posición del ranking
 
-## Enrutamiento y Seguridad
+### DashboardRecentDocumentsTable
 
-### Redirección por Rol
-El archivo `src/app/(main)/dashboard/page.tsx` no renderiza contenido, sino que actúa como un guardia de navegación (router dinámico) que evalúa los permisos, incluyendo el acceso a la consola de administración:
+Tabla de documentos recientes.
 
-**Controlador de Tráfico Automático:**
-Este mecanismo funciona como un guardia de seguridad en la entrada principal del panel. Cuando un usuario hace clic en el botón general de "Dashboard", el sistema no le muestra una pantalla genérica, sino que reacciona instantáneamente haciendo lo siguiente:
-1. **Verificación de Identidad:** Primero, revisa la "etiqueta" del usuario para saber su puesto. Si por algún error el usuario no tiene rol, detiene el proceso por seguridad.
-2. **Acceso de Administración:** Si detecta que es un Administrador, lo redirige inmediatamente a la consola central de gestión y configuraciones.
-3. **Acceso Comercial:** Si la persona tiene el rol de Manager (Gerente), lo envía automáticamente al panel analítico de métricas financieras y rankings de empresas.
-4. **Acceso Operativo:** Si no es ninguno de los anteriores (lo que significa que es personal de Recursos Humanos), lo dirige directamente a la vista de seguimiento de personal y alertas laborales.
+### DashboardWelcome
 
-Todo esto sucede de forma invisible y en fracciones de segundo, asegurando que cada empleado vea únicamente las pantallas, herramientas y métricas que le corresponden según sus permisos.
+Mensaje de bienvenida personalizado con nombre del usuario.
+
+## Utilidades (lib/utils.ts)
+
+### COLORS
+
+Paleta de colores por documentType:
+
+| documentType | Color |
+|-------------|-------|
+| `COMPANY` | emerald |
+| `LABOR` | red |
+
+### buildRecentDocumentsFromAPI
+
+Normaliza las respuestas crudas del API para el formato de UI:
+- Formateo de fechas relativas
+- Mapeo de estados de contratos
+- Asignación de etiquetas por defecto
