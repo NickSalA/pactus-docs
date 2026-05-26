@@ -60,17 +60,11 @@ Incluye funciones de utilidad como `buildRecentDocumentsFromAPI` que normalizan 
 ### Redirección por Rol
 El archivo `src/app/(main)/dashboard/page.tsx` no renderiza contenido, sino que actúa como un guardia de navegación (router dinámico) que evalúa los permisos, incluyendo el acceso a la consola de administración:
 
-```typescript
-useEffect(() => {
-  if (!user?.role) return;
+**Controlador de Tráfico Automático:**
+Este mecanismo funciona como un guardia de seguridad en la entrada principal del panel. Cuando un usuario hace clic en el botón general de "Dashboard", el sistema no le muestra una pantalla genérica, sino que reacciona instantáneamente haciendo lo siguiente:
+1. **Verificación de Identidad:** Primero, revisa la "etiqueta" del usuario para saber su puesto. Si por algún error el usuario no tiene rol, detiene el proceso por seguridad.
+2. **Acceso de Administración:** Si detecta que es un Administrador, lo redirige inmediatamente a la consola central de gestión y configuraciones.
+3. **Acceso Comercial:** Si la persona tiene el rol de Manager (Gerente), lo envía automáticamente al panel analítico de métricas financieras y rankings de empresas.
+4. **Acceso Operativo:** Si no es ninguno de los anteriores (lo que significa que es personal de Recursos Humanos), lo dirige directamente a la vista de seguimiento de personal y alertas laborales.
 
-  if (user.role === "ADMIN" || user.role === "Administrador") {
-    router.replace("/admin");
-  } else if (user.role === "MANAGER") {
-    router.replace("/dashboard/manager");
-  } else {
-    router.replace("/dashboard/hr");
-  }
-}, [user?.role, router]);
-```
-
+Todo esto sucede de forma invisible y en fracciones de segundo, asegurando que cada empleado vea únicamente las pantallas, herramientas y métricas que le corresponden según sus permisos.

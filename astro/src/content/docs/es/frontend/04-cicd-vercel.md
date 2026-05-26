@@ -22,21 +22,8 @@ Variables accesibles tanto en el servidor como en el cliente:
 
 ### Archivo .env.local
 
-Configuración para desarrollo local:
-
-```bash
-# Backend API
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Supabase Authentication
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=
-
-# Google OAuth (configurar en Supabase Dashboard)
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=
-NEXT_PUBLIC_GOOGLE_API_KEY=
-NEXT_PUBLIC_GOOGLE_APP_ID=
-```
+**Archivo de configuración secreta local:**
+Para que el sistema funcione en la computadora de un desarrollador, este necesita crear un archivo especial (invisible) que contenga las "llaves maestras" de la plataforma. Este archivo incluye las direcciones exactas para conectarse al servidor local de datos, las credenciales de seguridad únicas del proyecto en Supabase, y los permisos de Google necesarios para que el botón de "Iniciar sesión con Google" funcione correctamente durante las pruebas. 
 
 ### Variables por Entorno
 
@@ -50,21 +37,8 @@ NEXT_PUBLIC_GOOGLE_APP_ID=
 
 ### package.json
 
-```json
-{
-  "name": "contractia-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "type-check": "tsc --noEmit",
-    "test": "vitest run"
-  }
-}
-```
+**El menú de comandos del proyecto:**
+Este archivo es como la "caja de herramientas" principal. Define cómo se llama nuestra aplicación (`contractia-frontend`) y contiene accesos directos (scripts) para que los desarrolladores no tengan que memorizar instrucciones largas. Incluye comandos para encender el servidor de prueba, para empaquetar la aplicación cuando está lista, para revisar que el código esté limpio y sin errores ortográficos, y para correr simulacros automáticos que prueban que todo funcione.
 
 | Script | Comando | Descripción |
 |--------|---------|-------------|
@@ -88,54 +62,18 @@ NEXT_PUBLIC_GOOGLE_APP_ID=
 
 ### Archivo de Workflow
 
-Ubicación: `.github/workflows/ci.yml`
-
-```yaml
-name: CI Pipeline
-
-on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
-
-jobs:
-  ci:
-    name: Lint, Type Check, Test & Build
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run linter
-        run: npm run lint
-
-      - name: Type check
-        run: npm run type-check
-
-      - name: Run tests
-        run: npm run test
-        continue-on-error: true
-
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_KEY }}
-```
+**El Robot de Inspección de Código:**
+Este archivo contiene las instrucciones para un robot automático (GitHub Actions). Cada vez que un programador intenta enviar código nuevo a la plataforma principal, el robot se despierta y hace lo siguiente paso a paso:
+1. Crea un entorno de computadora virtual (usando Ubuntu).
+2. Descarga todo el código propuesto.
+3. Le pasa un corrector ortográfico y de estilo (Linter) para asegurar que se sigan las reglas de la empresa.
+4. Verifica que no haya cruce de información incorrecta (Type check).
+5. Ejecuta los exámenes automáticos para asegurar que no se haya roto nada (Tests).
+6. Finalmente, intenta armar la aplicación por completo (Build). Si el robot no puede armarla, bloquea la subida del código para proteger la plataforma en vivo.
 
 ## Despliegue en Vercel
+
+
 
 ### Configuración Inicial (Una sola vez)
 
@@ -155,22 +93,8 @@ jobs:
 
 ### Archivo vercel.json
 
-```json
-{
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "framework": "nextjs",
-  "regions": ["iad1"],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store" }
-      ]
-    }
-  ]
-}
-```
+**Reglas de alojamiento del servidor:**
+Este archivo le dice a Vercel (nuestro proveedor de alojamiento en la nube) exactamente cómo debe tratar nuestra página. Le indica qué comando usar para construirla, define que el centro de datos principal debe estar en la región `iad1` (Este de Estados Unidos, para mejor latencia) y le pone una regla estricta a la memoria caché: le prohíbe explícitamente guardar copias antiguas de los datos de la API, asegurando que cuando el usuario entra, siempre vea su información en tiempo real.
 
 ### Configuración por Entorno en Vercel
 
@@ -216,63 +140,21 @@ En el dashboard de Vercel (Settings → Environment Variables):
 
 ### Estructura de Componentes
 
-```typescript
-"use client"; // Si es Client Component
-
-// 1. Imports
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-// 2. Types
-interface Props {
-  title: string;
-}
-
-// 3. Component
-export default function MyComponent({ title }: Props) {
-  // 3.1 Hooks
-  const router = useRouter();
-  const [data, setData] = useState(null);
-
-  // 3.2 Effects
-  useEffect(() => {
-    // Side effects
-  }, []);
-
-  // 3.3 Handlers
-  const handleClick = () => {
-    // Logic
-  };
-
-  // 3.4 Render
-  return (
-    <div>
-      <h1>{title}</h1>
-    </div>
-  );
-}
-```
+**El molde universal para crear pantallas:**
+Para mantener el orden, cada pieza visual (como un botón o una tabla) debe construirse siguiendo una receta estricta de 4 pasos:
+1. **Importaciones:** Se piden prestadas las herramientas externas que se van a usar.
+2. **Definiciones:** Se declara qué información necesita esta pieza para funcionar (por ejemplo, "necesito que me des un título").
+3. **Lógica e Inteligencia:** Se configuran las memorias temporales, los efectos automáticos y qué pasa cuando el usuario hace clic.
+4. **Dibujo (Renderizado):** Finalmente, se entrega el resultado visual final que el usuario verá en su pantalla.
 
 ## Instalación y Ejecución
 
-```bash
-# Clonar repositorio
-git clone https://github.com/tu-usuario/contractia-frontend.git
-cd contractia-frontend
-
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno
-cp .env.example .env.local
-# Editar .env.local con tus valores
-
-# Iniciar servidor de desarrollo
-npm run dev
-
-# Abrir en navegador
-# http://localhost:3000
-```
+**Guía de arranque para nuevos programadores:**
+El proceso manual para que un desarrollador nuevo instale la plataforma en su computadora consta de cuatro pasos básicos:
+1. Descargar (clonar) todo el código desde el repositorio oficial a su computadora.
+2. Instalar automáticamente todas las herramientas y bibliotecas de terceros que el proyecto necesita para existir.
+3. Crear y rellenar su archivo de seguridad local (`.env.local`) con las contraseñas secretas proporcionadas por el líder técnico.
+4. Encender el motor de desarrollo, lo cual levantará una versión privada de la plataforma que podrá ver abriendo su navegador de internet.
 
 ## Dependencias del Proyecto
 

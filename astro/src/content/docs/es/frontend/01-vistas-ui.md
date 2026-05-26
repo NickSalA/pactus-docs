@@ -173,25 +173,14 @@ Interfaz de chat para interactuar con el chatbot:
 
 ## Componentes de Layout
 
-### Sidebar (`components/layout/Sidebar.tsx`)
+### Sidebar 
 
-Barra lateral de navegación colapsable:
+Es el menú principal ubicado a la izquierda. Su comportamiento es dinámico e inteligente:
 
-```typescript
-const buildMainMenuItems = (hasTemplateAuthoringAccess: boolean): MenuItem[] => {
-  const items: MenuItem[] = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Contratos", href: "/contracts", icon: FileText },
-  ];
-
-  if (hasTemplateAuthoringAccess) {
-    items.push({ name: "Plantillas", href: "/templates", icon: FileStack, match: "prefix" });
-  }
-
-  items.push({ name: "Agente IA", href: "/ai-agent", icon: Bot });
-  return items;
-};
-```
+- Muestra opciones universales para todos: Dashboard, Contratos y Agente IA.
+- Evalúa los permisos del usuario de forma invisible. Si detecta privilegios de administración o autoría, despliega automáticamente opciones exclusivas, como el menú de Plantillas.
+- Puede colapsarse para dar más espacio de lectura, manteniendo tooltips (textos flotantes) para no perder la orientación
+- Recuerda su última posición (abierto/cerrado) en visitas futuras.
 
 Características:
 - Logo con toggle para colapsar/expandir
@@ -201,7 +190,7 @@ Características:
 - Tooltips en modo colapsado
 - Estado persistido con Zustand
 
-### Header (`components/layout/Header.tsx`)
+### Header 
 
 Header superior con información del usuario:
 - Icono de notificaciones con indicador de alertas
@@ -211,23 +200,9 @@ Header superior con información del usuario:
   - Cerrar sesión
 - Sincronización automática con Supabase Auth
 
-### Layout Principal (`app/(main)/layout.tsx`)
+### Layout Principal 
 
-```typescript
-export default function MainLayout({ children }) {
-  return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 bg-gray-50 p-8">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
-}
-```
+Es el espacio de trabajo central (fondo claro) que ocupa la mayor parte de la pantalla. Aquí es donde se carga dinámicamente la información (tablas, chats, gráficos) de acuerdo con lo que el usuario seleccione en la barra lateral.
 
 ## Flujo de Navegación
 

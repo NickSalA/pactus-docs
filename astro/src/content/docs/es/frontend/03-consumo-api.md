@@ -7,6 +7,7 @@ El frontend de ContractIA consume el backend a través de un **cliente API centr
 
 ## Arquitectura de Comunicación
 
+
 ```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  UI Component   │ -> │   API Client    │ -> │    Backend      │ -> │    Response     │
@@ -14,15 +15,17 @@ El frontend de ContractIA consume el backend a través de un **cliente API centr
 └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
+El proceso de comunicación sigue una línea directa y estandarizada:
+1. **Componente Visual:** La pantalla o botón que el usuario está utilizando solicita información (ej. "quiero ver mis contratos").
+2. **Cliente API:** Nuestra herramienta centralizada toma esa petición, le pone nuestro sello de seguridad y la envía por internet.
+3. **Backend:** El servidor recibe la petición, la procesa en la base de datos y prepara la respuesta.
+4. **Respuesta:** La información vuelve a la pantalla del usuario en un formato ordenado y listo para leerse.
+
 ## Configuración del Cliente
 
 ### Variable de Entorno
 
-```typescript
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-// Desarrollo: http://localhost:8000
-// Producción: https://api.contractia.railway.app
-```
+El sistema utiliza un "directorio central" (una variable maestra) para saber automáticamente a qué servidor debe conectarse. Si los programadores están haciendo pruebas, el sistema apunta a la computadora local; pero si la aplicación está en vivo, apunta automáticamente a los servidores oficiales de producción.
 
 ### Timeouts por Operación
 
@@ -33,71 +36,15 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 | `UPLOAD` | 60,000 ms (60 seg) | Subida de archivos PDF |
 | `AI` | 120,000 ms (2 min) | Interacciones con chatbot |
 
-```typescript
-export const TIMEOUTS = {
-  AUTH: 10000,
-  DEFAULT: 30000,
-  UPLOAD: 60000,
-  AI: 120000,
-};
-```
+El sistema tiene un reloj interno para cancelar operaciones automáticamente si tardan demasiado. Esto protege a la plataforma de quedarse "congelada". Asigna tiempos cortos (10 segundos) para accesos rápidos como el login, y otorga tiempos más largos (hasta 2 minutos) para tareas complejas como hablar con la Inteligencia Artificial o procesar archivos PDF pesados.
 
 ## Función Fetch Base
 
-```typescript
-export async function fetchAPI<T>(
-  endpoint: string,
-  options: RequestInit = {},
-  timeout: number = TIMEOUTS.DEFAULT,
-  includeAuth: boolean = true
-): Promise<T> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  const token = includeAuth && typeof window !== 'undefined' 
-    ? localStorage.getItem('access_token') 
-    : null;
-    
-  const headers = new Headers(options.headers ?? {});
-  const hasBody = options.body !== undefined && options.body !== null;
-  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
-
-  if (hasBody && !isFormData && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-
-  if (token && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      signal: controller.signal,
-      headers,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || errorData.message || 'Error en la petición');
-    }
-
-    if (response.status === 204) {
-      return null as T;
-    }
-
-    return response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('La petición excedió el tiempo límite');
-    }
-    throw error;
-  }
-}
-```
+Esta es la "antena de comunicación central" de ContractIA. Cada vez que la plataforma necesita enviar o recibir datos, pasa por este conducto. Sus responsabilidades automáticas son:
+- **Seguridad:** Adjunta la "credencial digital" (token) del usuario a cada mensaje para demostrar que tiene permiso para ver esa información.
+- **Clasificación:** Le avisa al servidor si lo que le estamos enviando es un texto simple, un formulario o un archivo pesado.
+- **Control de tiempos:** Activa el temporizador (timeout) para abortar la misión si el servidor no responde a tiempo.
+- **Traducción de Errores:** Si algo sale mal (ej. "el servidor está caído" o "no tienes permisos"), captura el código de error informático y lo prepara para que la pantalla pueda mostrar un mensaje amigable al usuario.
 
 ## Endpoints Implementados
 
@@ -111,15 +58,7 @@ Desde la perspectiva del consumo HTTP, el endpoint relevante para la capa de fro
 |--------|----------|-------------|---------|
 | GET | `/user/me` | Obtener perfil autenticado | AUTH |
 
-```typescript
-export async function getCurrentUser(): Promise<CurrentUser> {
-  return fetchAPI<CurrentUser>('/user/me', { method: 'GET' }, TIMEOUTS.AUTH);
-}
-
-export function logout(): void {
-  localStorage.removeItem('access_token');
-}
-```
+Estas son las herramientas operativas para la sesión: una se encarga de ir al servidor y traer la "ficha completa" del usuario que acaba de entrar, y la otra se encarga de destruir la llave de acceso de la computadora cuando el usuario presiona "Cerrar sesión", asegurando que nadie más pueda entrar.
 
 ### Usuarios
 
@@ -127,13 +66,7 @@ export function logout(): void {
 |--------|----------|-------------|---------|
 | GET | `/user/me` | Obtener usuario autenticado | AUTH |
 
-```typescript
-export async function getCurrentUser(): Promise<CurrentUser> {
-  return fetchAPI<CurrentUser>('/user/me', {
-    method: 'GET',
-  }, TIMEOUTS.AUTH);
-}
-```
+Utilidad específica que le pregunta al servidor de forma segura: "¿Cuáles son los datos actualizados del dueño de esta sesión?" para poder mostrar su nombre y avatar en la cabecera superior.
 
 ### Chatbot
 
@@ -141,14 +74,7 @@ export async function getCurrentUser(): Promise<CurrentUser> {
 |--------|----------|-------------|---------|
 | POST | `/chatbot` | Enviar mensaje | AI |
 
-```typescript
-export async function sendMessage(data: ChatRequest): Promise<ChatResponse> {
-  return fetchAPI<ChatResponse>('/chatbot', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }, TIMEOUTS.AI);
-}
-```
+Es el canal de comunicación directa con la IA. Toma el texto que el usuario escribió en la caja de chat, lo empaqueta y se lo envía al cerebro del bot, esperando pacientemente la respuesta procesada para mostrarla en pantalla.
 
 ### Conversaciones
 
@@ -157,19 +83,8 @@ export async function sendMessage(data: ChatRequest): Promise<ChatResponse> {
 | GET | `/conversations/user/{user_id}` | Listar conversaciones del usuario | DEFAULT |
 | GET | `/conversations/{conversation_id}` | Obtener historial | DEFAULT |
 
-```typescript
-export async function getConversations(userId: number): Promise<Conversation[]> {
-  return fetchAPI<Conversation[]>(`/conversations/user/${userId}`, {
-    method: 'GET',
-  }, TIMEOUTS.DEFAULT);
-}
+Estas funciones operan como "buscadores de archivos históricos": la primera le pide al servidor la lista general de todas las conversaciones pasadas del usuario para armar el menú lateral. La segunda, entra en acción cuando el usuario hace clic en una conversación específica, pidiendo al servidor que le devuelva todo el hilo de mensajes (preguntas y respuestas) de ese día.
 
-export async function getConversationById(conversationId: number): Promise<ConversationWithContent> {
-  return fetchAPI<ConversationWithContent>(`/conversations/${conversationId}`, {
-    method: 'GET',
-  }, TIMEOUTS.DEFAULT);
-}
-```
 ### Dashboard (Analítica y Métricas)
 
 | Método | Endpoint | Descripción | Timeout |
@@ -182,33 +97,7 @@ export async function getConversationById(conversationId: number): Promise<Conve
 | GET | `/dashboard/top_services` | Ranking de servicios más utilizados | DEFAULT |
 | GET | `/dashboard/recent_contracts/*` | Últimos movimientos por sector | DEFAULT |
 
-
-```typescript
-export interface AreaChartResponse {
-  props: {
-    title: string;
-    series: Array<{
-      name: string;
-      data: Array<{ x: string; y: number; is_forecast: boolean }>;
-    }>;
-    y_axis: { format: string; labels: number[] };
-  };
-}
-
-// Rankings y Alertas
-export interface TopCompanyResponse {
-  name: string;
-  contracts: number;
-  amount: number;
-}
-
-export interface AlertCategory {
-  label: string;
-  count: number;
-  color: { accent: string; bg: string };
-  items: Array<{ id: number; name: string; status: string }>;
-}
-```
+Aquí se definen las "plantillas estrictas" que el servidor debe respetar al enviar datos para los gráficos. Exigen que la información llegue en un formato específico para que los gráficos funcionen sin romperse: coordenadas exactas para las líneas de tendencia, avisos sobre qué datos son proyecciones a futuro (líneas punteadas), y estructuras ordenadas de rankings que separen el volumen de contratos del dinero generado.
 
 ### Documentos
 
@@ -221,178 +110,25 @@ export interface AlertCategory {
 | PATCH | `/documents/{id}` | Actualizar | UPLOAD |
 | DELETE | `/documents/{id}` | Eliminar | AUTH |
 
-
-```typescript
-export async function uploadDocument(data: DocumentCreateRequest): Promise<Document> {
-  const formData = new FormData();
-  formData.append('file', data.file);
-
-  formData.append('document', JSON.stringify(data.document));
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.UPLOAD);
-
-  const token = typeof window !== 'undefined' 
-    ? localStorage.getItem('access_token') 
-    : null;
-
-  const response = await fetch(`${API_BASE_URL}/documents`, {
-    method: 'POST',
-    body: formData,
-    signal: controller.signal,
-    headers: {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-  });
-
-  clearTimeout(timeoutId);
-  return response.json();
-}
-
-export async function getDocuments(): Promise<Document[]> {
-  return fetchAPI<Document[]>('/documents', { method: 'GET' }, TIMEOUTS.DEFAULT, false);
-}
-
-export async function getDocumentById(id: number): Promise<Document> {
-  return fetchAPI<Document>(`/documents/${id}`, { method: 'GET' }, TIMEOUTS.DEFAULT);
-}
-
-export async function getDocumentFileUrl(id: number): Promise<string> {
-  const response = await fetchAPI<DocumentFileUrlResponse>(
-    `/documents/${id}/file-url`,
-    { method: 'GET' },
-    TIMEOUTS.DEFAULT
-  );
-  return response.url;
-}
-
-export async function deleteDocument(id: number): Promise<void> {
-  return fetchAPI<void>(`/documents/${id}`, { method: 'DELETE' }, TIMEOUTS.AUTH);
-}
-```
+Este es el panel de control completo para los archivos. Contiene las instrucciones exactas para realizar cualquier operación sobre un contrato:
+- **Subir/Crear:** Empaqueta un documento físico junto con todos sus datos (fechas, clientes, tipo) y lo envía a la base de datos.
+- **Listar:** Trae todo el catálogo de contratos de la empresa para armar las tablas.
+- **Leer PDF:** Solicita al servidor un enlace web especial, seguro y de un solo uso, para que el usuario pueda ver el PDF en pantalla.
+- **Modificar y Borrar:** Envían la orden de guardar los cambios que el usuario hizo en un formulario o destruir definitivamente un registro.
 
 ## Caché de Documentos
 
-Se implementa un caché simple para evitar peticiones redundantes:
-
-```typescript
-const DOCUMENTS_CACHE_TTL_MS = 15_000; // 15 segundos
-
-let documentsCache: { data: Document[]; timestamp: number } | null = null;
-let documentsInFlight: Promise<Document[]> | null = null;
-
-export async function getDocuments(): Promise<Document[]> {
-  // Retornar caché si es válido
-  if (documentsCache && Date.now() - documentsCache.timestamp < DOCUMENTS_CACHE_TTL_MS) {
-    return documentsCache.data;
-  }
-
-  // Evitar peticiones duplicadas
-  if (documentsInFlight) {
-    return documentsInFlight;
-  }
-
-  documentsInFlight = fetchAPI<Document[]>('/documents', { method: 'GET' })
-    .then((documents) => {
-      documentsCache = { data: documents, timestamp: Date.now() };
-      return documents;
-    })
-    .finally(() => {
-      documentsInFlight = null;
-    });
-
-  return documentsInFlight;
-}
-```
+El sistema implementa una "memoria a corto plazo" inteligente (Caché). Para no saturar al servidor pidiéndole exactamente la misma lista de contratos cada vez que el usuario cambia de pestaña rápidamente, la plataforma guarda una copia fotográfica temporal de los contratos durante 15 segundos. 
+Si el sistema necesita mostrar los contratos antes de que acaben esos 15 segundos, usa la copia guardada instantáneamente. Además, si el sistema detecta que ya hay una petición "en viaje" hacia el servidor, evita mandar otra idéntica al mismo tiempo.
 
 ## Tipos TypeScript
 
-```typescript
-// src/types/api.types.ts
+Este es el "Diccionario Oficial y Legal" de la plataforma. Para que la pantalla de la aplicación y el servidor no se confundan al hablar entre ellos, este bloque establece las reglas de negocio inflexibles:
+- Define exactamente cómo se compone un mensaje de chat (si lo dice el "usuario" o el "asistente").
+- Enumera los únicos estados que un contrato puede tener en toda la plataforma: Borrador, Pendiente de Firma, Activo, Próximo a Vencer, Vencido o Terminado.
+- Dicta qué tipos de moneda son válidos (Soles, Dólares o Euros).
+- Establece qué datos son obligatorios y cuáles son opcionales al momento de armar la ficha técnica de un nuevo contrato.
 
-// Chatbot
-export interface ChatRequest {
-  message: string;
-  thread_id?: number;
-}
-
-export interface ChatResponse {
-  response: string;
-  thread_id: number;
-}
-
-// Conversaciones
-export type MessageRole = 'user' | 'assistant';
-
-export interface ConversationMessage {
-  role: MessageRole;
-  content: string;
-  timestamp: string;
-}
-
-export interface Conversation {
-  id: number;
-  title: string;
-  organization_id: number;
-  user_id: number;
-  created_at: string;
-}
-
-export interface ConversationWithContent extends Conversation {
-  content: ConversationMessage[];
-  updated_at: string;
-}
-
-// Documentos
-export type DocumentType = 'COMPANY' | 'LABOR';
-export type DocumentState = 'DRAFT' | 'PENDING_SIGNATURE' | 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'TERMINATED';
-export type CurrencyType = 'PEN' | 'USD' | 'EUR';
-
-export interface DocumentServiceItem {
-  id?: number;
-  service_id: number;
-  description?: string | null;
-  value: number;
-  currency: CurrencyType;
-  start_date: string;
-  end_date: string;
-}
-
-export interface DocumentDraftPayload {
-  name?: string | null;
-  client?: string | null;
-  type?: DocumentType | null;
-  start_date?: string | null;
-  end_date?: string | null;
-  form_data: Record<string, unknown>;
-  state?: DocumentState | null;
-  folder_id?: number | null;
-  template_id?: string | null;
-  service_items?: DocumentServiceItem[];
-}
-
-export interface Document {
-  id: number;
-  name?: string | null;
-  client?: string | null;
-  type?: DocumentType | null;
-  start_date?: string | null;
-  end_date?: string | null;
-  form_data: Record<string, unknown>;
-  state?: DocumentState | null;
-  folder_id?: number | null;
-  file_path?: string | null;
-  file_name?: string | null;
-  service_items: DocumentServiceItem[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface DocumentCreateRequest {
-  file: File;
-  document: DocumentDraftPayload;
-}
-```
 ### Plantillas (Templates)
 
 | Método | Endpoint | Descripción | Timeout |
@@ -412,32 +148,8 @@ export interface DocumentCreateRequest {
 | GET | `/admin/catalogs` | Obtener catálogos del sistema (servicios, carpetas) | DEFAULT |
 | POST | `/admin/notifications/rules` | Configurar reglas del centro de alertas | DEFAULT |
 
-```typescript
-// Plantillas (Templates)
-export type TemplateState = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-export type TemplateFieldType = 'text' | 'number' | 'date' | 'time' | 'boolean';
-export type TemplateGenerationMode = 'adaptive' | 'strict';
+Al igual que con los contratos, el "Diccionario Oficial" se expande para la consola de administración. Aquí se dictan las leyes para la creación de plantillas de contratos: cuáles son sus estados permitidos (Borrador, Publicada o Archivada), qué tipo de datos se pueden exigir a la hora de llenarlas (si es un número, un texto, o una fecha) y cómo debe comportarse el motor de la IA a la hora de procesarlas.
 
-export interface TemplateField {
-  key: string;
-  type: TemplateFieldType;
-  label: string;
-  required: boolean;
-}
-
-export interface Template {
-  id: string;
-  name: string;
-  description?: string;
-  content: string; // Contenido en Markdown
-  state: TemplateState;
-  generation_mode: TemplateGenerationMode;
-  fields: TemplateField[];
-  created_at: string;
-  updated_at: string;
-}
-
-```
 ## Manejo de Estados en la UI
 
 Cada petición debe reflejar su estado en la interfaz:
@@ -449,15 +161,7 @@ Cada petición debe reflejar su estado en la interfaz:
 | `success` | Toast verde | Mostrar datos                                  |
 | `error` | Toast rojo / Banner | Mostrar mensaje, permitir reintentar           |
 
-```typescript
-export type ApiStatus = 'idle' | 'loading' | 'success' | 'error';
-
-export interface ApiState<T> {
-  data: T | null;
-  status: ApiStatus;
-  error: string | null;
-}
-```
+Este es el mecanismo traductor. Su objetivo es convertir los procesos invisibles de comunicación con el servidor en elementos visuales que la persona entienda. Vigila en qué "fase" está cada acción y le dice a la pantalla qué mostrar: las cajas grises parpadeantes mientras los datos cargan (loading), el aviso verde flotante cuando todo salió bien (success), o la alerta roja con botón de reintento si algo falló en internet (error).
 
 ## Manejo de Errores HTTP
 
