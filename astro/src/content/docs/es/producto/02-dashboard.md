@@ -1,9 +1,9 @@
 ---
 title: Dashboard
-description: Panel principal de ContractIA con métricas, documentos recientes y acciones rápidas.
+description: Panel principal de Pactus con métricas, documentos recientes y acciones rápidas.
 ---
 
-El **Dashboard** es el punto de entrada principal de ContractIA tras la autenticación. Proporciona una vista consolidada del estado de los contratos y accesos directos a las funcionalidades más importantes del sistema.
+El **Dashboard** es el punto de entrada principal de Pactus tras la autenticación. Proporciona una vista consolidada del estado de los contratos y accesos directos a las funcionalidades más importantes del sistema.
 
 ## Estructura del Dashboard
 
@@ -38,7 +38,7 @@ El Dashboard proporciona dos acciones rápidas principales:
 
 ## Dashboards Ejecutivos
 
-Para análisis executives profundos, el backend de ContractIA expone endpoints analíticos especializados que proporcionan:
+Para análisis executives profundos, el backend de Pactus expone endpoints analíticos especializados que proporcionan:
 
 - **Área de ingresos/gasto**: Gráficos de área para proyecciones de ingresos (empresa) o gasto de planilla (trabajador)
 - **Centro de alertas**: Categorías de contratos próximos a vencer o en vigencia prolongada
@@ -56,7 +56,7 @@ Para análisis executives profundos, consulte los módulos de dashboards especia
 | [Dashboards de Trabajador](/es/producto/08-dashboards-trabajador) | Gestión de RRHH, gasto de planilla y alertas | Director RRHH, CFO, Gerente Legal |
 
 Estos módulos proporcionan Ficha Técnica, Guía de Funcionalidad y Valor de Negocio para la toma de decisiones estratégicas.
-
+      
 ## Flujo de Navegación
 
 ```

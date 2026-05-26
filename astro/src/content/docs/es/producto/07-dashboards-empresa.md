@@ -14,8 +14,8 @@ El módulo de **Dashboards de Empresa** proporciona a los altos cargos una visi�
 | [Servicios más Contratados](/es/producto/dashboards-empresa/03-servicios-contratados) | Volumen y valor por categoría de servicio | Sales, Product Manager |
 | [Contratos Recientes](/es/producto/dashboards-empresa/05-contratos-recientes-b2b) | Lista de últimos contratos empresariales actualizados | Legal, Operations |
 | [Top Empresas (Volumen)](/es/producto/dashboards-empresa/06-top-empresas) | Ranking de clientes por carga operativa | Account Manager, Sales |
+| [Fidelidad (Retención)](/es/producto/dashboards-empresa/04-fidelidad-retencion) | Análisis de permanencia y lealtad de cuentas B2B | Account Manager, Director Comercial |
 
-> **Nota**: Los dashboards de Fidelidad/Retención, Permanencia Media, Churn y Clientes en Riesgo no están implementados en el backend actual.
 
 ## Resumen de KPIs Clave
 

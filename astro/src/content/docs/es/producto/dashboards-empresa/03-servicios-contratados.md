@@ -3,11 +3,9 @@ title: Servicios más Contratados
 description: Ranking de los servicios más contratados por empresas clientes.
 ---
 
-El dashboard de **Servicios más Contratados** presenta un ranking de los servicios más demandados por las empresas clientes.
+El dashboard de **Servicios más Contratados** presenta un ranking dinámico que identifica los productos y servicios más demandados por el portafolio de clientes empresariales.
 
-## Resumen Ejecutivo
-
-Este dashboard muestra los servicios más contratados por clientes empresariales, discriminando entre volumen (cantidad de contratos) y valor económico.
+Permite a los analistas discriminar entre los servicios con mayor volumen de adopción y aquellos que representan el mayor valor económico facturado.
 
 ## Ficha Técnica
 
@@ -23,34 +21,15 @@ Este dashboard muestra los servicios más contratados por clientes empresariales
 
 | Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|-----------|-------------|
-| `currency` | string | No | Filtra por moneda (PEN, USD, EUR) |
-| `sort_by` | string | No | Criterio de ordenamiento: `volume` (default) o `value` |
-
-### Origen de Datos
-
-| Entidad | Campos Utilizados |
-|---------|-------------------|
-| `Document` | id, type (COMPANY), state |
-| `ServiceItem` | service_id, value, currency |
-| `ServiceTable` | name, organization_id |
-
-### Filtros Aplicados
-
-- `type = COMPANY`
-- `state IN (ACTIVE, EXPIRING_SOON)`
-- `name IS NOT NULL`
-- `client IS NOT NULL`
-- `ServiceTable.organization_id` igual a la organización actual
+| `currency` | string | No | Filtra resultados por moneda (PEN, USD, EUR). |
+| `sort_by` | string | No | Criterio de ordenamiento: `volume` (por defecto) o `value`. |
 
 ### Lógica de Cálculo
+- Analiza todos los ítems de servicio asociados a contratos B2B vigentes.
+- Agrupa los registros por el tipo de servicio contratado, sumando tanto la cantidad total de contratos como el monto acumulado.
+- Retorna el top 5 absoluto según el criterio de ordenamiento solicitado.
 
-- **quantity**: Cantidad de contratos distintos asociados al servicio
-- **amount**: Suma de `service_items.value`
-- Retorna **máximo 5 servicios**
-- Ordenado por `sort_by` (volume o value)
-
-### Respuesta del Endpoint
-
+### Respuesta del Endpoint (Ejemplo)
 ```json
 [
   { "name": "Cloud Hosting", "quantity": 15, "amount": 45000.00 },
@@ -61,64 +40,8 @@ Este dashboard muestra los servicios más contratados por clientes empresariales
 ]
 ```
 
-### Frecuencia de Actualización
-
-| Métrica | Valor |
-|---------|-------|
-| **Latencia de Datos** | Tiempo real (consulta directa a BD) |
-
-## Guía de Funcionalidad
-
-### Comportamiento Visual
-
-| Elemento | Descripción |
-|----------|-------------|
-| **Ranking de 5 servicios** | Lista ordenada por volumen o valor |
-| **Columna cantidad** | Número de contratos distintos por servicio |
-| **Columna monto** | Valor total acumulado del servicio |
-
-### Interactividad
-
-| Interacción | Descripción |
-|-------------|-------------|
-| **Ordenar por volumen** | Ver servicios por cantidad de contratos |
-| **Ordenar por valor** | Ver servicios por facturación total |
-| **Filtro por moneda** | Ver solo servicios en PEN, USD o EUR |
-
-### Funcionalidades NO Implementadas
-
-- Top 10 (solo Top 5)
-- Últimos 12 meses móviles
-- Tendencia vs. período anterior
-- Valor promedio por contrato
-- Cambio de período
-- Click para filtrar contratos
-- Gráfico de doble eje
-- Exportar CSV
-
 ## Valor de Negocio
 
-### Stakeholder Objetivo
+Para un **Director Comercial** o **Product Manager**, entender cuáles servicios lideran en tracción o facturación es vital para definir estrategias de marketing, asignar presupuesto de ventas y tomar decisiones sobre el desarrollo o retiro de ciertos productos.
 
-| Rol | Necesidad |
-|-----|-----------|
-| **Director comercial** | Identificar servicios estrellas |
-| **Product Manager** | Decisiones sobre desarrollo de servicios |
-| **CFO** | Distribución de ingresos por línea |
-
-### Decisiones Asociadas
-
-- Desarrollo de nuevos servicios
-- Ajuste de precios por servicio
-- Asignación de presupuesto de marketing
-
-### Limitaciones
-
-Este dashboard **no incluye**:
-- Períodos históricos configurables
-- Tendencias temporales
-- Comparación entre períodos
-- Gráficos visuales
-- Exportación de datos
-
-> **Nota de alcance**: Esta documentación describe el estado actual del backend.
+Si un servicio presenta alta adopción (volumen) pero baja contribución (valor), se pueden aplicar estrategias de optimización de precios. Por el contrario, los servicios de alto valor con bajo volumen representan oportunidades para realizar campañas de *cross-selling* y maximizar la rentabilidad de clientes existentes.

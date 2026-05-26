@@ -113,7 +113,7 @@ Además de los campos visibles, existen campos operacionales requeridos por el b
 
 ## Generación de Borradores con IA
 
-ContractIA permite generar borradores de plantillas mediante **Gemini**:
+Pactus permite generar borradores de plantillas mediante **Gemini**:
 
 ### Desde Archivo PDF
 

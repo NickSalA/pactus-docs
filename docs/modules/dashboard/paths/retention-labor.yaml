@@ -1,0 +1,24 @@
+get:
+  tags:
+    - Dashboards
+  summary: Analíticas de retención de trabajadores
+  operationId: getDashboardRetentionLabor
+  responses:
+    '200':
+      description: Dashboard de retención de talento laboral (HR).
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/RetentionDashboardResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: Sin permisos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

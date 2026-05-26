@@ -3,7 +3,7 @@ title: "Visión General"
 description: "Marco de pruebas del backend: frameworks, cobertura y propósito."
 ---
 
-Las pruebas del backend de **ContractIA** constituyen un pilar fundamental para garantizar la calidad, estabilidad y correcta evolución del sistema. Este módulo documenta cómo se estructuran las pruebas, qué framework se utiliza y cuál es el objetivo de cada capa de testing.
+Las pruebas del backend de **Pactus** constituyen un pilar fundamental para garantizar la calidad, estabilidad y correcta evolución del sistema. Este módulo documenta cómo se estructuran las pruebas, qué framework se utiliza y cuál es el objetivo de cada capa de testing.
 
 ## Marco de Trabajo
 
@@ -48,7 +48,7 @@ Un conjunto sólido de pruebas permite refactorizar código con confianza. Si la
 
 ## Organización General
 
-Las pruebas se encuentran en el directorio `ContractAI-Backend/tests/` y se organizan siguiendo la misma estructura de módulos que el código fuente:
+Las pruebas se encuentran en el directorio `Pactus-Backend/tests/` y se organizan siguiendo la misma estructura de módulos que el código fuente:
 
 ```text
 tests/

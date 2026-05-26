@@ -1,4 +1,4 @@
-# ContractIA Documentation Site
+# Pactus Documentation Site
 
 Sitio de documentacion generado con Astro + Starlight.
 

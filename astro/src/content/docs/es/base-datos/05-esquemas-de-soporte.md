@@ -3,7 +3,7 @@ title: Esquemas de Soporte
 description: Cómo se apoyan los datos del dominio en Supabase Storage y en los esquemas internos de la plataforma.
 ---
 
-Además del esquema `public`, ContractIA utiliza capas de soporte de Supabase para resolver autenticación, almacenamiento de archivos e infraestructura interna. Esta sección se limita a esas piezas de soporte directo.
+Además del esquema `public`, Pactus utiliza capas de soporte de Supabase para resolver autenticación, almacenamiento de archivos e infraestructura interna. Esta sección se limita a esas piezas de soporte directo.
 
 ## Almacenamiento de Archivos
 

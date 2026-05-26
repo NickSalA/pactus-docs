@@ -3,7 +3,7 @@ title: Contratos
 description: Entidad Document, estados, tipos, servicios asociados, archivos, carpetas y permisos reales de uso.
 ---
 
-En ContractIA, un contrato se representa como la entidad `Document`. El frontend la consume desde `src/types/api.types.ts` y el backend la expone principalmente por los endpoints `/documents/`.
+En Pactus, un contrato se representa como la entidad `Document`. El frontend la consume desde `src/types/api.types.ts` y el backend la expone principalmente por los endpoints `/documents/`.
 
 ## Que Es
 

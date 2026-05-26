@@ -1,6 +1,6 @@
-# ContractIA Docs
+# Pactus Docs
 
-Este repositorio se utiliza exclusivamente para la documentacion para ContractIA.
+Este repositorio se utiliza exclusivamente para la documentacion para Pactus.
 
 ## Contenido
 

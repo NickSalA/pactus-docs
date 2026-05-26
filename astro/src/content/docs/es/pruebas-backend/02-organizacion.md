@@ -7,7 +7,7 @@ Las pruebas del backend siguen una estructura de directorios paralela al código
 
 ## Estructura de Directorios
 
-El directorio principal de pruebas se encuentra en `ContractAI-Backend/tests/` y contiene subdirectorios para cada módulo del sistema:
+El directorio principal de pruebas se encuentra en `Pactus-Backend/tests/` y contiene subdirectorios para cada módulo del sistema:
 
 ```text
 tests/

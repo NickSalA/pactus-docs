@@ -3,7 +3,7 @@ title: Usuarios y Organizaciones
 description: Usuario funcional, organizacion, miembros, roles y preferencias de notificacion.
 ---
 
-ContractIA separa la identidad autenticada del usuario funcional. La identidad vive en Supabase Auth; el usuario de negocio vive en el backend como `User`.
+Pactus separa la identidad autenticada del usuario funcional. La identidad vive en Supabase Auth; el usuario de negocio vive en el backend como `User`.
 
 ## Usuario Funcional
 

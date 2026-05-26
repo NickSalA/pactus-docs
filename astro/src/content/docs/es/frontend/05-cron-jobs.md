@@ -3,177 +3,71 @@ title: "Cron Jobs"
 description: "Endpoints de cron jobs para notificaciones periódicas y warmup de la aplicación."
 ---
 
-ContractIA utiliza **Vercel Cron** para ejecutar tareas programadas, como el envío de notificaciones de contratos próximos a vencer. Estos endpoints son protegidos y se comunican con el backend.
+Pactus utiliza **Vercel Cron** para ejecutar tareas programadas. Estos endpoints actúa como proxy seguro entre Vercel y el backend FastAPI.
 
 ## Cron Jobs Disponibles
 
 | Endpoint | Descripción | Programación |
 |----------|-------------|-------------|
-| `/api/cron/send-emails` | Envío de alertas de contratos por vencer | 8:00 AM Lima (0 13 * * * UTC) |
-| `/api/cron/warmup` | Warmup de la aplicación | 12:00 AM Lima (0 5 * * * UTC) |
+| `/api/cron/send-emails` | Envío de alertas de contratos por vencer | `0 13 * * *` UTC (8:00 AM Lima) |
+| `/api/cron/warmup` | Warmup del contenedor backend | `0 5 * * *` UTC (12:00 AM Lima) |
 
 ## send-emails
 
-### Propósito
+**Propósito:** Proxy que reenvía la petición al backend para enviar alertas por email sobre contratos próximos a vencer.
 
-El endpoint `/api/cron/send-emails` envía notificaciones por email a los usuarios sobre contratos próximos a vencer. Se ejecuta diariamente a las 8:00 AM (hora de Lima).
+**Flujo:**
+1. Vercel Cron invoca el endpoint con `Authorization: Bearer {CRON_SECRET}`
+2. El route valida el secret
+3. Si es válido, reenvía `POST /notifications/cron/send-emails` al backend con header `X-Cron-Secret`
 
-### Programación
+**Backend:** `POST {NEXT_PUBLIC_API_URL}/notifications/cron/send-emails`
 
-```cron
-# Vercel Cron
-0 13 * * *  # UTC = 8:00 AM Lima (UTC-5)
-```
-
-### Flujo
-
-```
-Vercel Cron → GET /api/cron/send-emails 
-→ Valida CRON_SECRET 
-→ POST /notifications/cron/send-emails (Backend)
-→ Backend envía emails via Gmail
-```
-
-### Implementación
-
-```typescript
-// src/app/api/cron/send-emails/route.ts
-export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // Valida que la petición venga de Vercel
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  // Reenvía al backend con X-Cron-Secret
-  const response = await fetch(`${apiUrl}/notifications/cron/send-emails`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Cron-Secret": cronSecret,
-    },
-  });
-
-  return NextResponse.json(await response.json());
-}
-```
+**Seguridad:**
+- Valida `Authorization: Bearer {CRON_SECRET}` contra `CRON_SECRET` de env
+- Reenvía el secret al backend via header `X-Cron-Secret` para autorización sin JWT
 
 ## warmup
 
-### Propósito
+**Propósito:** Mantiene el contenedor del backend en Azure Container Apps "caliente" para evitar cold starts.
 
-El endpoint `/api/cron/warmup` mantiene las funciones Lambda "calientes" para evitar cold starts. Realiza un ping al backend para despertar el contenedor.
+**Flujo:**
+1. Vercel Cron invoca el endpoint con `Authorization: Bearer {CRON_SECRET}`
+2. El route valida el secret
+3. Si es válido, envía un GET a la raíz del backend (`/`)
+4. Timeout de 8 segundos con AbortController
 
-### Programación
+**Backend:** `GET {baseUrl}/` (raíz del API, no `/api/`)
 
-```cron
-# Vercel Cron
-0 5 * * *  # UTC = 12:00 AM Lima (UTC-5)
-```
+**Manejo de errores:**
+- Si ocurre error o timeout, retorna `{ ok: true, warmed: false }` — no es crítico
 
-### Implementación
-
-```typescript
-// src/app/api/cron/warmup/route.ts
-export const runtime = "nodejs";
-
-export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // Valida que la petición venga de Vercel
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8_000);
-
-    const baseUrl = apiUrl.replace(/\/api\/v1\/?$/, "");
-    const response = await fetch(`${baseUrl}/`, {
-      method: "GET",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    return NextResponse.json({ ok: true, status: response.status });
-  } catch {
-    // Un error o timeout aquí no es crítico — el contenedor igual se despertó
-    return NextResponse.json({ ok: true, warmed: false });
-  }
-}
-```
-
-## Seguridad
-
-### Variables de Entorno
-
-| Variable | Descripción |
-|----------|-------------|
-| `CRON_SECRET` | Secreto compartido entre Vercel y la app |
-| `NEXT_PUBLIC_API_URL` | URL del backend FastAPI |
-
-### Validación
-
-Cada cron job valida el header `Authorization`:
-
-```typescript
-if (authHeader !== `Bearer ${cronSecret}`) {
-  return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-}
-```
-
-###-header X-Cron-Secret
-
-El frontend reenvía el secreto al backend mediante el header `X-Cron-Secret`, permitiendo que el backend autorice sin JWT.
-
-## Configuración en Vercel
+## Configuración
 
 ### vercel.json
 
 ```json
 {
   "crons": [
-    {
-      "path": "/api/cron/send-emails",
-      "schedule": "0 13 * * *"
-    },
-    {
-      "path": "/api/cron/warmup",
-      "schedule": "0 5 * * *"
-    }
+    { "path": "/api/cron/warmup", "schedule": "0 5 * * *" },
+    { "path": "/api/cron/send-emails", "schedule": "0 13 * * *" }
   ]
 }
 ```
 
-## Diferencias con Otros Endpoints
+Vercel ejecuta automáticamente estos jobs según la programación especificada.
 
-| Característica | Endpoints Normales | Cron Jobs |
-|---------------|-------------------|----------|
-| Autenticación | JWT (Bearer) | CRON_SECRET |
-| Programación | Bajo demanda | Programada |
-| Timeout | Default | maxDuration: 60s |
-| Propósito | Interacción usuario | Tareas automate |
+### Variables de Entorno
+
+| Variable | Descripción |
+|----------|-------------|
+| `CRON_SECRET` | Secreto compartido entre Vercel y el frontend para validación |
+| `NEXT_PUBLIC_API_URL` | URL base del backend FastAPI |
 
 ## Errores Comunes
 
 | Error | Causa | Solución |
 |-------|------|----------|
-| 401 Unauthorized | CRON_SECRET incorrecto | Verificar variable en Vercel |
+| 401 Unauthorized | `CRON_SECRET` incorrecto o ausente | Verificar variable en Vercel |
 | 500 Backend error | Fallo en el backend | Revisar logs del backend |
-| Timeout | Función fría | Usar warmup |
-
-## Mejores Prácticas
-
-1. **No exposing secrets**: El CRON_SECRET nunca se expone al cliente
-2. **Retry logic**: Configurar reintentos en Vercel para fallos
-3. **Logging**: Registrar ejecuciones en el backend
-4. **Monitoring**: Alertas si el cron falla
+| 500 API URL no configurada | `NEXT_PUBLIC_API_URL` no definida | Agregar variable en Vercel |

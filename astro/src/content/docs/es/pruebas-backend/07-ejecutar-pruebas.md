@@ -3,14 +3,14 @@ title: "Ejecutar Pruebas"
 description: "Comandos para ejecutar las pruebas del backend."
 ---
 
-Este documento describe los comandos disponibles para ejecutar las pruebas del backend de ContractIA.
+Este documento describe los comandos disponibles para ejecutar las pruebas del backend de Pactus.
 
 ## Requisitos Previos
 
 Las pruebas requieren las dependencias de desarrollo instaladas:
 
 ```bash
-cd ContractAI-Backend
+cd Pactus-Backend
 uv sync --group dev
 ```
 

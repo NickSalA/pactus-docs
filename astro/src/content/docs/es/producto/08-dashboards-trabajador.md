@@ -12,8 +12,9 @@ El módulo de **Dashboards de Trabajador** proporciona a los altos cargos una vi
 | [Gasto de Planilla](/es/producto/dashboards-trabajador/01-gasto-planilla) | Proyección de gasto laboral con línea de tendencia | CFO, Director de RRHH |
 | [Centro de Alertas (Trabajadores)](/es/producto/dashboards-trabajador/02-centro-alertas-trabajador) | Alertas de vencimiento de contratos de trabajadores a 30/60 días y vigencia prolongada | Gerente de RRHH, Legal |
 | [Contratos Recientes (Trabajadores)](/es/producto/dashboards-trabajador/03-contratos-recientes-trabajador) | Lista de últimos contratos laborales actualizados | Gerente de RRHH, Operations |
+| [Retención de Talento](/es/producto/dashboards-trabajador/04-ranking-retencion-trabajador) | Análisis de retención, antigüedad y renovación laboral | Director de RRHH |
+| [Origen de Contratos](/es/producto/dashboards-trabajador/05-origen-contratos) | Procedencia y métodos de creación de contratos | Operations, RRHH |
 
-> **Nota**: Los dashboards de Ranking de Retención, Antigüedad Promedio y Retención Histórica no están implementados en el backend actual.
 
 ## Resumen de KPIs Clave
 
