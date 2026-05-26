@@ -6,12 +6,12 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'ContractIA',
+			title: 'Pactus',
 			defaultLocale: 'es',
 			locales: {
-				es: { label: 'Español'},
+				es: { label: 'Espaï¿½ol'},
 			},
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/NickSalA/ContractIA' }],
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/NickSalA/Pactus' }],
 			sidebar: [
 				{
 					label: 'Producto',

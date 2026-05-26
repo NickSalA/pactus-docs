@@ -3,11 +3,11 @@ title: Modelo Entidad Relación
 description: Relaciones vigentes entre las tablas de negocio en Supabase y su enlace con Auth y Storage.
 ---
 
-Este documento resume la estructura relacional actual de **ContractIA** en Supabase.
+Este documento resume la estructura relacional actual de **Pactus** en Supabase.
 
 ## MER
 
-![Modelo Entidad-Relacion de ContractIA](../../../../assets/base-datos/02-modelo-entidad-relacion/mer-bd.png)
+![Modelo Entidad-Relacion de Pactus](../../../../assets/base-datos/02-modelo-entidad-relacion/mer-bd.png)
 
 La imagen del MER puede actualizarse por separado. La vista textual y las relaciones listadas a continuación reflejan el esquema vigente del producto.
 

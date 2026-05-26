@@ -3,7 +3,7 @@ title: Supabase Auth y Seguridad
 description: Cómo se integra Supabase Auth con el modelo de usuarios del sistema y cuál es el estado actual de la seguridad de acceso.
 ---
 
-ContractIA utiliza **Supabase Auth** como capa de identidad y organiza el acceso alrededor de dos niveles:
+Pactus utiliza **Supabase Auth** como capa de identidad y organiza el acceso alrededor de dos niveles:
 
 - autenticación y sesión con Google OAuth
 - control de acceso del dominio desde `public.users`, `organization_id` y la lógica del backend
@@ -52,7 +52,7 @@ La relación es lógica y no física. La intención es mantener desacoplado el s
 
 ## Rol de `public.users`
 
-La tabla `public.users` complementa lo que Supabase Auth no resuelve por sí solo. En ella se conserva el contexto funcional del usuario dentro de ContractIA.
+La tabla `public.users` complementa lo que Supabase Auth no resuelve por sí solo. En ella se conserva el contexto funcional del usuario dentro de Pactus.
 
 Los campos más importantes para ese objetivo son:
 
@@ -102,7 +102,7 @@ En la implementación actual:
 
 La decisión de separar `auth.users` de `public.users` responde a una necesidad concreta del proyecto: mantener una autenticación moderna y delegada en Supabase, pero conservar en el dominio propio toda la información que el producto necesita para operar.
 
-Con esa base, ContractIA puede:
+Con esa base, Pactus puede:
 
 - autenticar usuarios con Google sin construir un sistema propio de login
 - asociar cada usuario a una organización

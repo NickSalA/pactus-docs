@@ -1,16 +1,16 @@
 ---
 title: Vision General del Dominio
-description: Mapa simple de las entidades funcionales de ContractIA y su relacion con frontend, backend y OpenAPI.
+description: Mapa simple de las entidades funcionales de Pactus y su relacion con frontend, backend y OpenAPI.
 ---
 
-El dominio de **ContractIA** se organiza alrededor de organizaciones, usuarios y contratos. Esta seccion explica las entidades como las usa la aplicacion, no como tablas SQL completas ni como schemas OpenAPI exhaustivos.
+El dominio de **Pactus** se organiza alrededor de organizaciones, usuarios y contratos. Esta seccion explica las entidades como las usa la aplicacion, no como tablas SQL completas ni como schemas OpenAPI exhaustivos.
 
 Las fuentes usadas para esta documentacion son:
 
-- Tipos del frontend: `ContractAI-Frontend/src/types/api.types.ts`
-- Clientes API del frontend: `ContractAI-Frontend/src/lib/api/*.ts`
-- Reglas de permisos del frontend: `ContractAI-Frontend/src/lib/permissions.ts`
-- Routers y servicios del backend: `ContractAI-Backend/src/contractai_backend/modules/**`
+- Tipos del frontend: `Pactus-Frontend/src/types/api.types.ts`
+- Clientes API del frontend: `Pactus-Frontend/src/lib/api/*.ts`
+- Reglas de permisos del frontend: `Pactus-Frontend/src/lib/permissions.ts`
+- Routers y servicios del backend: `Pactus-Backend/src/pactus_backend/modules/**`
 - Contrato HTTP: `openapi.bundle.yaml`
 - Modelo persistente: `base-datos/03-tablas-del-dominio.md`
 

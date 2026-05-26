@@ -3,7 +3,7 @@ title: Agente IA
 description: Chatbot conversacional basado en LangGraph para interactuar con el contenido de los contratos.
 ---
 
-El **Agente IA** es el módulo de inteligencia artificial de ContractIA. Permite a los usuarios realizar preguntas en lenguaje natural sobre el contenido de sus contratos y recibir respuestas fundamentadas mediante técnicas de Retrieval-Augmented Generation (RAG).
+El **Agente IA** es el módulo de inteligencia artificial de Pactus. Permite a los usuarios realizar preguntas en lenguaje natural sobre el contenido de sus contratos y recibir respuestas fundamentadas mediante técnicas de Retrieval-Augmented Generation (RAG).
 
 ## Arquitectura del Agente
 

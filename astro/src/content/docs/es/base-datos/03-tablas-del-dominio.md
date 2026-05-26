@@ -3,7 +3,7 @@ title: Tablas del Dominio
 description: Diccionario actualizado de las tablas del esquema public con columnas, relaciones y notas operativas del modelo.
 ---
 
-El esquema `public` concentra las tablas que modelan el dominio principal de ContractIA. A continuación se documenta la estructura vigente que utiliza el backend del sistema, con sus relaciones y notas operativas más relevantes.
+El esquema `public` concentra las tablas que modelan el dominio principal de Pactus. A continuación se documenta la estructura vigente que utiliza el backend del sistema, con sus relaciones y notas operativas más relevantes.
 
 ## Resumen del Esquema `public`
 

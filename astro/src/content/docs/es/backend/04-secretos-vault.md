@@ -3,13 +3,13 @@ title: Secretos y Key Vault
 description: Cómo se resuelve la configuración sensible del backend y qué rol cumple Azure Key Vault dentro del proyecto.
 ---
 
-El backend de **ContractIA** concentra su configuración en la clase `Settings` de `shared/config.py`, pero no trata todos los valores de la misma manera. Algunos se resuelven con defaults razonables y otros dependen de secretos externos.
+El backend de **Pactus** concentra su configuración en la clase `Settings` de `shared/config.py`, pero no trata todos los valores de la misma manera. Algunos se resuelven con defaults razonables y otros dependen de secretos externos.
 
 ## Punto Central de Configuración
 
 La configuración del backend vive en:
 
-- `ContractAI-Backend/src/contractai_backend/shared/config.py`
+- `Pactus-Backend/src/pactus_backend/shared/config.py`
 
 Esa clase define parámetros para:
 

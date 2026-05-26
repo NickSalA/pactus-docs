@@ -1,9 +1,9 @@
 ---
 title: Metodología y Estándares
-description: Reglas de arquitectura, organización de código y convenciones para ContractIA
+description: Reglas de arquitectura, organización de código y convenciones para Pactus
 ---
 
-Para asegurar que **ContractIA** sea un proyecto escalable, mantenible y colaborativo, se establecen directrices estrictas sobre la metodología de trabajo, la organización del código y las convenciones de desarrollo.
+Para asegurar que **Pactus** sea un proyecto escalable, mantenible y colaborativo, se establecen directrices estrictas sobre la metodología de trabajo, la organización del código y las convenciones de desarrollo.
 
 ## Metodología de Trabajo
 

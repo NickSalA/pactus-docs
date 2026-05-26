@@ -1,6 +1,6 @@
 ---
 title: Visión General de la Base de Datos
-description: Cómo se organiza la persistencia relacional y el soporte documental de ContractIA en Supabase.
+description: Cómo se organiza la persistencia relacional y el soporte documental de Pactus en Supabase.
 ---
 
 Esta documentación describe la **base de datos vigente del producto en Supabase**. El foco está puesto en el modelo persistente que utiliza la aplicación y en los soportes directos de Supabase necesarios para operar el dominio documental.

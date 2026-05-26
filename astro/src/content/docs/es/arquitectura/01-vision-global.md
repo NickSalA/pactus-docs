@@ -1,15 +1,15 @@
 ---
 title: Vision Global
-description: Vista general de la arquitectura de ContractIA y flujo principal de procesamiento.
+description: Vista general de la arquitectura de Pactus y flujo principal de procesamiento.
 ---
 
-El sistema ContractIA está diseñado como una plataforma integral de análisis legal basada en Inteligencia Artificial. La arquitectura se divide en capas de responsabilidad clara para garantizar que el procesamiento de documentos legales sea preciso, seguro y escalable.
+El sistema Pactus está diseñado como una plataforma integral de análisis legal basada en Inteligencia Artificial. La arquitectura se divide en capas de responsabilidad clara para garantizar que el procesamiento de documentos legales sea preciso, seguro y escalable.
 
 ## Diagrama de la Arquitectura
 
 A continuación se presenta el flujo de datos desde la interacción del usuario hasta la persistencia y el procesamiento de IA:
 
-![Diagrama de arquitectura de ContractIA](../../../../assets/arquitectura/01-vision-global/arquitectura-global.svg)
+![Diagrama de arquitectura de Pactus](../../../../assets/arquitectura/01-vision-global/arquitectura-global.svg)
 
 ## Descripción de los Flujos de Trabajo
 

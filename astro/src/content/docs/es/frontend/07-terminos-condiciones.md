@@ -3,7 +3,7 @@ title: "Páginas Legales"
 description: "Páginas de términos de servicio, política de privacidad y enlaces desde el login."
 ---
 
-ContractIA incluye páginas legales para cumplir con requisitos legales y de transparencia: Términos de Servicio y Política de Privacidad.
+Pactus incluye páginas legales para cumplir con requisitos legales y de transparencia: Términos de Servicio y Política de Privacidad.
 
 ## Páginas Disponibles
 
@@ -22,7 +22,7 @@ ContractIA incluye páginas legales para cumplir con requisitos legales y de tra
 
 Los términos incluyen:
 
-1. **Descripción del servicio**: Funcionalidades de ContractIA
+1. **Descripción del servicio**: Funcionalidades de Pactus
 2. **Uso permitido**: Normas de uso legal
 3. **Cuentas**: Responsabilidades del usuario
 4. **Datos y contenido**: Propiedad del usuario
@@ -36,7 +36,7 @@ Los términos incluyen:
 
 ### Metadata
 
-**Configuración SEO y Pestaña del Navegador:** Es una etiqueta de configuración invisible que le dice al navegador de internet qué título exacto mostrar en la pestaña superior (por ejemplo: "Términos de Servicio | ContractAI"). También provee una breve descripción oficial que plataformas como Google o WhatsApp utilizarán si alguien comparte el enlace.
+**Configuración SEO y Pestaña del Navegador:** Es una etiqueta de configuración invisible que le dice al navegador de internet qué título exacto mostrar en la pestaña superior (por ejemplo: "Términos de Servicio | Pactus"). También provee una breve descripción oficial que plataformas como Google o WhatsApp utilizarán si alguien comparte el enlace.
 
 ### Fecha de Actualización
 

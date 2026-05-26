@@ -3,7 +3,7 @@ title: Contratos API
 description: Definición formal de los contratos HTTP entre el frontend y el backend implementado en FastAPI.
 ---
 
-Los contratos API de **ContractIA** describen cómo se comunican el frontend y el backend en términos concretos: qué ruta existe, qué método HTTP utiliza, qué body acepta, qué respuesta devuelve y qué restricciones de acceso aplica.
+Los contratos API de **Pactus** describen cómo se comunican el frontend y el backend en términos concretos: qué ruta existe, qué método HTTP utiliza, qué body acepta, qué respuesta devuelve y qué restricciones de acceso aplica.
 
 En la práctica, este contrato evita ambigüedades entre equipos. El frontend no debería adivinar payloads ni respuestas, y el backend no debería exponer formatos distintos a los que han quedado documentados.
 
@@ -11,7 +11,7 @@ En la práctica, este contrato evita ambigüedades entre equipos. El frontend no
 
 La fuente de verdad de la API vive en dos capas complementarias:
 
-- el backend real en `ContractAI-Backend/src/contractai_backend/modules/*/api/routers*.py`
+- el backend real en `Pactus-Backend/src/pactus_backend/modules/*/api/routers*.py`
 - la especificación OpenAPI del repositorio en `docs/openapi.yaml` y `docs/modules/**/*.yaml`
 - el bundle para visualizadores Swagger/OpenAPI en `openapi.bundle.yaml`
 
