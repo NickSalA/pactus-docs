@@ -33,3 +33,15 @@ get:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+    '500':
+      description: Error interno al listar conversaciones.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/InternalServerError'
+    '503':
+      description: Persistencia de conversaciones no disponible.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'

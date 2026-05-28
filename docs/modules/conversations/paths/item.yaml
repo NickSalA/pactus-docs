@@ -31,3 +31,111 @@ get:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '500':
+      description: Error interno al obtener la conversación.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/InternalServerError'
+    '503':
+      description: Persistencia de conversaciones no disponible.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'
+
+patch:
+  summary: Actualizar una conversación
+  description: Actualiza el título de una conversación del usuario autenticado.
+  operationId: updateConversation
+  tags:
+    - Conversaciones
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/ConversationUpdateRequest'
+  responses:
+    '200':
+      description: Conversación actualizada satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ConversationRead'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '404':
+      description: Conversación no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '409':
+      description: Conflicto al actualizar la conversación.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '500':
+      description: Error interno al actualizar la conversación.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/InternalServerError'
+    '503':
+      description: Persistencia de conversaciones no disponible.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'
+    '422':
+      description: Datos inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
+
+delete:
+  summary: Eliminar una conversación
+  description: Elimina una conversación del usuario autenticado.
+  operationId: deleteConversation
+  tags:
+    - Conversaciones
+  responses:
+    '204':
+      description: Conversación eliminada satisfactoriamente.
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '404':
+      description: Conversación no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '409':
+      description: Conflicto al eliminar la conversación.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '500':
+      description: Error interno al eliminar la conversación.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/InternalServerError'
+    '503':
+      description: Persistencia de conversaciones no disponible.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'

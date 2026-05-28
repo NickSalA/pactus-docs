@@ -77,6 +77,8 @@ paths:
     $ref: 'modules/users/paths/me.yaml'
   /chatbot/:
     $ref: 'modules/chat/paths.yaml'
+  /conversations:
+    $ref: 'modules/conversations/paths/collection.yaml'
   /conversations/user/{user_id}:
     $ref: 'modules/conversations/paths/user.yaml'
   /conversations/{conversation_id}:
