@@ -5,7 +5,7 @@ ConversationMessage:
       type: string
       enum:
         - user
-        - assistant
+        - bot
     content:
       type: string
     chart:
@@ -117,7 +117,7 @@ ConversationRead:
     content:
       type: array
       items:
-        $ref: '#/ConversationMessage'
+        $ref: "#/ConversationMessage"
     created_at:
       type: string
       format: date-time
@@ -159,9 +159,9 @@ ConversationList:
     - updated_at
 
 ConversationResponse:
-  $ref: '#/ConversationRead'
+  $ref: "#/ConversationRead"
 
 ConversationListResponse:
   type: array
   items:
-    $ref: '#/ConversationList'
+    $ref: "#/ConversationList"
