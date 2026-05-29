@@ -8,6 +8,9 @@ ConversationMessage:
         - assistant
     content:
       type: string
+    chart:
+      $ref: '#/ChartData'
+
     timestamp:
       type: string
       format: date-time
@@ -16,8 +19,70 @@ ConversationMessage:
     - content
     - timestamp
 
-ConversationCreateRequest:
+ChartData:
   type: object
+  properties:
+    type:
+      type: string
+      enum:
+        - bar
+        - line
+        - pie
+    layout:
+      type: string
+      enum:
+        - vertical
+        - horizontal
+        - centric
+    title:
+      type: string
+    config:
+      type: object
+      properties:
+        categoryKey:
+          type: string
+        series:
+          type: array
+          items:
+            type: object
+            properties:
+              dataKey:
+                type: string
+              name:
+                type: string
+              color:
+                type: string
+            required:
+              - dataKey
+              - name
+      required:
+        - categoryKey
+        - series
+    data:
+      type: array
+      description: |
+        Arreglo de objetos con llaves dinámicas en inglés. El contenido dependerá de la consulta:
+        * Top Servicios por Monto: { "name": string, "value": number }
+        * Concentración Contratos/Mes: { "month": string, "contracts": number }
+        * Valor Promedio (Multi-serie): { "month": string, "[serviceName]": number }
+        * Concentración de Ingresos (Pie): { "name": string, "value": number }
+        * Concentración de Ingresos (Barras): { "name": string, "percentage": number }
+      items:
+        type: object
+        additionalProperties:
+          anyOf:
+            - type: string
+            - type: number
+  required:
+    - type
+    - layout
+    - title
+    - config
+    - data
+
+
+ConversationCreateRequest:
+  type: objecto
   properties:
     title:
       type: string
