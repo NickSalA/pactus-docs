@@ -26,3 +26,5 @@ ChatResponse:
       type: integer
       description: ID de la conversación.
       example: 12
+    chart:
+      $ref: '../../conversations/schemas/schema.yaml#/ChartData'
