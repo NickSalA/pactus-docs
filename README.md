@@ -24,7 +24,7 @@ npm run dev
 Generar un archivo único de OpenAPI:
 
 ```bash
-npx @redocly/cli bundle docs/openapi.yaml --output dist/openapi-single.yaml
+npx @redocly/cli bundle ./docs/openapi.yaml --output openapi.bundle.yaml
 ```
 
 ## Convenciones de commits
