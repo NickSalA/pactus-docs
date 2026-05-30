@@ -80,18 +80,6 @@ ChartData:
     - config
     - data
 
-
-ConversationCreateRequest:
-  type: objecto
-  properties:
-    title:
-      type: string
-      minLength: 1
-      pattern: '.*\S.*'
-      description: Título de la conversación. No puede estar vacío y el backend recorta espacios externos.
-  required:
-    - title
-
 ConversationUpdateRequest:
   type: object
   properties:
