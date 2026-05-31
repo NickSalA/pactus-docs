@@ -96,3 +96,50 @@ ImportResponse:
     - queued_files
     - index_name
     - job_id
+
+JobStatus:
+  type: string
+  enum:
+    - RUNNING
+    - COMPLETED
+    - FAILED
+
+FilePhase:
+  type: string
+  enum:
+    - PENDING
+    - DATABASE
+    - KNOWLEDGE_BASE
+    - COMPLETED
+    - FAILED
+
+FileImportStatus:
+  type: object
+  properties:
+    file_id:
+      type: string
+    phase:
+      $ref: '#/FilePhase'
+    error:
+      type: string
+      nullable: true
+  required:
+    - file_id
+    - phase
+
+ImportEventData:
+  type: object
+  properties:
+    job_id:
+      type: string
+      format: uuid
+    status:
+      $ref: '#/JobStatus'
+    files:
+      type: array
+      items:
+        $ref: '#/FileImportStatus'
+  required:
+    - job_id
+    - status
+    - files

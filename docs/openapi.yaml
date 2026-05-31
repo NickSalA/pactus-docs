@@ -103,6 +103,8 @@ paths:
     $ref: 'modules/integrations/paths/download.yaml'
   /integrations/drive/import:
     $ref: 'modules/integrations/paths/import.yaml'
+  /integrations/drive/import/{job_id}/events:
+    $ref: 'modules/integrations/paths/import-events.yaml'
   /organizations:
     $ref: 'modules/organizations/paths/collection.yaml'
   /organizations/me:
