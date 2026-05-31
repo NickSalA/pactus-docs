@@ -767,12 +767,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ya existe una importación en progreso. Espere a que termine.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: Datos inválidos.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /integrations/drive/import/{job_id}/events:
+    get:
+      tags:
+        - Integraciones
+      summary: Obtener eventos de importación (SSE)
+      description: |
+        Conecta a un stream de eventos Server-Sent Events para seguir el progreso de una importación de archivos de Google Drive.
+
+        El contenido de data: sigue la estructura definida en el schema ImportEventData.
+      operationId: getImportEvents
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID del trabajo de importación.
+      responses:
+        '200':
+          description: Stream de eventos SSE.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example:
+                event: initial_state
+                data:
+                  job_id: 550e8400-e29b-41d4-a716-446655440000
+                  status: RUNNING
+                  files:
+                    - file_id: abc123
+                      phase: PENDING
+                      error: null
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No tiene acceso a este trabajo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Trabajo no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /organizations:
     get:
       summary: Listar organizaciones
@@ -2721,10 +2779,14 @@ components:
           type: integer
         index_name:
           type: string
+        job_id:
+          type: string
+          format: uuid
       required:
         - message
         - queued_files
         - index_name
+        - job_id
     OrganizationResponse:
       type: object
       properties:
