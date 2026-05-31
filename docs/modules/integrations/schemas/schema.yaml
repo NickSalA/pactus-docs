@@ -88,7 +88,11 @@ ImportResponse:
       type: integer
     index_name:
       type: string
+    job_id:
+      type: string
+      format: uuid
   required:
     - message
     - queued_files
     - index_name
+    - job_id
