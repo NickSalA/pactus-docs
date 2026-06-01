@@ -80,9 +80,10 @@ El agente filtra el acceso a documentos según el rol del usuario:
 | Elemento | Descripción |
 |----------|-------------|
 | **Mensaje del Usuario** | Preguntas y comandos |
-| **Mensaje del Bot** | Respuestas con Markdown renderizado |
+| **Mensaje del Bot** | Respuestas con Markdown renderizado y graficos dinamicos |
 | **Timestamps** | Hora de cada mensaje |
 | **Citations** | Referencias a los documentos fuente |
+| **Visualizaciones** | Graficos bar/line/pie cuando el agente lo estima pertinente |
 
 ### Composer
 
@@ -137,6 +138,20 @@ El sistema de recuperación de información funciona de la siguiente manera:
 ### Streaming de Respuestas
 
 La interfaz muestra la respuesta del agente en tiempo real conforme se genera, proporcionando una experiencia de usuario fluida e inmediata.
+
+### Visualizaciones Dinamicas
+
+El agente puede generar graficos dinamicos para ilustrar respuestas que involucran datos estructurados. El motor de renderizado en el frontend soporta tres tipos de visualizaciones:
+
+| Tipo | Uso |
+|------|-----|
+| `bar` | Rankings, comparaciones de cantidad |
+| `line` | Tendencias temporales, proyecciones |
+| `pie` | Distribuciones, proporciones |
+
+El agente decide automaticamente si una respuesta se beneficia de una visualizacion. Cuando es asi, la respuesta incluye un objeto `chart` junto con el texto explicativo. El frontend renderiza el grafico usando `ChartRenderer` con dispatch por tipo.
+
+Ver [Graficos Dinamicos en Chatbot](../frontend/09-graficos-dinamicos.md) para detalles de implementacion.
 
 ### memoria Conversacional
 
