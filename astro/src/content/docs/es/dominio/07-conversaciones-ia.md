@@ -3,7 +3,7 @@ title: Conversaciones IA
 description: Chatbot, mensajes, conversaciones persistidas y endpoints reales usados por el frontend.
 ---
 
-El modulo de IA expone un chatbot y conversaciones persistidas. El frontend usa `ChatRequest`, `ChatResponse`, `Conversation` y `ConversationWithContent`.
+El modulo de IA expone un chatbot y conversaciones persistidas. El frontend usa `ChatRequest`, `ChatResponse`, `ConversationList` y `ConversationRead`.
 
 ## Chatbot
 
@@ -54,10 +54,10 @@ Una conversacion pertenece a un usuario y una organizacion. En frontend se manej
 
 | Tipo | Uso |
 |------|-----|
-| `ApiChatRequest` | Envio de mensaje `{ message, thread_id? }` |
-| `ApiChatResponse` | Respuesta del agente `{ response, thread_id, chart? }` |
-| `ApiConversationList` | Item resumido para historial |
-| `ApiConversationRead` | Conversacion completa con mensajes |
+| `ChatRequest` | Envio de mensaje `{ message, thread_id? }` |
+| `ChatResponse` | Respuesta del agente `{ response, thread_id, chart? }` |
+| `ConversationList` | Item resumido para historial |
+| `ConversationRead` | Conversacion completa con mensajes |
 
 El backend expone tambien `organization_id`, `user_id`, `created_at` y `updated_at` en el schema de conversacion.
 
