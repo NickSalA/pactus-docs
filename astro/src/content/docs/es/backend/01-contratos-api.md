@@ -244,7 +244,6 @@ El frontend utiliza **Google Picker API** para la selección visual de archivos.
   {
     "message": "La importación ha comenzado en segundo plano.",
     "queued_files": 1,
-    "skipped_files": 0,
     "index_name": "drive_contracts_index",
     "job_id": "550e8400-e29b-41d4-a716-446655440000"
   }
