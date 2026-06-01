@@ -7,7 +7,19 @@ El **Agente IA** es el módulo de inteligencia artificial de Pactus. Permite a l
 
 ## Arquitectura del Agente
 
-El agente está orquestado mediante **LangGraph**, lo que permite:
+El agente está orquestado mediante **LangGraph** con tres agentes especializados:
+
+```
+START → a1_context → a2_permissions → a3_conversation → (tools loop) → n3_final_response
+```
+
+| Agente | Propósito |
+|--------|-----------|
+| **A1: Context** | Clasifica si el mensaje es contractual o respuesta inmediata |
+| **A2: Permissions** | Valida acceso según rol y resuelve contratos por nombre |
+| **A3: Conversation** | Genera respuestas usando herramientas de consulta y RAG |
+
+LangGraph permite:
 
 | Componente | Función |
 |------------|---------|
@@ -42,9 +54,13 @@ Usuario → Prompt → Agente LangGraph
 
 | Herramienta | Descripción |
 |-------------|-------------|
-| **RAG Search** | Búsqueda vectorial en Qdrant para recuperar información relevante |
-| **Document Access** | Acceso a contratos según permisos del rol del usuario |
-| **Context Retrieval** | Recuperación de chunks con metadatos enriquecidos |
+| **bc_tool** | Búsqueda vectorial en contratos (contenido textual, cláusulas, firmantes) |
+| **company_contracts_query_tool** | Consultas estructuradas para contratos COMPANY (count, list, ranking, services_ranking, client_services_ranking) |
+| **labor_contracts_query_tool** | Consultas estructuradas para contratos LABOR (count, list; NO ranking) |
+| **dashboard_chart_tool** | Generación de gráficos de dashboard (top_services, top_companies, loyalty, retention, origin) |
+| **party_lookup_tool** | Resolución de contratos por nombre de contraparte (solo agente A2) |
+
+Para el detalle completo de parámetros y reglas de selección, ver [Prompts y Tools](../ia/03-prompts-tools.md).
 
 ## Control de Acceso por Rol
 
@@ -52,9 +68,11 @@ El agente filtra el acceso a documentos según el rol del usuario:
 
 | Rol | Acceso a Documentos |
 |-----|---------------------|
-| **ADMIN** | Todos los documentos |
+| **HR** | Solo documentos LABOR |
 | **MANAGER** | Solo documentos COMPANY |
-| **WORKER** | Solo documentos LABOR |
+| **WORKER** | Solo documentos COMPANY |
+
+Para más detalle, ver [Agente LangGraph](../ia/03-agente-langgraph.md) y [Prompts y Tools](../ia/03-prompts-tools.md).
 
 ## Historial de Conversaciones
 
