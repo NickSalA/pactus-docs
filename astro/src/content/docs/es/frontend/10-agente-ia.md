@@ -7,7 +7,7 @@ La página del Agente IA (`/ai-agent`) permite a los usuarios interactuar con un
 
 ## Estructura de la Página
 
-Located in `features/aiAgent/components/page/AIAgentPageContent.tsx`. Compuesta por:
+Ubicado en `features/aiAgent/components/page/AIAgentPageContent.tsx`. Compuesto por:
 
 | Componente | Descripción |
 |------------|-------------|
@@ -17,7 +17,7 @@ Located in `features/aiAgent/components/page/AIAgentPageContent.tsx`. Compuesta 
 
 ## ChatHistorySidebar
 
-Located in `features/aiAgent/components/widgets/ChatHistorySidebar.tsx`.
+Ubicado en `features/aiAgent/components/widgets/ChatHistorySidebar.tsx`.
 
 Sidebar que muestra el historial de conversaciones del usuario. Proporciona acceso rápido a conversaciones anteriores y acciones CRUD.
 
@@ -55,9 +55,9 @@ Cada conversación en la lista permite:
 
 ## Hook Principal
 
-### useAiAgentPage
+### useAIAgentPage
 
-Located in `features/aiAgent/hooks/useAiAgentPage.ts`. Gestiona el estado completo de la página.
+Ubicado en `features/aiAgent/hooks/useAIAgentPage.ts`. Gestiona el estado completo de la página.
 
 #### Estado
 
