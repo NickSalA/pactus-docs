@@ -281,7 +281,7 @@ Guarda el historial conversacional que la aplicación muestra al usuario y reuti
     "timestamp": "2026-03-20T10:00:00Z"
   },
   {
-    "role": "assistant",
+    "role": "bot",
     "content": "La clausula establece una renovacion automatica...",
     "timestamp": "2026-03-20T10:00:03Z"
   }

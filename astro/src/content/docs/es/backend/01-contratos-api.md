@@ -180,6 +180,20 @@ Response típica de documento:
 - `GET /conversations/{conversation_id}`
   Devuelve el detalle de una conversación concreta.
 
+- `PATCH /conversations/{conversation_id}`
+  Actualiza el título de una conversación existente.
+
+  Request JSON:
+
+  ```json
+  {
+    "title": "Nuevo título de la conversación"
+  }
+  ```
+
+- `DELETE /conversations/{conversation_id}`
+  Elimina una conversación existente. Responde con código 204 sin contenido.
+
 La respuesta real del historial conversacional utiliza mensajes con esta estructura:
 
 ```json
@@ -190,7 +204,7 @@ La respuesta real del historial conversacional utiliza mensajes con esta estruct
     "timestamp": "2026-04-10T10:00:00Z"
   },
   {
-    "role": "assistant",
+    "role": "bot",
     "content": "Las cláusulas principales son...",
     "timestamp": "2026-04-10T10:00:02Z"
   }

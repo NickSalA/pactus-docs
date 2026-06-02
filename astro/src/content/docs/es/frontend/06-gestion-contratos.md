@@ -59,7 +59,7 @@ Hook que gestiona filtros, búsqueda y paginación:
 
 ## ContractsFolderTabs
 
-Tabs para filtrar contratos por carpeta. Located in `features/contracts/components/ui/ContractsFolderTabs.tsx`.
+Tabs para filtrar contratos por carpeta. Ubicado en `features/contracts/components/ui/ContractsFolderTabs.tsx`.
 
 ## Acciones
 
