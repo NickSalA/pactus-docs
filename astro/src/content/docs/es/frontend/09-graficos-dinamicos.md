@@ -3,7 +3,7 @@ title: "Graficos Dinamicos en Chatbot"
 description: "Motor de renderizado de visualizaciones en el agente IA, con soporte para graficos de barras, lineas y pastel."
 ---
 
-El sistema de聊天机器人 integra un motor de renderizado dinamico de graficos que permite al agente devolver visualizaciones junto con respuestas de texto.
+El sistema de chatbot integra un motor de renderizado dinámico de gráficos que permite al agente devolver visualizaciones junto con respuestas de texto.
 
 ## ChartRenderer
 
@@ -42,8 +42,6 @@ Grafico de lineas para tendencias temporales.
 **Props:** `chart: ApiChartData`
 
 **Caracteristicas:**
-- Linea punteada para datos proyectados (`is_forecast`)
-- Gradient fill bajo la linea
 - Soporte para multiples series
 
 ### PieChartWidget
@@ -53,7 +51,7 @@ Grafico de pastel o dona para distribuciones.
 **Props:** `chart: ApiChartData`
 
 **Caracteristicas:**
-- Variantes `pie` y `donut`
+- Renderizado con radio interno (donut)
 - Labels con porcentajes
 - Colores por segmento
 
@@ -101,6 +99,6 @@ En `ChatMessageList.tsx` se renderiza condicionalmente:
 1. Usuario envia mensaje al chatbot via `POST /chatbot/`
 2. Backend procesa la consulta y decide si devuelve visualizacion
 3. Si hay visualizacion, `ApiChatResponse` incluye el objeto `chart`
-4. El hook `useAiAgentPage` construye el `ChatMessage` con el chart adjunto
+4. El hook `useAIAgentPage` construye el `ChatMessage` con el chart adjunto
 5. `ChatMessageList` detecta `message.chart` y renderiza `ChartRenderer`
 6. `ChartRenderer` hace dispatch al widget correcto segun `chart.type`

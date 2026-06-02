@@ -1,0 +1,47 @@
+UsageTokenRecord:
+  type: object
+  properties:
+    conversation_id:
+      type: integer
+    input_tokens:
+      type: integer
+    output_tokens:
+      type: integer
+    total_tokens:
+      type: integer
+    model:
+      type: string
+    timestamp:
+      type: string
+      format: date-time
+
+ConversationUsage:
+  type: object
+  properties:
+    conversation_id:
+      type: integer
+    total_input_tokens:
+      type: integer
+    total_output_tokens:
+      type: integer
+    total_tokens:
+      type: integer
+    records:
+      type: array
+      items:
+        $ref: '#/UsageTokenRecord'
+
+UsageSummary:
+  type: object
+  properties:
+    total_input_tokens:
+      type: integer
+    total_output_tokens:
+      type: integer
+    total_tokens:
+      type: integer
+    total_conversations:
+      type: integer
+    average_tokens_per_conversation:
+      type: number
+      format: float

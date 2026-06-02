@@ -9,7 +9,7 @@ La base vectorial de ContractAI usa Qdrant como vector store para la búsqueda s
 
 ### Colecciones
 
-Cada organización tiene una colección convectores indexados. Los vectores corresponden a chunks de documentos asociados a contratos de esa organización.
+Cada organización tiene una colección de vectores indexados. Los vectores corresponden a chunks de documentos asociados a contratos de esa organización.
 
 ### Estructura de un Vector
 
@@ -53,7 +53,7 @@ El sistema utiliza **Voyage AI** para generar embeddings. El modelo específico 
 ### Criterios de Segmentación
 
 - El chunking intenta respetar límites semánticos (párrafos, secciones)
-- Cuando un párrafo excede el tamaño máximo, se fragmenta siguiendo的自然 boundaries
+- Cuando un párrafo excede el tamaño máximo, se fragmenta siguiendo los límites semánticos naturales
 - El overlap garantiza que la información en los límites de chunks no se pierda
 
 ## Indexación y Búsqueda
