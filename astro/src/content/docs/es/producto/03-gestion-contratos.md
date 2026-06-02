@@ -11,8 +11,8 @@ Pactus soporta dos tipos fundamentales de contratos:
 
 | Tipo | Código | Descripción | Roles con Acceso |
 |------|--------|-------------|------------------|
-| **Laboral** | LABOR | Contratos de trabajo individuales | ADMIN, WORKER |
-| **Empresarial** | COMPANY | Contratos entre empresas | ADMIN, MANAGER |
+| **Laboral** | LABOR | Contratos de trabajo individuales | ADMIN, MANAGER, WORKER |
+| **Empresarial** | COMPANY | Contratos entre empresas | ADMIN, MANAGER, WORKER |
 
 ## Estados del Contrato
 
@@ -101,11 +101,12 @@ Pactus permite importar contratos directamente desde Google Drive:
 ### Flujo de Importación
 
 1. **Autenticación**: Popup OAuth de Google (Google Identity Services)
-2. **Selector de Archivos**: Google Picker muestra archivos disponibles
-3. **Selección**: Usuario selecciona archivos PDF de Drive
-4. **Envío al Backend**: Archivos y metadata se envían a `POST /integrations/drive/import`
-5. **Proceso en Segundo Plano**: El backend descarga, procesa e indexa
-6. **Seguimiento en Tiempo Real**: Eventos SSE muestran progreso (PENDING → DATABASE → KNOWLEDGE_BASE → COMPLETED)
+2. **Selector de Archivos**: Google Picker muestra archivos disponibles (incluye Google Workspace)
+3. **Selección**: Usuario selecciona archivos de Google Drive
+4. **Filtrado**: Carpetas y archivos no soportados se excluyen automáticamente
+5. **Envío al Backend**: Archivos y metadata se envían a `POST /integrations/drive/import`
+6. **Proceso en Segundo Plano**: El backend descarga, procesa e indexa (exporta Workspace a PDF)
+7. **Seguimiento en Tiempo Real**: Eventos SSE muestran progreso (PENDING → DATABASE → KNOWLEDGE_BASE → COMPLETED)
 
 ### Estados de Importación
 

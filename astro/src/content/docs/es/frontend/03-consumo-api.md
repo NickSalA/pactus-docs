@@ -55,6 +55,46 @@ Cada módulo agrupa funciones relacionadas. Todos se exportan desde `src/api/ind
 | `organizations` | `queries/hooks/organizations/queries` y `mutations` | Gestión de organización y miembros |
 | `notifications` | `queries/hooks/notifications/queries` y `mutations` | Notificaciones y reglas de alerts |
 
+### Módulo Chat (Conversaciones)
+
+El módulo `chat` gestiona el historial de conversaciones con el agente IA. Ubicado en `src/api/chat.ts` y `src/queries/hooks/chat/`.
+
+#### Funciones del API Layer (`src/api/chat.ts`)
+
+| Función | Endpoint | Descripción |
+|---------|----------|-------------|
+| `getConversations(userId)` | `GET /conversations/user/{userId}` | Lista todas las conversaciones del usuario |
+| `getConversationById(id)` | `GET /conversations/{id}` | Obtiene una conversación con su historial de mensajes |
+| `updateConversation(id, data)` | `PATCH /conversations/{id}` | Actualiza el título de una conversación |
+| `deleteConversation(id)` | `DELETE /conversations/{id}` | Elimina una conversación |
+| `sendMessage(data)` | `POST /chatbot/` | Envía mensaje al agente IA (crea o continúa conversación) |
+
+#### Hooks de TanStack Query (`src/queries/hooks/chat/`)
+
+**Queries:**
+
+| Hook | Query Key | Descripción |
+|------|-----------|-------------|
+| `useConversations(userId)` | `["conversations", "user", userId]` | Lista de conversaciones del usuario |
+| `useConversation(conversationId)` | `["conversations", conversationId]` | Detalle de una conversación con mensajes |
+
+**Mutations:**
+
+| Hook | Descripción |
+|------|-------------|
+| `useSendMessage()` | Envía mensaje; invalida `["conversations"]` al completar |
+| `useUpdateConversation()` | Actualiza título; invalida `["conversations"]` al completar |
+| `useDeleteConversation()` | Elimina conversación; invalida `["conversations"]` al completar |
+
+#### Tipos de Datos (`src/types/api/apiConversation/`)
+
+| Tipo | Descripción |
+|------|-------------|
+| `ApiConversationList` | Resumen para listados: `id`, `title`, `organization_id`, `user_id`, `created_at`, `updated_at` |
+| `ApiConversationRead` | Detalle completo: `id`, `title`, `organization_id`, `user_id`, `content[]`, `created_at`, `updated_at` |
+| `ApiConversationMessage` | Mensaje individual: `role` (`user`\|`bot`), `content`, `chart?`, `timestamp` |
+| `ApiConversationUpdateRequest` | Request para actualizar: `{ title: string }` |
+
 ## Patrón de Uso
 
 Todas las llamadas a API usan **TanStack Query** a través de la capa de queries en `queries/hooks/`. Esta capa provee cache, loading states y error handling automáticos.
