@@ -69,19 +69,8 @@ ImportRequest:
   properties:
     token:
       type: object
-      description: Token OAuth de Google Drive
-      properties:
-        token:
-          type: string
-          description: Access token de Google OAuth 2.0
-        scopes:
-          type: array
-          items:
-            type: string
-          description: Alcances OAuth solicitados (ej. https://www.googleapis.com/auth/drive.readonly)
-      required:
-        - token
-        - scopes
+      additionalProperties: true
+      description: Token OAuth de Google Drive. Puede contener cualquier estructura requerida por el flujo de autenticación.
     files:
       type: array
       minItems: 1
