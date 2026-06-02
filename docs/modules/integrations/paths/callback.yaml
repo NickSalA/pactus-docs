@@ -1,8 +1,9 @@
 get:
   tags:
     - Integraciones
-  summary: Intercambiar código de Google por tokens
+  summary: Intercambiar código de Google por tokens (Legacy)
   operationId: exchangeDriveCode
+  description: Flujo OAuth tradicional. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad.
   parameters:
     - name: code
       in: query

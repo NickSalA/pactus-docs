@@ -199,19 +199,64 @@ La respuesta real del historial conversacional utiliza mensajes con esta estruct
 
 ### Integraciones con Google Drive
 
+El frontend utiliza **Google Picker API** para la selección visual de archivos. El flujo de autenticación es mediante **Google Identity Services (GIS)** con popup OAuth, no redirects tradicionales.
+
+**Flujo actual:**
+1. Frontend abre Google Picker con `DocsView` y `MULTISELECT_ENABLED`
+2. Usuario selecciona archivos (carpetas excluidas)
+3. Google retorna `access_token` + `expires_in` directamente al frontend
+4. Frontend envía `POST /integrations/drive/import` con el token
+
+**Endpoints:**
+
 - `GET /integrations/drive/auth-url`
-  Devuelve la URL de autorización de Google Drive.
+  Genera URL de autorización OAuth (flujo legacy, no usado por frontend actual)
 
 - `GET /integrations/drive/callback`
-  Recibe el `code` OAuth y devuelve el token autenticado.
-
-- `POST /integrations/drive/download/{file_id}`
-  Descarga el binario de un archivo de Drive a partir de un token válido.
+  Intercambia código OAuth por token (flujo legacy, no usado por frontend actual)
 
 - `POST /integrations/drive/import`
-  Encola la importación en segundo plano de uno o varios archivos de Google Drive hacia el pipeline documental del sistema.
+  Encola importación en segundo plano. El payload incluye metadata documental reutilizando el modelo de documento en borrador.
 
-El payload de importación permite adjuntar metadata documental rica, porque cada entrada de `files[]` reutiliza el modelo de documento en borrador del backend.
+  Payload ejemplo:
+  ```json
+  {
+    "token": {
+      "token": "ya29.a0AfH6...",
+      "scopes": ["https://www.googleapis.com/auth/drive.readonly"]
+    },
+    "files": [
+      {
+        "file_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs",
+        "document": {
+          "name": "Contrato 2026",
+          "contract_type": "COMPANY",
+          "company_contract": { "client": "Acme S.A.C.", "ruc": "20600000001" },
+          "form_data": { "value": 1200, "currency": "PEN" }
+        }
+      }
+    ]
+  }
+  ```
+
+  Respuesta:
+  ```json
+  {
+    "message": "La importación ha comenzado en segundo plano.",
+    "queued_files": 1,
+    "index_name": "drive_contracts_index",
+    "job_id": "550e8400-e29b-41d4-a716-446655440000"
+  }
+  ```
+
+- `GET /integrations/drive/import/{job_id}/events`
+  Stream SSE para seguir progreso de importación. Requiere autenticación Bearer.
+
+  Eventos:
+  - `initial_state`: Estado inicial del job
+  - `file_update`: Actualización por archivo (fases: PENDING → DATABASE → KNOWLEDGE_BASE → COMPLETED)
+  - `job_complete`: Job finalizado
+  - `ping`: Keep-alive
 
 ### Catálogo de Servicios
 
