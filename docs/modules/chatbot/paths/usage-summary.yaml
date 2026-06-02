@@ -1,0 +1,19 @@
+get:
+  summary: Obtener resumen de uso de tokens
+  description: Devuelve un resumen agregado del uso de tokens del chatbot para el usuario autenticado.
+  operationId: getUsageSummary
+  tags:
+    - Chatbot
+  responses:
+    '200':
+      description: Resumen obtenido satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/UsageSummary'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

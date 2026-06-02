@@ -16,13 +16,28 @@ El chatbot recibe un mensaje y opcionalmente un `thread_id`.
 }
 ```
 
-La respuesta contiene texto generado y el hilo asociado:
+La respuesta contiene texto generado, el hilo asociado y opcionalmente una visualizacion:
 
 ```json
 {
   "response": "Tienes 3 contratos activos...",
   "thread_id": 12,
-  "chart": null
+  "chart": {
+    "type": "bar",
+    "layout": "vertical",
+    "title": "Contratos por Estado",
+    "config": {
+      "categoryKey": "estado",
+      "series": [
+        { "dataKey": "cantidad", "name": "Contratos", "color": "#10b981" }
+      ]
+    },
+    "data": [
+      { "estado": "Activos", "cantidad": 3 },
+      { "estado": "Pendientes", "cantidad": 1 },
+      { "estado": "Vencidos", "cantidad": 0 }
+    ]
+  }
 }
 ```
 
@@ -47,6 +62,26 @@ START → a1_context → a2_permissions → a3_conversation → (tools loop) →
 El flujo atraviesa nodos de terminacion en casos de respuesta temprana, acceso denegado, o clarificacion requerida.
 
 Ver [Agente LangGraph](../ia/03-agente-langgraph.md) para el diagrama completo y detalle de cada nodo.
+
+## Visualizaciones Dinamicas
+
+El chatbot puede devolver graficos dinamicos junto con la respuesta de texto. El tipo `ApiChartData` define la estructura de cada visualizacion:
+
+| Campo | Tipo | Descripcion |
+|-------|------|-------------|
+| `type` | `bar` \| `line` \| `pie` | Tipo de grafico a renderizar |
+| `layout` | `vertical` \| `horizontal` \| `centric` | Orientacion del grafico |
+| `title` | `string` | Titulo de la visualizacion |
+| `config.categoryKey` | `string` | Clave para el eje de categorias |
+| `config.series` | `Array<{dataKey, name, color?}>` | Series de datos con colores opcionales |
+| `data` | `Record<string, string\|number>[]` | Datos a visualizar |
+
+El frontend renderiza los charts usando `ChartRenderer` en `src/features/aiAgent/components/widgets/`, que hace dispatch segun el tipo:
+- `bar` → `BarChartWidget`
+- `line` → `LineChartWidget`
+- `pie` → `PieChartWidget`
+
+El componente `ChatMessageList` renderiza condicionalmente `{message.chart && <ChartRenderer chart={message.chart} />}` despues del contenido markdown cuando existe un chart.
 
 ## Conversacion
 

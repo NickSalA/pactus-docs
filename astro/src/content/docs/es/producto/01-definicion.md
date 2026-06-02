@@ -61,6 +61,6 @@ El sistema implementa un control de acceso basado en roles:
 |-----|-------------|
 | **ADMIN** | Acceso completo a todos los módulos, gestión de usuarios y configuraciones de la organización |
 | **MANAGER** | Gestión de contratos de tipo empresarial (COMPANY), acceso a carpetas designadas |
-| **WORKER** | Acceso a contratos laborales (LABOR) y funcionalidades básicas del sistema |
+| **WORKER** | Acceso a contratos de tipo empresarial (COMPANY) y funcionalidades básicas del sistema |
 
-Cada rol tiene carpetas asignadas y políticas de acceso específicas para garantizar el aislamiento de la información. Los contratos se filtran por tipo según el rol del usuario: ADMIN y MANAGER acceden a COMPANY, mientras que WORKER accede a LABOR.
+Cada rol tiene carpetas asignadas y políticas de acceso específicas para garantizar el aislamiento de la información. Los contratos se filtran por tipo según el rol del usuario: ADMIN y MANAGER acceden a COMPANY, mientras que WORKER accede a COMPANY.
