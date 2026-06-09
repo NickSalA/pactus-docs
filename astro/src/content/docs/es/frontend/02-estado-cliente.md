@@ -11,6 +11,7 @@ El sistema define cuatro roles de usuario:
 
 | Rol | Descripción |
 |-----|-------------|
+| `SUPERADMIN` | Portal de aprovisionamiento de organizaciones (`/super-admin`) |
 | `ADMIN` | Acceso a la consola de administración |
 | `MANAGER` | Acceso al panel gerencial y métricas comerciales |
 | `HR` | Acceso al panel de gestión de personal |

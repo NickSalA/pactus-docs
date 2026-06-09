@@ -47,7 +47,7 @@ La sección de accesos muestra todos los usuarios de la organización:
 | Columna | Descripción |
 |---------|-------------|
 | **Usuario** | Nombre y email |
-| **Rol** | ADMIN, MANAGER o WORKER |
+| **Rol** | ADMIN, HR, MANAGER o WORKER |
 | **Estado** | Activo o inactivo |
 | **Notificaciones** | Preferencia de alertas email |
 
@@ -58,8 +58,7 @@ El administrador puede invitar nuevos usuarios:
 | Campo | Descripción |
 |-------|-------------|
 | **Email** | Correo electrónico del nuevo usuario |
-| **Rol** | Rol que se asignará (ADMIN, MANAGER, WORKER) |
-| **Nombre** | Nombre completo del usuario |
+| **Rol** | Rol que se asignará (WORKER, HR, MANAGER, ADMIN) |
 
 ### Estadísticas de Usuarios
 

@@ -79,6 +79,8 @@ El frontend define `OrganizationMember` como alias de `User`. Los miembros se ad
 | `PATCH` | `/organizations/me/members/{member_id}/role` | Actualizar rol de un miembro |
 | `PATCH` | `/organizations/me/members/{member_id}/notifications` | Activar o desactivar alertas por usuario |
 
+> **Estado actual del frontend:** Actualizar rol (`PATCH /role`) y eliminar miembro no tienen UI implementada en el frontend. Solo están disponibles vía API directa.
+
 El cliente frontend usa estos endpoints desde `src/lib/api/organizations.ts`.
 
 ## Gestion de Organizaciones
