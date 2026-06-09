@@ -57,8 +57,8 @@ Gráfico de áreas con Recharts para visualizar tendencias temporales.
 | `documentType` | `ApiDocumentType` | COMPANY o LABOR |
 
 **Características:**
-- Línea punteada para datos con `is_forecast: true`
-- Paleta de colores según documentType (emerald para COMPANY, red para LABOR)
+- Nota al pie indicando que los datos proyectados son estimaciones (*)
+- Paleta de colores según documentType (azul para COMPANY, rojo para LABOR)
 - Tooltip con formato de moneda (PEN/USD)
 - Gradient fill bajo la línea
 
@@ -78,7 +78,7 @@ Widget de alertas por estado de vencimiento.
 
 ### DashboardTopCompanies y DashboardTopServices
 
-Gráficos de barras verticales para rankings.
+Gráficos de barras horizontales para rankings.
 
 **Características:**
 - Botones para alternar entre `VOL` (cantidad) y `VALOR` (monto)

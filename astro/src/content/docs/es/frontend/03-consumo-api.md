@@ -52,10 +52,10 @@ Cada módulo agrupa funciones relacionadas. Todos se exportan desde `src/api/ind
 | `members` | `src/api/members.ts` | `queries/hooks/admin/queries` y `mutations` |
 | `organizations` | `src/api/organizations.ts` | `queries/hooks/organizations/queries` y `mutations` |
 | `chat` | `src/api/chat.ts` | `queries/hooks/chat/queries` y `mutations` |
-| `contracts` | `src/api/contracts.ts` | `queries/hooks/contracts/queries` y `mutations` |
+| `documents` | `src/api/documents.ts` | `queries/hooks/contracts/queries` y `mutations` |
 | `templates` | `src/api/templates.ts` | `queries/hooks/templates/queries` y `mutations` |
 | `notifications` | `src/api/notifications.ts` | `queries/hooks/notifications/queries` y `mutations` |
-| `dashboard` | `src/api/dashboard.ts` | `queries/hooks/admin/queries` |
+| `dashboard` | `src/api/dashboard.ts` | `queries/hooks/dashboard/queries` |
 
 ### Módulo Chat (Conversaciones)
 

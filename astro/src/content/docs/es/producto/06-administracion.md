@@ -14,7 +14,7 @@ El panel se organiza en las siguientes secciones principales:
 | **Dashboard Admin** | `/admin/dashboard` | Resumen del sistema y módulos de acceso rápido |
 | **Gestión de Accesos** | `/admin/access` | Usuarios y permisos de la organización |
 | **Configuración de Alertas** | `/admin/alerts` | Reglas de notificación por email |
-| **Gestión Documental** | `/admin/document-management` | Plantillas, carpetas y servicios |
+| **Gestión Documental** | `/admin/document-management` | Plantillas y servicios |
 | **Auditoría** | `/admin/audit` | Registro de eventos de usuarios y chatbot |
 
 ## Dashboard de Administración
@@ -37,7 +37,7 @@ El dashboard admin presenta un resumen del estado del sistema:
 |--------|-------------|
 | **Gestión de Usuarios** | Ir a la sección de miembros |
 | **Configuración de Alertas** | Ir a reglas de notificación |
-| **Gestión Documental** | Ir a plantillas, carpetas y servicios |
+| **Gestión Documental** | Ir a plantillas y servicios |
 
 ## Gestión de Accesos
 
@@ -142,7 +142,7 @@ El sistema ejecuta un proceso automático diario que:
 
 ## Gestión Documental
 
-La sección de gestión documental contiene tres tabs:
+La sección de gestión documental contiene dos tabs:
 
 ### Tab 1: Plantillas
 
@@ -162,19 +162,11 @@ La sección de gestión documental contiene tres tabs:
 | **PUBLISHED** | Borde verde |
 | **ARCHIVED** | Borde gris |
 
-### Tab 2: Gestor de Carpetas
+### Tab 2: Gestión de Servicios
 
-| Operación | Descripción |
-|-----------|-------------|
-| **Crear Carpeta** | Nueva carpeta organizacional |
-| **Renombrar** | Cambiar nombre de carpeta |
-| **Eliminar** | Eliminar carpeta vacía |
+Este tab contiene dos sub-secciones:
 
-Las carpetas corresponden a los roles y se crean automáticamente según la estructura organizacional.
-
-### Tab 3: Gestión de Servicios
-
-El catálogo de servicios permite mantener un inventario de servicios ofrecidos:
+**Catálogo de Servicios:** CRUD completo para mantener un inventario de servicios ofrecidos:
 
 | Campo | Descripción |
 |-------|-------------|
@@ -190,6 +182,8 @@ El catálogo de servicios permite mantener un inventario de servicios ofrecidos:
 | **Editar** | Modificar datos del servicio |
 | **Eliminar** | Eliminar servicio |
 | **Activar/Desactivar** | Habilitar/inhabilitar sin eliminar |
+
+**Tipos de Documento:** Lista de referencia de los tipos de documento disponibles (solo lectura).
 
 ## Notificaciones por Email
 
