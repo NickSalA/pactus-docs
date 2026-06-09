@@ -29,6 +29,8 @@ tags:
     description: Operaciones para el usuario autenticado.
   - name: Chatbot
     description: Operaciones para interactuar con el chatbot.
+  - name: Chatbot Usage
+    description: Endpoints para consultar uso de tokens del chatbot.
   - name: Conversaciones
     description: Operaciones para la gestión de conversaciones.
   - name: Documentos
@@ -75,10 +77,14 @@ paths:
                   - version
   /user/me:
     $ref: 'modules/users/paths/me.yaml'
+  /user/{user_id}:
+    $ref: 'modules/users/paths/user-item.yaml'
   /chatbot/:
     $ref: 'modules/chat/paths.yaml'
-  /conversations:
-    $ref: 'modules/conversations/paths/collection.yaml'
+  /chatbot/usage/conversation/{conversation_id}:
+    $ref: 'modules/chatbot/paths/usage-conversation.yaml'
+  /chatbot/usage/summary:
+    $ref: 'modules/chatbot/paths/usage-summary.yaml'
   /conversations/user/{user_id}:
     $ref: 'modules/conversations/paths/user.yaml'
   /conversations/{conversation_id}:
@@ -105,6 +111,8 @@ paths:
     $ref: 'modules/integrations/paths/download.yaml'
   /integrations/drive/import:
     $ref: 'modules/integrations/paths/import.yaml'
+  /integrations/drive/import/{job_id}/events:
+    $ref: 'modules/integrations/paths/import-events.yaml'
   /organizations:
     $ref: 'modules/organizations/paths/collection.yaml'
   /organizations/me:

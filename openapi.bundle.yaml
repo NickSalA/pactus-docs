@@ -20,6 +20,8 @@ tags:
     description: Operaciones para el usuario autenticado.
   - name: Chatbot
     description: Operaciones para interactuar con el chatbot.
+  - name: Chatbot Usage
+    description: Endpoints para consultar uso de tokens del chatbot.
   - name: Conversaciones
     description: Operaciones para la gestión de conversaciones.
   - name: Documentos
@@ -38,6 +40,8 @@ tags:
     description: Operaciones para la gestión y generación de documentos mediante plantillas.
   - name: Dashboards
     description: Endpoints para gráficos y métricas del dashboard.
+  - name: Auditoría
+    description: Endpoints para consultar actividad auditada de la organización.
   - name: Sistema
     description: Operaciones básicas de estado del servidor.
 paths:
@@ -115,6 +119,159 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /chatbot/usage/conversation/{conversation_id}:
+    get:
+      summary: Obtener uso de tokens por conversación
+      description: Devuelve el historial de uso de tokens para una conversación específica del chatbot.
+      operationId: getConversationUsage
+      tags:
+        - Chatbot
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la conversación.
+      responses:
+        '200':
+          description: Uso obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationUsage'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conversación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /chatbot/usage/summary:
+    get:
+      summary: Obtener resumen de uso de tokens
+      description: Devuelve un resumen agregado del uso de tokens del chatbot para el usuario autenticado.
+      operationId: getUsageSummary
+      tags:
+        - Chatbot
+      responses:
+        '200':
+          description: Resumen obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageSummary'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /audit/users:
+    get:
+      summary: Listar auditoría de usuarios
+      description: Lista los eventos auditados de gestión de usuarios para la organización actual. Solo disponible para administradores.
+      operationId: listUserActivity
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+      responses:
+        '200':
+          description: Actividad de usuarios obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserActivityListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de paginación inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /audit/chatbot:
+    get:
+      summary: Listar auditoría de chatbot
+      description: Lista los eventos auditados de uso del chatbot para la organización actual. Solo disponible para administradores.
+      operationId: listChatbotActivity
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+      responses:
+        '200':
+          description: Actividad de chatbot obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatbotActivityListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de paginación inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
   /conversations/user/{user_id}:
     parameters:
       - name: user_id
@@ -150,6 +307,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno al listar conversaciones.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Persistencia de conversaciones no disponible.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /conversations/{conversation_id}:
     parameters:
       - name: conversation_id
@@ -179,6 +348,112 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Conversación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno al obtener la conversación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Persistencia de conversaciones no disponible.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Actualizar una conversación
+      description: Actualiza el título de una conversación del usuario autenticado.
+      operationId: updateConversation
+      tags:
+        - Conversaciones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationUpdateRequest'
+      responses:
+        '200':
+          description: Conversación actualizada satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationRead'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conversación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflicto al actualizar la conversación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Datos inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Error interno al actualizar la conversación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Persistencia de conversaciones no disponible.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Eliminar una conversación
+      description: Elimina una conversación del usuario autenticado.
+      operationId: deleteConversation
+      tags:
+        - Conversaciones
+      responses:
+        '204':
+          description: Conversación eliminada satisfactoriamente.
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conversación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflicto al eliminar la conversación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno al eliminar la conversación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Persistencia de conversaciones no disponible.
           content:
             application/json:
               schema:
@@ -551,8 +826,9 @@ paths:
     get:
       tags:
         - Integraciones
-      summary: Obtener URL de autorización de Google Drive
+      summary: Obtener URL de autorización de Google Drive (Legacy)
       operationId: getDriveAuthUrl
+      description: Flujo OAuth tradicional. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad.
       responses:
         '200':
           description: URL generada con éxito.
@@ -564,8 +840,9 @@ paths:
     get:
       tags:
         - Integraciones
-      summary: Intercambiar código de Google por tokens
+      summary: Intercambiar código de Google por tokens (Legacy)
       operationId: exchangeDriveCode
+      description: Flujo OAuth tradicional. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad.
       parameters:
         - name: code
           in: query
@@ -598,6 +875,7 @@ paths:
         - Integraciones
       summary: Descargar archivo de Google Drive
       operationId: downloadDriveFile
+      description: Descarga un archivo individual por ID. El flujo de importación usa internamente este mecanismo.
       requestBody:
         required: true
         content:
@@ -649,12 +927,247 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ya existe una importación en progreso. Espere a que termine.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: Datos inválidos.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /integrations/drive/import/{job_id}/events:
+    get:
+      tags:
+        - Integraciones
+      summary: Obtener eventos de importación (SSE)
+      description: |
+        Conecta a un stream de eventos Server-Sent Events para seguir el progreso de una importación de archivos de Google Drive.
+
+        El contenido de data: sigue la estructura definida en el schema ImportEventData.
+      operationId: getImportEvents
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID del trabajo de importación.
+      responses:
+        '200':
+          description: Stream de eventos SSE.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example:
+                event: initial_state
+                data:
+                  job_id: 550e8400-e29b-41d4-a716-446655440000
+                  status: RUNNING
+                  files:
+                    - file_id: abc123
+                      phase: PENDING
+                      error: null
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No tiene acceso a este trabajo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Trabajo no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /organizations:
+    get:
+      summary: Listar organizaciones
+      description: Lista organizaciones según el alcance del usuario. ADMIN obtiene solo su organización; SUPERADMIN puede listar todas con filtros.
+      operationId: listOrganizations
+      tags:
+        - Organizaciones
+      parameters:
+        - name: is_active
+          in: query
+          required: false
+          description: Filtrar por estado de actividad.
+          schema:
+            type: boolean
+            nullable: true
+        - name: name
+          in: query
+          required: false
+          description: Filtrar por nombre.
+          schema:
+            type: string
+            nullable: true
+        - name: ruc
+          in: query
+          required: false
+          description: Filtrar por RUC.
+          schema:
+            type: string
+            nullable: true
+        - name: limit
+          in: query
+          required: false
+          description: Máximo de organizaciones a retornar.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 1000
+            default: 1000
+        - name: offset
+          in: query
+          required: false
+          description: Número de organizaciones a omitir.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Organizaciones obtenidas satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado. Solo ADMIN o SUPERADMIN pueden listar organizaciones.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Crear una organización con administrador inicial
+      description: Crea una nueva organización y registra su primer usuario ADMIN local. Solo accesible por SUPERADMIN.
+      operationId: createOrganization
+      tags:
+        - Organizaciones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationProvisionRequest'
+      responses:
+        '201':
+          description: Organización creada satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+        '400':
+          description: Datos inválidos, organización duplicada o correo de administrador duplicado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado. Se requiere rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /organizations/me:
+    get:
+      summary: Obtener mi organización
+      description: Obtiene la organización asociada al usuario ADMIN autenticado. SUPERADMIN no usa este endpoint para gestión global.
+      operationId: getMyOrganization
+      tags:
+        - Organizaciones
+      responses:
+        '200':
+          description: Organización obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado. Se requiere rol ADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Organización no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Actualizar mi organización
+      description: Actualiza la organización asociada al usuario ADMIN autenticado.
+      operationId: updateMyOrganization
+      tags:
+        - Organizaciones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdateRequest'
+      responses:
+        '200':
+          description: Organización actualizada satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+        '400':
+          description: Datos inválidos, nombre duplicado o RUC duplicado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado. Se requiere rol ADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Organización no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /organizations/me/members:
     get:
       summary: Listar miembros de la organización actual
@@ -764,6 +1277,115 @@ paths:
                 $ref: '#/components/schemas/UserResponse'
         '404':
           description: Miembro no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /organizations/{organization_id}:
+    parameters:
+      - name: organization_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID de la organización.
+    get:
+      summary: Obtener una organización por ID
+      description: Obtiene los detalles de una organización. SUPERADMIN puede acceder a cualquier organización; ADMIN solo a su propia organización.
+      operationId: getOrganization
+      tags:
+        - Organizaciones
+      responses:
+        '200':
+          description: Organización obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para acceder a esta organización.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Organización no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Actualizar una organización
+      description: Actualiza los datos de una organización. SUPERADMIN puede editar cualquier organización; ADMIN solo puede editar su propia organización.
+      operationId: updateOrganization
+      tags:
+        - Organizaciones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdateRequest'
+      responses:
+        '200':
+          description: Organización actualizada satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+        '400':
+          description: Datos inválidos o nombre duplicado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para editar esta organización.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Organización no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Eliminar una organización
+      description: Desactiva una organización mediante soft delete, estableciendo is_active en false. Solo accesible por SUPERADMIN.
+      operationId: deleteOrganization
+      tags:
+        - Organizaciones
+      responses:
+        '204':
+          description: Organización eliminada satisfactoriamente.
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado. Se requiere rol SUPERADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Organización no encontrada.
           content:
             application/json:
               schema:
@@ -1495,6 +2117,81 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /dashboard/retention/labor:
+    get:
+      tags:
+        - Dashboards
+      summary: Analíticas de retención de trabajadores
+      operationId: getDashboardRetentionLabor
+      responses:
+        '200':
+          description: Dashboard de retención de talento laboral (HR).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionDashboardResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Sin permisos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /dashboard/origin/labor:
+    get:
+      tags:
+        - Dashboards
+      summary: Distribución de origen de contratos laborales
+      operationId: getDashboardOriginLabor
+      responses:
+        '200':
+          description: Dashboard de distribución de origen de contratos (HR).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginDashboardResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Sin permisos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /dashboard/loyalty/company:
+    get:
+      tags:
+        - Dashboards
+      summary: Analíticas de fidelidad comercial B2B
+      operationId: getDashboardLoyaltyCompany
+      responses:
+        '200':
+          description: Dashboard de fidelidad de clientes B2B (Company).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoyaltyDashboardResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Sin permisos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   securitySchemes:
     BearerAuth:
@@ -1505,6 +2202,7 @@ components:
     UserRole:
       type: string
       enum:
+        - SUPERADMIN
         - ADMIN
         - HR
         - MANAGER
@@ -1544,10 +2242,7 @@ components:
       required:
         - id
         - organization_id
-        - supabase_user_id
         - email
-        - full_name
-        - avatar_url
         - role
         - receives_notifications
         - is_active
@@ -1591,6 +2286,66 @@ components:
           nullable: true
           description: ID de la conversación existente. Si se omite, el backend crea una nueva conversación.
           example: 12
+    ChartData:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - bar
+            - line
+            - pie
+        layout:
+          type: string
+          enum:
+            - vertical
+            - horizontal
+            - centric
+        title:
+          type: string
+        config:
+          type: object
+          properties:
+            categoryKey:
+              type: string
+            series:
+              type: array
+              items:
+                type: object
+                properties:
+                  dataKey:
+                    type: string
+                  name:
+                    type: string
+                  color:
+                    type: string
+                required:
+                  - dataKey
+                  - name
+          required:
+            - categoryKey
+            - series
+        data:
+          type: array
+          description: |
+            Arreglo de objetos con llaves dinámicas en inglés. El contenido dependerá de la consulta:
+            * Top Servicios por Monto: { "name": string, "value": number }
+            * Concentración Contratos/Mes: { "month": string, "contracts": number }
+            * Valor Promedio (Multi-serie): { "month": string, "[serviceName]": number }
+            * Concentración de Ingresos (Pie): { "name": string, "value": number }
+            * Concentración de Ingresos (Barras): { "name": string, "percentage": number }
+          items:
+            type: object
+            additionalProperties:
+              anyOf:
+                - type: string
+                - type: number
+      required:
+        - type
+        - layout
+        - title
+        - config
+        - data
     ChatResponse:
       type: object
       required:
@@ -1604,6 +2359,12 @@ components:
           type: integer
           description: ID de la conversación.
           example: 12
+        chart:
+          description: |
+            Datos del gráfico generado por dashboard_chart_tool.
+            Solo presente cuando el usuario solicita una visualización (top services, top companies, loyalty, retention, origin).
+            Estructura compatible con recharts (BarChart, LineChart, PieChart).
+          $ref: '#/components/schemas/ChartData'
     ValidationError:
       allOf:
         - $ref: '#/components/schemas/ErrorResponse'
@@ -1622,6 +2383,166 @@ components:
                 type: string
               example:
                 - body -> name: Field required
+    UsageTokenRecord:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+        input_tokens:
+          type: integer
+        output_tokens:
+          type: integer
+        total_tokens:
+          type: integer
+        model:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    ConversationUsage:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+        total_input_tokens:
+          type: integer
+        total_output_tokens:
+          type: integer
+        total_tokens:
+          type: integer
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageTokenRecord'
+    UsageSummary:
+      type: object
+      properties:
+        total_input_tokens:
+          type: integer
+        total_output_tokens:
+          type: integer
+        total_tokens:
+          type: integer
+        total_conversations:
+          type: integer
+        average_tokens_per_conversation:
+          type: number
+          format: float
+    UserActivityAction:
+      type: string
+      enum:
+        - CREATED
+        - UPDATED
+        - DELETED
+    UserActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/UserActivityAction'
+        target_user_id:
+          type: integer
+          nullable: true
+        target_user_email:
+          type: string
+          format: email
+          nullable: true
+        target_user_name:
+          type: string
+          nullable: true
+        previous_role:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    UserActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserActivityResponse'
+    ChatbotActivityAction:
+      type: string
+      enum:
+        - CONVERSATION_STARTED
+        - MESSAGE_SENT
+        - RESPONSE_GENERATED
+    ChatbotActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/ChatbotActivityAction'
+        conversation_id:
+          type: integer
+          nullable: true
+        input_tokens:
+          type: integer
+          nullable: true
+        output_tokens:
+          type: integer
+          nullable: true
+        total_tokens:
+          type: integer
+          nullable: true
+        input_cost_usd:
+          type: number
+          format: decimal
+          nullable: true
+        output_cost_usd:
+          type: number
+          format: decimal
+          nullable: true
+        total_cost_usd:
+          type: number
+          format: decimal
+          nullable: true
+        model_used:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    ChatbotActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/ChatbotActivityResponse'
     ConversationList:
       type: object
       properties:
@@ -1636,12 +2557,16 @@ components:
         created_at:
           type: string
           format: date-time
+        updated_at:
+          type: string
+          format: date-time
       required:
         - id
         - title
         - organization_id
         - user_id
         - created_at
+        - updated_at
     ConversationMessage:
       type: object
       properties:
@@ -1652,6 +2577,8 @@ components:
             - bot
         content:
           type: string
+        chart:
+          $ref: '#/components/schemas/ChartData'
         timestamp:
           type: string
           format: date-time
@@ -1688,6 +2615,16 @@ components:
         - content
         - created_at
         - updated_at
+    ConversationUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          pattern: .*\S.*
+          description: Nuevo título de la conversación. No puede estar vacío y el backend recorta espacios externos.
+      required:
+        - title
     DocumentState:
       type: string
       enum:
@@ -2149,6 +3086,7 @@ components:
         token:
           type: object
           additionalProperties: true
+          description: Token OAuth de Google Drive. Puede contener cualquier estructura requerida por el flujo de autenticación.
         files:
           type: array
           minItems: 1
@@ -2166,10 +3104,149 @@ components:
           type: integer
         index_name:
           type: string
+        job_id:
+          type: string
+          format: uuid
       required:
         - message
         - queued_files
         - index_name
+        - job_id
+    OrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        ruc:
+          type: string
+          pattern: ^\d{11}$
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        company_type:
+          type: string
+          nullable: true
+        objeto_social:
+          type: string
+          nullable: true
+        legal_rep_name:
+          type: string
+          nullable: true
+        legal_rep_dni:
+          type: string
+          pattern: ^\d{8}$
+          nullable: true
+        jurisdiction:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        autorizacion_entidad:
+          type: string
+          nullable: true
+        autorizacion_fecha:
+          type: string
+          format: date
+          nullable: true
+        autorizacion_emitida_por:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          pattern: ^\d{9}$
+          nullable: true
+      required:
+        - id
+        - name
+        - is_active
+        - created_at
+        - updated_at
+    OrganizationListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/OrganizationResponse'
+    OrganizationProvisionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        admin_email:
+          type: string
+          format: email
+      required:
+        - name
+        - admin_email
+    OrganizationUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          nullable: true
+        is_active:
+          type: boolean
+          nullable: true
+        ruc:
+          type: string
+          pattern: ^\d{11}$
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        company_type:
+          type: string
+          nullable: true
+        objeto_social:
+          type: string
+          nullable: true
+        legal_rep_name:
+          type: string
+          nullable: true
+        legal_rep_dni:
+          type: string
+          pattern: ^\d{8}$
+          nullable: true
+        jurisdiction:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        autorizacion_entidad:
+          type: string
+          nullable: true
+        autorizacion_fecha:
+          type: string
+          format: date
+          nullable: true
+        autorizacion_emitida_por:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          pattern: ^\d{9}$
+          nullable: true
     OrganizationMemberListResponse:
       type: array
       items:
@@ -2766,3 +3843,183 @@ components:
         - name
         - quantity
         - amount
+    RetentionKPIs:
+      type: object
+      properties:
+        active_retention_rate:
+          type: number
+          format: float
+        total_unique_workers:
+          type: integer
+        avg_contracts_per_worker:
+          type: number
+          format: float
+      required:
+        - active_retention_rate
+        - total_unique_workers
+        - avg_contracts_per_worker
+    TenureDistributionPoint:
+      type: object
+      properties:
+        contracts_count:
+          type: integer
+        workers_count:
+          type: integer
+      required:
+        - contracts_count
+        - workers_count
+    RenewalTrendPoint:
+      type: object
+      properties:
+        month:
+          type: string
+        renewal_rate:
+          type: number
+          format: float
+        total_expired:
+          type: integer
+        total_renewed:
+          type: integer
+      required:
+        - month
+        - renewal_rate
+        - total_expired
+        - total_renewed
+    RetentionDetail:
+      type: object
+      properties:
+        worker_name:
+          type: string
+        worker_document_number:
+          type: string
+        contracts_count:
+          type: integer
+        first_contract_start:
+          type: string
+          format: date
+        latest_contract_end:
+          type: string
+          format: date
+      required:
+        - worker_name
+        - worker_document_number
+        - contracts_count
+        - first_contract_start
+        - latest_contract_end
+    RetentionDashboardResponse:
+      type: object
+      properties:
+        kpis:
+          $ref: '#/components/schemas/RetentionKPIs'
+        tenure_distribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenureDistributionPoint'
+        renewal_trend:
+          type: array
+          items:
+            $ref: '#/components/schemas/RenewalTrendPoint'
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/RetentionDetail'
+      required:
+        - kpis
+        - tenure_distribution
+        - renewal_trend
+        - details
+    OriginDistributionPoint:
+      type: object
+      properties:
+        origin_type:
+          type: string
+        count:
+          type: integer
+        percentage:
+          type: number
+          format: float
+      required:
+        - origin_type
+        - count
+        - percentage
+    OriginDashboardResponse:
+      type: object
+      properties:
+        total_contracts:
+          type: integer
+        distribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/OriginDistributionPoint'
+      required:
+        - total_contracts
+        - distribution
+    LoyaltyKPIs:
+      type: object
+      properties:
+        active_retention_rate:
+          type: number
+          format: float
+        total_unique_clients:
+          type: integer
+        avg_contracts_per_client:
+          type: number
+          format: float
+      required:
+        - active_retention_rate
+        - total_unique_clients
+        - avg_contracts_per_client
+    LoyaltyTenureDistributionPoint:
+      type: object
+      properties:
+        contracts_count:
+          type: integer
+        clients_count:
+          type: integer
+      required:
+        - contracts_count
+        - clients_count
+    LoyaltyDetail:
+      type: object
+      properties:
+        client_name:
+          type: string
+        ruc:
+          type: string
+          nullable: true
+        contracts_count:
+          type: integer
+        first_contract_start:
+          type: string
+          format: date
+        latest_contract_end:
+          type: string
+          format: date
+      required:
+        - client_name
+        - ruc
+        - contracts_count
+        - first_contract_start
+        - latest_contract_end
+    LoyaltyDashboardResponse:
+      type: object
+      properties:
+        kpis:
+          $ref: '#/components/schemas/LoyaltyKPIs'
+        tenure_distribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoyaltyTenureDistributionPoint'
+        renewal_trend:
+          type: array
+          items:
+            $ref: '#/components/schemas/RenewalTrendPoint'
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoyaltyDetail'
+      required:
+        - kpis
+        - tenure_distribution
+        - renewal_trend
+        - details

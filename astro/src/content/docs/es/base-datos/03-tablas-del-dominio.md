@@ -1,31 +1,57 @@
 ---
 title: Tablas del Dominio
-description: Diccionario actualizado de las tablas del esquema public con columnas, relaciones y notas operativas del modelo.
+description: Diccionario actualizado de las tablas de negocio, auditoría y telemetría con columnas, relaciones y notas operativas.
 ---
 
-El esquema `public` concentra las tablas que modelan el dominio principal de Pactus. A continuación se documenta la estructura vigente que utiliza el backend del sistema, con sus relaciones y notas operativas más relevantes.
+El dominio principal de Pactus se distribuye en esquemas especializados. A continuación se documenta la estructura vigente que utiliza el backend del sistema, con sus relaciones y notas operativas más relevantes.
 
-## Resumen del Esquema `public`
+## Resumen de Esquemas y Tablas
 
 | Tabla | Proposito | Clave principal |
 |-------|-----------|-----------------|
-| `organizations` | Organizacion o tenant del sistema | `id` |
-| `users` | Usuario funcional asociado a una organizacion | `id` |
-| `documents` | Cabecera documental y referencia al archivo | `id` |
-| `services` | Catálogo de servicios por organización | `id` |
-| `company_contracts` | Extension corporativa para contratos de tipo COMPANY | `id` |
-| `labor_contracts` | Extension laboral para contratos de tipo LABOR | `id` |
-| `company_contract_services` | Lineas de servicio para contratos corporativos | `id` |
-| `conversations` | Historial conversacional visible para la aplicacion | `id` |
-| `document_templates` | Plantillas usadas para generacion documental | `id` |
-| `template_formats` | Catálogo de formatos de plantilla | `id` |
-| `document_folders` | Carpetas documentales por rol | `id` |
-| `notification_rules` | Reglas de alerta por organización o contrato | `id` |
-| `notification_send_logs` | Log diario de correos enviados por organizacion | `id` |
+| `identity.organizations` | Organizacion o tenant del sistema | `id` |
+| `identity.users` | Usuario funcional asociado a una organizacion | `id` |
+| `contracts.documents` | Cabecera documental y referencia al archivo | `id` |
+| `catalog.services` | Catálogo de servicios por organización | `id` |
+| `contracts.company_contracts` | Extension corporativa para contratos de empresa | `id` |
+| `contracts.labor_contracts` | Extension laboral para contratos de trabajo | `id` |
+| `contracts.company_contract_services` | Lineas de servicio para contratos corporativos | `id` |
+| `chatbot.conversations` | Historial conversacional visible para la aplicacion | `id` |
+| `templates.document_templates` | Plantillas usadas para generacion documental | `id` |
+| `templates.template_formats` | Catálogo de formatos de plantilla | `id` |
+| `contracts.document_folders` | Carpetas documentales por rol | `id` |
+| `notifications.notification_rules` | Reglas de alerta por organización o contrato | `id` |
+| `notifications.notification_send_logs` | Log diario de correos enviados por organizacion | `id` |
+| `telemetry.chatbot_token_usage` | Medición de tokens y costos por conversación | `id` |
+| `audit.user_activity` | Auditoría de gestión de usuarios | `id` |
+| `audit.chatbot_activity` | Auditoría de uso del chatbot | `id` |
+| `audit.contract_activity` | Auditoría de contratos | `id` |
+| `audit.template_activity` | Auditoría de plantillas | `id` |
 
-La tabla `public.empresas` ya no forma parte del modelo actual.
+La tabla `public.empresas` ya no forma parte del modelo actual. El esquema `public` no contiene actualmente las tablas principales del dominio.
 
-## `public.organizations`
+## Tipos Compartidos
+
+Los enums reutilizados por las tablas de negocio viven en `app_types`:
+
+| Enum | Valores |
+|------|---------|
+| `app_types.user_role` | `WORKER`, `HR`, `MANAGER`, `ADMIN`, `SUPERADMIN` |
+| `app_types.document_type` | `COMPANY`, `LABOR` |
+| `app_types.document_state` | `DRAFT`, `PENDING_SIGNATURE`, `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `TERMINATED` |
+| `app_types.document_template_state` | `DRAFT`, `PUBLISHED`, `ARCHIVED` |
+| `app_types.currency_type` | `PEN`, `USD`, `EUR` |
+
+Los enums de auditoría viven en `audit`:
+
+| Enum | Valores |
+|------|---------|
+| `audit.audit_user_action` | `CREATED`, `UPDATED`, `DELETED` |
+| `audit.audit_chatbot_action` | `CONVERSATION_STARTED`, `MESSAGE_SENT`, `RESPONSE_GENERATED` |
+| `audit.audit_contract_action` | `CREATED`, `GENERATED_FROM_TEMPLATE`, `IMPORTED_FROM_GOOGLE_DRIVE`, `UPDATED`, `DELETED` |
+| `audit.audit_template_action` | `CREATED`, `UPDATED`, `PUBLISHED`, `ARCHIVED` |
+
+## `identity.organizations`
 
 Es la tabla raíz del dominio. Desde aquí se organiza el aislamiento por tenant y se relacionan los principales recursos del sistema.
 
@@ -33,14 +59,15 @@ Es la tabla raíz del dominio. Desde aquí se organiza el aislamiento por tenant
 
 **Relaciones salientes:**
 
-- `users.organization_id -> organizations.id`
-- `documents.organization_id -> organizations.id`
-- `services.organization_id -> organizations.id`
-- `conversations.organization_id -> organizations.id`
-- `document_templates.organization_id -> organizations.id`
-- `notification_rules.organization_id -> organizations.id`
-- `document_folders.organization_id -> organizations.id`
-- `notification_send_logs.organization_id -> organizations.id`
+- `identity.users.organization_id -> identity.organizations.id`
+- `contracts.documents.organization_id -> identity.organizations.id`
+- `catalog.services.organization_id -> identity.organizations.id`
+- `chatbot.conversations.organization_id -> identity.organizations.id`
+- `templates.document_templates.organization_id -> identity.organizations.id`
+- `notifications.notification_rules.organization_id -> identity.organizations.id`
+- `contracts.document_folders.organization_id -> identity.organizations.id`
+- `notifications.notification_send_logs.organization_id -> identity.organizations.id`
+- `audit.*.organization_id -> identity.organizations.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -55,15 +82,15 @@ Es la tabla raíz del dominio. Desde aquí se organiza el aislamiento por tenant
 | `objeto_social` | `text` | Objeto social de la organizacion |
 | `legal_rep_name` | `varchar` | Nombre del representante legal |
 | `legal_rep_dni` | `varchar` | Documento del representante legal |
-| `jurisdiction` | `varchar` | Jurisdiccion principal |
-| `city` | `varchar` | Ciudad principal |
+| `jurisdiction` | `varchar` | Jurisdiccion principal; por defecto `Lima` |
+| `city` | `varchar` | Ciudad principal; por defecto `Lima` |
 | `autorizacion_entidad` | `text` | Entidad asociada a la autorizacion |
 | `autorizacion_fecha` | `date` | Fecha de autorizacion |
 | `autorizacion_emitida_por` | `text` | Emisor de la autorizacion |
 | `email` | `varchar` | Correo corporativo |
 | `phone` | `varchar` | Telefono corporativo |
 
-## `public.users`
+## `identity.users`
 
 Conserva el usuario funcional del sistema. Complementa a `auth.users` con informacion propia del dominio de negocio.
 
@@ -71,7 +98,7 @@ Conserva el usuario funcional del sistema. Complementa a `auth.users` con inform
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
+- `organization_id -> identity.organizations.id`
 
 **Relación lógica con Auth:**
 
@@ -81,11 +108,11 @@ Conserva el usuario funcional del sistema. Complementa a `auth.users` con inform
 |---------|------|---------|
 | `id` | `bigint` | Identidad interna del usuario |
 | `organization_id` | `bigint` | Organización a la que pertenece |
-| `supabase_user_id` | `uuid` | Vínculo con la identidad gestionada por Supabase Auth |
-| `email` | `varchar` | Correo del usuario |
+| `supabase_user_id` | `uuid` | Vínculo lógico con la identidad gestionada por Supabase Auth |
+| `email` | `varchar` | Correo único del usuario |
 | `full_name` | `varchar` | Nombre mostrado en la aplicación |
 | `avatar_url` | `text` | Referencia visual del usuario |
-| `role` | `user_role` | Rol de aplicación: `WORKER`, `HR`, `MANAGER`, `ADMIN`, `SUPERADMIN` |
+| `role` | `app_types.user_role` | Rol de aplicación |
 | `is_active` | `boolean` | Estado logico del usuario |
 | `receives_notifications` | `boolean` | Indica si el usuario recibe alertas de vencimiento |
 | `created_at` | `timestamptz` | Fecha de creacion |
@@ -99,36 +126,40 @@ Conserva el usuario funcional del sistema. Complementa a `auth.users` con inform
 - `ADMIN`: usuario con control total de la organización
 - `SUPERADMIN`: superadministrador con acceso global a todas las organizaciones
 
-## `public.documents`
+## `contracts.documents`
 
-Guarda la cabecera del documento y la referencia al archivo asociado. Los contratos corporativos guardan su extension en `company_contracts` y los laborales en `labor_contracts`.
+Guarda la cabecera del documento y la referencia al archivo asociado. Los contratos corporativos guardan su extension en `contracts.company_contracts` y los laborales en `contracts.labor_contracts`.
 
 **Clave primaria:** `id`
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
-- `folder_id -> document_folders.id` (opcional)
+- `organization_id -> identity.organizations.id`
+- `folder_id -> contracts.document_folders.id` (opcional)
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad del documento |
 | `organization_id` | `bigint` | Organización propietaria |
-| `type` | `text` | Tipo documental: `COMPANY` o `LABOR` |
+| `type` | `text` | Tipo técnico u origen del documento, por ejemplo `google_drive`, `management` o `fixed_term` |
 | `start_date` | `date` | Inicio del periodo contractual |
 | `end_date` | `date` | Fin del periodo contractual |
 | `form_data` | `jsonb` | Datos estructurados extraídos o capturados del contrato |
-| `state` | `document_state` | Estado documental persistido |
+| `state` | `app_types.document_state` | Estado documental persistido |
 | `file_path` | `text` | Ruta tecnica del archivo en Storage |
 | `file_name` | `text` | Nombre visible del archivo |
 | `folder_id` | `bigint` | Carpeta asignada al documento |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
-### Semántica de `document_type`
+### Tipo funcional de contrato
 
-- `COMPANY`: contrato corporativo, comercial o institucional
-- `LABOR`: contrato laboral o asociado a gestión de personal
+El tipo funcional `COMPANY` o `LABOR` no se guarda en `contracts.documents.type`. Se expresa mediante las extensiones uno a uno:
+
+- si existe `contracts.company_contracts.document_id`, el documento es corporativo
+- si existe `contracts.labor_contracts.document_id`, el documento es laboral
+
+La API puede exponer ese concepto como `contract_type`, pero la columna `type` conserva el origen o formato técnico.
 
 ### Semántica de `document_state`
 
@@ -146,9 +177,7 @@ Guarda la cabecera del documento y la referencia al archivo asociado. Los contra
 - guardar campos variables del contrato que no justifican una tabla propia
 - conservar claves resumidas que el backend usa para filtros y rankings, como `value` y `currency`
 
-Por eso, aunque el detalle económico formal viva en `company_contract_services` y `labor_contracts`, parte de la metadata económica puede reaparecer resumida en este JSONB.
-
-## `public.services`
+## `catalog.services`
 
 Contiene el catálogo de servicios de cada organización. Su objetivo es reutilizar conceptos contractuales sin repetir su definición en cada documento.
 
@@ -156,13 +185,11 @@ Contiene el catálogo de servicios de cada organización. Su objetivo es reutili
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
+- `organization_id -> identity.organizations.id`
 
 **Relaciones entrantes:**
 
-- `company_contract_services.service_id -> services.id`
-
-Un servicio del catálogo puede aparecer en varias líneas de contrato corporativo. Esto evita redefinir el mismo concepto contractual en cada documento.
+- `contracts.company_contract_services.service_id -> catalog.services.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -173,19 +200,15 @@ Un servicio del catálogo puede aparecer en varias líneas de contrato corporati
 | `created_at` | `timestamptz` | Fecha de creación |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
-### Restricciones relevantes
+## `contracts.company_contracts`
 
-- Unicidad por `organization_id` + nombre normalizado de servicio
-
-## `public.company_contracts`
-
-Extension para contratos corporativos (tipo `COMPANY`). Almacena el RUC y el nombre del cliente asociado al contrato.
+Extension para contratos corporativos. Almacena el RUC y el nombre del cliente asociado al contrato.
 
 **Clave primaria:** `id`
 
 **Claves foráneas:**
 
-- `document_id -> documents.id` (único)
+- `document_id -> contracts.documents.id` (único)
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -196,15 +219,15 @@ Extension para contratos corporativos (tipo `COMPANY`). Almacena el RUC y el nom
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
-## `public.labor_contracts`
+## `contracts.labor_contracts`
 
-Extension para contratos laborales (tipo `LABOR`). Almacena los datos del trabajador y las condiciones salariales.
+Extension para contratos laborales. Almacena los datos del trabajador y las condiciones salariales.
 
 **Clave primaria:** `id`
 
 **Claves foráneas:**
 
-- `document_id -> documents.id` (único)
+- `document_id -> contracts.documents.id` (único)
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -214,13 +237,13 @@ Extension para contratos laborales (tipo `LABOR`). Almacena los datos del trabaj
 | `worker_document_number` | `varchar` | Numero de documento de identidad |
 | `position` | `varchar` | Cargo o puesto |
 | `salary_value` | `float8` | Monto del salario |
-| `salary_currency` | `currency_type` | Moneda: `PEN`, `USD`, `EUR` |
+| `salary_currency` | `app_types.currency_type` | Moneda: `PEN`, `USD`, `EUR` |
 | `salary_periodicity` | `varchar` | Periodicidad del pago |
 | `contract_modality` | `varchar` | Modalidad del contrato |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
 
-## `public.company_contract_services`
+## `contracts.company_contract_services`
 
 Lineas de servicio para contratos corporativos. Enlaza un contrato de empresa con servicios del catálogo y persiste la información económica de cada línea.
 
@@ -228,8 +251,8 @@ Lineas de servicio para contratos corporativos. Enlaza un contrato de empresa co
 
 **Claves foráneas:**
 
-- `company_contract_id -> company_contracts.id`
-- `service_id -> services.id`
+- `company_contract_id -> contracts.company_contracts.id`
+- `service_id -> catalog.services.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -238,7 +261,7 @@ Lineas de servicio para contratos corporativos. Enlaza un contrato de empresa co
 | `service_id` | `bigint` | Servicio del catálogo |
 | `description` | `text` | Descripcion de la línea contractual |
 | `value` | `float8` | Valor monetario de la línea |
-| `currency` | `currency_type` | Moneda utilizada: `PEN`, `USD`, `EUR` |
+| `currency` | `app_types.currency_type` | Moneda utilizada: `PEN`, `USD`, `EUR` |
 | `start_date` | `date` | Inicio del periodo de la línea |
 | `end_date` | `date` | Fin del periodo de la línea |
 | `created_at` | `timestamptz` | Fecha de creacion |
@@ -250,7 +273,7 @@ Lineas de servicio para contratos corporativos. Enlaza un contrato de empresa co
 - `end_date` >= `start_date`
 - Unicidad por `company_contract_id` + `service_id`
 
-## `public.conversations`
+## `chatbot.conversations`
 
 Guarda el historial conversacional que la aplicación muestra al usuario y reutiliza para continuar el chat visible del producto.
 
@@ -258,8 +281,8 @@ Guarda el historial conversacional que la aplicación muestra al usuario y reuti
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
-- `user_id -> users.id`
+- `organization_id -> identity.organizations.id`
+- `user_id -> identity.users.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -281,14 +304,14 @@ Guarda el historial conversacional que la aplicación muestra al usuario y reuti
     "timestamp": "2026-03-20T10:00:00Z"
   },
   {
-    "role": "assistant",
+    "role": "bot",
     "content": "La clausula establece una renovacion automatica...",
     "timestamp": "2026-03-20T10:00:03Z"
   }
 ]
 ```
 
-## `public.document_templates`
+## `templates.document_templates`
 
 Conserva las plantillas base que el sistema utiliza para generar contratos por organización.
 
@@ -296,8 +319,8 @@ Conserva las plantillas base que el sistema utiliza para generar contratos por o
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
-- `template_format_id -> template_formats.id` (opcional)
+- `organization_id -> identity.organizations.id`
+- `template_format_id -> templates.template_formats.id` (opcional)
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -307,8 +330,8 @@ Conserva las plantillas base que el sistema utiliza para generar contratos por o
 | `description` | `text` | Descripción funcional |
 | `content` | `jsonb` | Estructura base usada para renderizar el contrato |
 | `created_at` | `timestamptz` | Fecha de creacion |
-| `state` | `document_template_state` | Estado de la plantilla: `DRAFT`, `PUBLISHED`, `ARCHIVED` |
-| `document_type` | `document_type` | Tipo documental al que pertenece la plantilla |
+| `state` | `app_types.document_template_state` | Estado de la plantilla: `DRAFT`, `PUBLISHED`, `ARCHIVED` |
+| `document_type` | `app_types.document_type` | Tipo documental al que pertenece la plantilla |
 | `template_format_id` | `integer` | Formato funcional asociado |
 
 ### Estructura utilizada en `content`
@@ -328,7 +351,7 @@ Conserva las plantillas base que el sistema utiliza para generar contratos por o
 
 `operational_fields` y `contract_date_mapping` son relevantes porque el backend los valida y los usa en flujos de generación documental.
 
-## `public.template_formats`
+## `templates.template_formats`
 
 Es el catálogo de formatos disponibles para las plantillas. Permite separar el tipo documental del formato operativo concreto que usa la organización.
 
@@ -336,19 +359,20 @@ Es el catálogo de formatos disponibles para las plantillas. Permite separar el 
 
 **Relaciones entrantes:**
 
-- `document_templates.template_format_id -> template_formats.id`
+- `templates.document_templates.template_format_id -> templates.template_formats.id`
+- `audit.template_activity.template_format_id -> templates.template_formats.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad del formato |
-| `document_type` | `document_type` | Tipo documental asociado |
+| `document_type` | `app_types.document_type` | Tipo documental asociado |
 | `format_code` | `varchar` | Codigo tecnico normalizado del formato |
 | `label` | `varchar` | Nombre visible del formato |
 | `default_name` | `varchar` | Nombre sugerido para la plantilla |
 | `default_description` | `text` | Descripcion sugerida |
 | `is_active` | `boolean` | Indica si el formato sigue disponible |
 
-## `public.document_folders`
+## `contracts.document_folders`
 
 Representa carpetas documentales por organización y por rol propietario. Sirve para clasificar contratos sin mezclar visibilidad entre grupos funcionales.
 
@@ -356,19 +380,19 @@ Representa carpetas documentales por organización y por rol propietario. Sirve 
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
-- `created_by -> users.id`
+- `organization_id -> identity.organizations.id`
+- `created_by -> identity.users.id`
 
 **Relaciones entrantes:**
 
-- `documents.folder_id -> document_folders.id`
+- `contracts.documents.folder_id -> contracts.document_folders.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
 | `id` | `bigint` | Identidad de la carpeta |
 | `organization_id` | `bigint` | Organización propietaria |
 | `name` | `varchar` | Nombre visible de la carpeta |
-| `owner_role` | `user_role` | Rol dueño de la carpeta |
+| `owner_role` | `app_types.user_role` | Rol dueño de la carpeta |
 | `created_by` | `bigint` | Usuario que creó la carpeta |
 | `created_at` | `timestamptz` | Fecha de creacion |
 | `updated_at` | `timestamptz` | Fecha de actualizacion |
@@ -377,11 +401,7 @@ Representa carpetas documentales por organización y por rol propietario. Sirve 
 
 La base de datos restringe `owner_role` a los valores `HR` y `MANAGER`. El backend usa ese dato para controlar visibilidad y administración de carpetas.
 
-### Restricciones relevantes
-
-- Unicidad por `organization_id` + `owner_role` + `lower(name)`
-
-## `public.notification_rules`
+## `notifications.notification_rules`
 
 Define las ventanas de alerta de vencimiento para una organización o para un contrato puntual.
 
@@ -389,8 +409,8 @@ Define las ventanas de alerta de vencimiento para una organización o para un co
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
-- `document_id -> documents.id` (opcional)
+- `organization_id -> identity.organizations.id`
+- `document_id -> contracts.documents.id` (opcional)
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -410,16 +430,14 @@ El backend resuelve las alertas con este orden:
 2. reglas activas por defecto de la organización
 3. fallback operativo si no existe configuración
 
-Además, la función `public.sync_document_states` usa la ventana activa más amplia para decidir cuándo un contrato pasa a `EXPIRING_SOON`.
+Además, la función `contracts.sync_document_states` usa la ventana activa más amplia para decidir cuándo un contrato pasa a `EXPIRING_SOON`.
 
 ### Restricciones relevantes
 
 - `days_before_due` > 0
-- Unicidad por `document_id` + `days_before_due` cuando `document_id` IS NOT NULL (regla por contrato)
-- Unicidad por `organization_id` + `days_before_due` cuando `document_id` IS NULL (regla organizacional)
-- Unicidad calculada: `organization_id` + `coalesce(document_id, 0)` + `days_before_due`
+- Unicidad por `organization_id` + `sent_date` en logs de envío
 
-## `public.notification_send_logs`
+## `notifications.notification_send_logs`
 
 Registra el resultado diario del envío consolidado de correos por organización. Su objetivo es evitar duplicados cuando corre el proceso programado de alertas.
 
@@ -427,7 +445,7 @@ Registra el resultado diario del envío consolidado de correos por organización
 
 **Claves foráneas:**
 
-- `organization_id -> organizations.id`
+- `organization_id -> identity.organizations.id`
 
 **Restricción relevante:**
 
@@ -441,12 +459,160 @@ Registra el resultado diario del envío consolidado de correos por organización
 | `emails_sent` | `integer` | Cantidad de correos enviados en esa corrida |
 | `created_at` | `timestamptz` | Fecha de registro |
 
+## `telemetry.chatbot_token_usage`
+
+Registra el consumo detallado de tokens y costos por mensaje de conversación.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `conversation_id -> chatbot.conversations.id`
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `integer` | Identidad del registro de uso |
+| `conversation_id` | `integer` | Conversación asociada |
+| `message_index` | `integer` | Índice del mensaje dentro del hilo |
+| `input_tokens` | `integer` | Tokens de entrada |
+| `output_tokens` | `integer` | Tokens de salida |
+| `total_tokens` | `integer` | Total de tokens del evento |
+| `input_cost_usd` | `numeric` | Costo de entrada en USD |
+| `output_cost_usd` | `numeric` | Costo de salida en USD |
+| `total_cost_usd` | `numeric` | Costo total en USD |
+| `model_used` | `varchar` | Modelo utilizado |
+| `created_at` | `timestamptz` | Fecha de registro |
+
+Esta tabla alimenta endpoints de uso del chatbot y permite análisis de costos sin alterar el historial visible de `chatbot.conversations`.
+
+## `audit.user_activity`
+
+Registra acciones auditadas de gestión de usuarios dentro de una organización.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> identity.organizations.id`
+- `actor_user_id -> identity.users.id`
+- `target_user_id -> identity.users.id` (opcional)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del evento |
+| `organization_id` | `bigint` | Organización donde ocurrió el evento |
+| `actor_user_id` | `bigint` | Usuario que ejecutó la acción |
+| `actor_name` | `varchar` | Nombre del actor al momento del evento |
+| `actor_role` | `varchar` | Rol del actor al momento del evento |
+| `action` | `audit.audit_user_action` | Acción auditada |
+| `target_user_id` | `bigint` | Usuario afectado |
+| `target_user_email` | `varchar` | Email del usuario afectado |
+| `target_user_name` | `varchar` | Nombre del usuario afectado |
+| `previous_role` | `varchar` | Rol previo cuando aplica |
+| `role` | `varchar` | Rol resultante cuando aplica |
+| `created_at` | `timestamptz` | Fecha del evento |
+
+## `audit.chatbot_activity`
+
+Registra eventos auditados de uso del chatbot y conserva métricas operativas cuando aplica.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> identity.organizations.id`
+- `actor_user_id -> identity.users.id`
+- `conversation_id -> chatbot.conversations.id` (opcional)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del evento |
+| `organization_id` | `bigint` | Organización donde ocurrió el evento |
+| `actor_user_id` | `bigint` | Usuario que interactuó con el chatbot |
+| `actor_name` | `varchar` | Nombre del actor al momento del evento |
+| `actor_role` | `varchar` | Rol del actor al momento del evento |
+| `action` | `audit.audit_chatbot_action` | Acción auditada |
+| `conversation_id` | `bigint` | Conversación relacionada |
+| `input_tokens` | `integer` | Tokens de entrada |
+| `output_tokens` | `integer` | Tokens de salida |
+| `total_tokens` | `integer` | Total de tokens |
+| `input_cost_usd` | `numeric` | Costo de entrada en USD |
+| `output_cost_usd` | `numeric` | Costo de salida en USD |
+| `total_cost_usd` | `numeric` | Costo total en USD |
+| `model_used` | `varchar` | Modelo utilizado |
+| `created_at` | `timestamptz` | Fecha del evento |
+
+### Restricciones relevantes
+
+- Los contadores de tokens deben ser no negativos cuando tienen valor.
+- Los costos deben ser no negativos cuando tienen valor.
+
+## `audit.contract_activity`
+
+Registra eventos auditados sobre contratos y sus extensiones.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> identity.organizations.id`
+- `actor_user_id -> identity.users.id`
+- `document_id -> contracts.documents.id` (opcional)
+- `company_contract_id -> contracts.company_contracts.id` (opcional)
+- `labor_contract_id -> contracts.labor_contracts.id` (opcional)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del evento |
+| `organization_id` | `bigint` | Organización donde ocurrió el evento |
+| `actor_user_id` | `bigint` | Usuario que ejecutó la acción |
+| `actor_name` | `varchar` | Nombre del actor al momento del evento |
+| `actor_role` | `varchar` | Rol del actor al momento del evento |
+| `action` | `audit.audit_contract_action` | Acción auditada |
+| `document_id` | `bigint` | Documento relacionado |
+| `company_contract_id` | `bigint` | Extension corporativa relacionada |
+| `labor_contract_id` | `bigint` | Extension laboral relacionada |
+| `document_name` | `text` | Nombre del documento al momento del evento |
+| `document_type` | `varchar` | Tipo funcional o técnico capturado para auditoría |
+| `previous_state` | `varchar` | Estado previo cuando aplica |
+| `state` | `varchar` | Estado resultante cuando aplica |
+| `created_at` | `timestamptz` | Fecha del evento |
+
+## `audit.template_activity`
+
+Registra eventos auditados sobre plantillas y formatos.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> identity.organizations.id`
+- `actor_user_id -> identity.users.id`
+- `template_id -> templates.document_templates.id` (opcional)
+- `template_format_id -> templates.template_formats.id` (opcional)
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del evento |
+| `organization_id` | `bigint` | Organización donde ocurrió el evento |
+| `actor_user_id` | `bigint` | Usuario que ejecutó la acción |
+| `actor_name` | `varchar` | Nombre del actor al momento del evento |
+| `actor_role` | `varchar` | Rol del actor al momento del evento |
+| `action` | `audit.audit_template_action` | Acción auditada |
+| `template_id` | `bigint` | Plantilla relacionada |
+| `template_format_id` | `bigint` | Formato relacionado |
+| `template_name` | `varchar` | Nombre de la plantilla al momento del evento |
+| `document_type` | `varchar` | Tipo documental capturado para auditoría |
+| `previous_state` | `varchar` | Estado previo cuando aplica |
+| `state` | `varchar` | Estado resultante cuando aplica |
+| `created_at` | `timestamptz` | Fecha del evento |
+
 ## Función SQL asociada al dominio
 
 Aunque no es una tabla, hay una función de negocio relevante para entender el esquema:
 
 | Funcion | Rol |
 |---------|-----|
-| `public.sync_document_states(p_organization_id bigint default null)` | Recalcula `documents.state` a partir de fechas y reglas activas |
+| `contracts.sync_document_states(p_organization_id bigint default null)` | Recalcula `contracts.documents.state` a partir de fechas y reglas activas |
 
-Esta función forma parte del comportamiento persistente del sistema porque escribe estados sobre `public.documents`.
+Esta función forma parte del comportamiento persistente del sistema porque escribe estados sobre `contracts.documents`.

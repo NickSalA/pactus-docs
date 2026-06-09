@@ -71,9 +71,11 @@ Requieren autenticación. La navegación y contenido se adapta según el rol del
 
 | Ruta                         | Descripción                                          |
 | ---------------------------- | ---------------------------------------------------- |
+| `/admin/dashboard`           | Panel de administración con resumen del sistema      |
 | `/admin/access`              | Gestión de usuarios y roles                          |
 | `/admin/alerts`              | Configuración de reglas de alertas                   |
 | `/admin/document-management` | Gestión documental (plantillas, carpetas, servicios) |
+| `/admin/audit`               | Registro de auditoría de usuarios y chatbot          |
 
 ## Flujo de Navegación
 

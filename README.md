@@ -19,6 +19,14 @@ npm install
 npm run dev
 ```
 
+## Bundle OpenAPI
+
+Generar un archivo único de OpenAPI:
+
+```bash
+npx @redocly/cli bundle ./docs/openapi.yaml --output openapi.bundle.yaml
+```
+
 ## Convenciones de commits
 
 - fix: Aumenta la version en 0.0.1 (Correccion de bugs).

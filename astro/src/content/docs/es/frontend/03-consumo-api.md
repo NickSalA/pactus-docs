@@ -45,15 +45,57 @@ const axiosInstance = axios.create({
 
 Cada módulo agrupa funciones relacionadas. Todos se exportan desde `src/api/index.ts`.
 
-| Módulo | Ubicación | Descripción |
-|--------|-----------|-------------|
-| `auth` | `queries/hooks/organizations/queries` | Usuario autenticado |
-| `chat` | `queries/hooks/chat/queries` y `mutations` | Mensajes y historial con el agente IA |
-| `dashboard` | `queries/hooks/dashboard/queries` | Métricas y analítica |
-| `contracts` | `queries/hooks/contracts/queries` y `mutations` | CRUD de documentos, carpetas y servicios |
-| `templates` | `queries/hooks/templates/queries` y `mutations` | Gestión de plantillas y generación de contratos |
-| `organizations` | `queries/hooks/organizations/queries` y `mutations` | Gestión de organización y miembros |
-| `notifications` | `queries/hooks/notifications/queries` y `mutations` | Notificaciones y reglas de alerts |
+| Módulo | Capa API | Capa de Queries (TanStack Query) |
+|--------|----------|----------------------------------|
+| `auth` | `src/api/auth.ts` | — |
+| `users` | `src/api/users.ts` | — |
+| `members` | `src/api/members.ts` | `queries/hooks/admin/queries` y `mutations` |
+| `organizations` | `src/api/organizations.ts` | `queries/hooks/organizations/queries` y `mutations` |
+| `chat` | `src/api/chat.ts` | `queries/hooks/chat/queries` y `mutations` |
+| `documents` | `src/api/documents.ts` | `queries/hooks/contracts/queries` y `mutations` |
+| `templates` | `src/api/templates.ts` | `queries/hooks/templates/queries` y `mutations` |
+| `notifications` | `src/api/notifications.ts` | `queries/hooks/notifications/queries` y `mutations` |
+| `dashboard` | `src/api/dashboard.ts` | `queries/hooks/dashboard/queries` |
+
+### Módulo Chat (Conversaciones)
+
+El módulo `chat` gestiona el historial de conversaciones con el agente IA. Ubicado en `src/api/chat.ts` y `src/queries/hooks/chat/`.
+
+#### Funciones del API Layer (`src/api/chat.ts`)
+
+| Función | Endpoint | Descripción |
+|---------|----------|-------------|
+| `getConversations(userId)` | `GET /conversations/user/{userId}` | Lista todas las conversaciones del usuario |
+| `getConversationById(id)` | `GET /conversations/{id}` | Obtiene una conversación con su historial de mensajes |
+| `updateConversation(id, data)` | `PATCH /conversations/{id}` | Actualiza el título de una conversación |
+| `deleteConversation(id)` | `DELETE /conversations/{id}` | Elimina una conversación |
+| `sendMessage(data)` | `POST /chatbot/` | Envía mensaje al agente IA (crea o continúa conversación) |
+
+#### Hooks de TanStack Query (`src/queries/hooks/chat/`)
+
+**Queries:**
+
+| Hook | Query Key | Descripción |
+|------|-----------|-------------|
+| `useConversations(userId)` | `["conversations", "user", userId]` | Lista de conversaciones del usuario |
+| `useConversation(conversationId)` | `["conversations", conversationId]` | Detalle de una conversación con mensajes |
+
+**Mutations:**
+
+| Hook | Descripción |
+|------|-------------|
+| `useSendMessage()` | Envía mensaje; invalida `["conversations"]` al completar |
+| `useUpdateConversation()` | Actualiza título; invalida `["conversations"]` al completar |
+| `useDeleteConversation()` | Elimina conversación; invalida `["conversations"]` al completar |
+
+#### Tipos de Datos (`src/types/api/apiConversation/`)
+
+| Tipo | Descripción |
+|------|-------------|
+| `ApiConversationList` | Resumen para listados: `id`, `title`, `organization_id`, `user_id`, `created_at`, `updated_at` |
+| `ApiConversationRead` | Detalle completo: `id`, `title`, `organization_id`, `user_id`, `content[]`, `created_at`, `updated_at` |
+| `ApiConversationMessage` | Mensaje individual: `role` (`user`\|`bot`), `content`, `chart?`, `timestamp` |
+| `ApiConversationUpdateRequest` | Request para actualizar: `{ title: string }` |
 
 ## Patrón de Uso
 

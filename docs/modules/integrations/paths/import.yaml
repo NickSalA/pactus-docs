@@ -34,3 +34,9 @@ post:
         application/json:
           schema:
             $ref: '../../../schemas/errors.yaml#/ValidationError'
+    '409':
+      description: Ya existe una importación en progreso. Espere a que termine.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ConflictError'
