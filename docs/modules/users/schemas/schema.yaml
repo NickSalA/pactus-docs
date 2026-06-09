@@ -51,3 +51,11 @@ UserResponse:
 
 CurrentUserResponse:
   $ref: '#/UserResponse'
+
+UserUpdateRequest:
+  type: object
+  properties:
+    role:
+      $ref: '#/UserRole'
+  required:
+    - role

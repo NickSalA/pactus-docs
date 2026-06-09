@@ -45,15 +45,17 @@ const axiosInstance = axios.create({
 
 Cada módulo agrupa funciones relacionadas. Todos se exportan desde `src/api/index.ts`.
 
-| Módulo | Ubicación | Descripción |
-|--------|-----------|-------------|
-| `auth` | `queries/hooks/organizations/queries` | Usuario autenticado |
-| `chat` | `queries/hooks/chat/queries` y `mutations` | Mensajes y historial con el agente IA |
-| `dashboard` | `queries/hooks/dashboard/queries` | Métricas y analítica |
-| `contracts` | `queries/hooks/contracts/queries` y `mutations` | CRUD de documentos, carpetas y servicios |
-| `templates` | `queries/hooks/templates/queries` y `mutations` | Gestión de plantillas y generación de contratos |
-| `organizations` | `queries/hooks/organizations/queries` y `mutations` | Gestión de organización y miembros |
-| `notifications` | `queries/hooks/notifications/queries` y `mutations` | Notificaciones y reglas de alerts |
+| Módulo | Capa API | Capa de Queries (TanStack Query) |
+|--------|----------|----------------------------------|
+| `auth` | `src/api/auth.ts` | — |
+| `users` | `src/api/users.ts` | — |
+| `members` | `src/api/members.ts` | `queries/hooks/admin/queries` y `mutations` |
+| `organizations` | `src/api/organizations.ts` | `queries/hooks/organizations/queries` y `mutations` |
+| `chat` | `src/api/chat.ts` | `queries/hooks/chat/queries` y `mutations` |
+| `contracts` | `src/api/contracts.ts` | `queries/hooks/contracts/queries` y `mutations` |
+| `templates` | `src/api/templates.ts` | `queries/hooks/templates/queries` y `mutations` |
+| `notifications` | `src/api/notifications.ts` | `queries/hooks/notifications/queries` y `mutations` |
+| `dashboard` | `src/api/dashboard.ts` | `queries/hooks/admin/queries` |
 
 ### Módulo Chat (Conversaciones)
 
