@@ -49,8 +49,6 @@ tags:
     description: Operaciones para la gestión y generación de documentos mediante plantillas.
   - name: Dashboards
     description: Endpoints para gráficos y métricas del dashboard.
-  - name: Auditoría
-    description: Endpoints para consultar actividad auditada de la organización.
   - name: Sistema
     description: Operaciones básicas de estado del servidor.
 
@@ -87,10 +85,6 @@ paths:
     $ref: 'modules/chatbot/paths/usage-conversation.yaml'
   /chatbot/usage/summary:
     $ref: 'modules/chatbot/paths/usage-summary.yaml'
-  /audit/users:
-    $ref: 'modules/audit/paths/users.yaml'
-  /audit/chatbot:
-    $ref: 'modules/audit/paths/chatbot.yaml'
   /conversations/user/{user_id}:
     $ref: 'modules/conversations/paths/user.yaml'
   /conversations/{conversation_id}:
