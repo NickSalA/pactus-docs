@@ -1,3 +1,21 @@
+# [1.3.0](https://github.com/NickSalA/pactus-docs/compare/v1.2.0...v1.3.0) (2026-06-09)
+
+
+### Bug Fixes
+
+* add job_id field for job tracking on ImportResponse ([39fe749](https://github.com/NickSalA/pactus-docs/commit/39fe7496b98901f29358cb9056d0d1bc1e184483))
+* openapi.bundle.yaml reinserted and README.md corrected ([767bfd0](https://github.com/NickSalA/pactus-docs/commit/767bfd09bcdb462e30803e2a2d3ba5df8063583a))
+* regenerate openapi.bundle.yaml ([50b810a](https://github.com/NickSalA/pactus-docs/commit/50b810a7af53e4b76cf431166827d90244bc385e))
+
+
+### Features
+
+* add chart field and ChartData Schema for chatbot charts feature ([42d6449](https://github.com/NickSalA/pactus-docs/commit/42d64493a214efcaee66091d55280f9028827f68))
+* add new get endpoint (SSE Event) for job tracking ([6140f2b](https://github.com/NickSalA/pactus-docs/commit/6140f2bef90f43e31b9670fcd8cd1a9a38cec513))
+* added audit endpoint specification for users and chatbot ([cfd280b](https://github.com/NickSalA/pactus-docs/commit/cfd280b6c43422c1b609db6fbbd2d072a9e5a8c6))
+* fix wrong field on ChatbotActivityResponse ([0ca4c26](https://github.com/NickSalA/pactus-docs/commit/0ca4c262fadab9ea63c66d43f8b2e397ec7d913a))
+* Refactor code structure for improved readability and maintainability ([68ee05f](https://github.com/NickSalA/pactus-docs/commit/68ee05f833f784b5cb5f0424c3f60929be8d15de))
+
 # [1.2.0](https://github.com/NickSalA/pactus-docs/compare/v1.1.0...v1.2.0) (2026-05-26)
 
 
