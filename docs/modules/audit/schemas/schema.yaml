@@ -76,8 +76,8 @@ ChatbotActivityResponse:
       type: string
     action:
       $ref: '#/ChatbotActivityAction'
-    conversation_id:
-      type: integer
+    conversation_title:
+      type: string
       nullable: true
     input_tokens:
       type: integer

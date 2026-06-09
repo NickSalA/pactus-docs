@@ -20,6 +20,8 @@ tags:
     description: Operaciones para el usuario autenticado.
   - name: Chatbot
     description: Operaciones para interactuar con el chatbot.
+  - name: Chatbot Usage
+    description: Endpoints para consultar uso de tokens del chatbot.
   - name: Conversaciones
     description: Operaciones para la gestión de conversaciones.
   - name: Documentos
@@ -117,6 +119,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /chatbot/usage/conversation/{conversation_id}:
+    get:
+      summary: Obtener uso de tokens por conversación
+      description: Devuelve el historial de uso de tokens para una conversación específica del chatbot.
+      operationId: getConversationUsage
+      tags:
+        - Chatbot
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la conversación.
+      responses:
+        '200':
+          description: Uso obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationUsage'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conversación no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /chatbot/usage/summary:
+    get:
+      summary: Obtener resumen de uso de tokens
+      description: Devuelve un resumen agregado del uso de tokens del chatbot para el usuario autenticado.
+      operationId: getUsageSummary
+      tags:
+        - Chatbot
+      responses:
+        '200':
+          description: Resumen obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageSummary'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /audit/users:
     get:
       summary: Listar auditoría de usuarios
@@ -771,8 +826,9 @@ paths:
     get:
       tags:
         - Integraciones
-      summary: Obtener URL de autorización de Google Drive
+      summary: Obtener URL de autorización de Google Drive (Legacy)
       operationId: getDriveAuthUrl
+      description: Flujo OAuth tradicional. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad.
       responses:
         '200':
           description: URL generada con éxito.
@@ -784,8 +840,9 @@ paths:
     get:
       tags:
         - Integraciones
-      summary: Intercambiar código de Google por tokens
+      summary: Intercambiar código de Google por tokens (Legacy)
       operationId: exchangeDriveCode
+      description: Flujo OAuth tradicional. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad.
       parameters:
         - name: code
           in: query
@@ -818,6 +875,7 @@ paths:
         - Integraciones
       summary: Descargar archivo de Google Drive
       operationId: downloadDriveFile
+      description: Descarga un archivo individual por ID. El flujo de importación usa internamente este mecanismo.
       requestBody:
         required: true
         content:
@@ -2190,121 +2248,6 @@ components:
         - is_active
         - created_at
         - updated_at
-    UserActivityAction:
-      type: string
-      enum:
-        - CREATED
-        - UPDATED
-        - DELETED
-    ChatbotActivityAction:
-      type: string
-      enum:
-        - CONVERSATION_STARTED
-        - MESSAGE_SENT
-        - RESPONSE_GENERATED
-    UserActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/UserActivityAction'
-        target_user_id:
-          type: integer
-          nullable: true
-        target_user_email:
-          type: string
-          format: email
-          nullable: true
-        target_user_name:
-          type: string
-          nullable: true
-        previous_role:
-          type: string
-          nullable: true
-        role:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    UserActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/UserActivityResponse'
-    ChatbotActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/ChatbotActivityAction'
-        conversation_id:
-          type: integer
-          nullable: true
-        input_tokens:
-          type: integer
-          nullable: true
-        output_tokens:
-          type: integer
-          nullable: true
-        total_tokens:
-          type: integer
-          nullable: true
-        input_cost_usd:
-          type: number
-          format: decimal
-          nullable: true
-        output_cost_usd:
-          type: number
-          format: decimal
-          nullable: true
-        total_cost_usd:
-          type: number
-          format: decimal
-          nullable: true
-        model_used:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    ChatbotActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/ChatbotActivityResponse'
     ErrorResponse:
       type: object
       description: Respuesta común de los manejadores de errores del backend.
@@ -2417,6 +2360,10 @@ components:
           description: ID de la conversación.
           example: 12
         chart:
+          description: |
+            Datos del gráfico generado por dashboard_chart_tool.
+            Solo presente cuando el usuario solicita una visualización (top services, top companies, loyalty, retention, origin).
+            Estructura compatible con recharts (BarChart, LineChart, PieChart).
           $ref: '#/components/schemas/ChartData'
     ValidationError:
       allOf:
@@ -2436,6 +2383,166 @@ components:
                 type: string
               example:
                 - body -> name: Field required
+    UsageTokenRecord:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+        input_tokens:
+          type: integer
+        output_tokens:
+          type: integer
+        total_tokens:
+          type: integer
+        model:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    ConversationUsage:
+      type: object
+      properties:
+        conversation_id:
+          type: integer
+        total_input_tokens:
+          type: integer
+        total_output_tokens:
+          type: integer
+        total_tokens:
+          type: integer
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageTokenRecord'
+    UsageSummary:
+      type: object
+      properties:
+        total_input_tokens:
+          type: integer
+        total_output_tokens:
+          type: integer
+        total_tokens:
+          type: integer
+        total_conversations:
+          type: integer
+        average_tokens_per_conversation:
+          type: number
+          format: float
+    UserActivityAction:
+      type: string
+      enum:
+        - CREATED
+        - UPDATED
+        - DELETED
+    UserActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/UserActivityAction'
+        target_user_id:
+          type: integer
+          nullable: true
+        target_user_email:
+          type: string
+          format: email
+          nullable: true
+        target_user_name:
+          type: string
+          nullable: true
+        previous_role:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    UserActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserActivityResponse'
+    ChatbotActivityAction:
+      type: string
+      enum:
+        - CONVERSATION_STARTED
+        - MESSAGE_SENT
+        - RESPONSE_GENERATED
+    ChatbotActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/ChatbotActivityAction'
+        conversation_id:
+          type: integer
+          nullable: true
+        input_tokens:
+          type: integer
+          nullable: true
+        output_tokens:
+          type: integer
+          nullable: true
+        total_tokens:
+          type: integer
+          nullable: true
+        input_cost_usd:
+          type: number
+          format: decimal
+          nullable: true
+        output_cost_usd:
+          type: number
+          format: decimal
+          nullable: true
+        total_cost_usd:
+          type: number
+          format: decimal
+          nullable: true
+        model_used:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    ChatbotActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/ChatbotActivityResponse'
     ConversationList:
       type: object
       properties:
@@ -2979,6 +3086,7 @@ components:
         token:
           type: object
           additionalProperties: true
+          description: Token OAuth de Google Drive. Puede contener cualquier estructura requerida por el flujo de autenticación.
         files:
           type: array
           minItems: 1
