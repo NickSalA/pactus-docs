@@ -74,7 +74,7 @@ El frontend define `OrganizationMember` como alias de `User`. Los miembros se ad
 
 | Metodo | Ruta | Uso | Cliente frontend |
 | ------ | ---- | --- | ---------------- |
-| `GET` | `/organizations/me/members` | Listar miembros de la organizacion actual | `src/api/members.ts` |
+| `GET` | `/organizations/me/members` | Listar miembros de la organización actual | `src/api/members.ts` |
 | `POST` | `/organizations/me/members` | Agregar miembro por email y rol | `src/api/members.ts` |
 | `PATCH` | `/user/{user_id}` | Actualizar rol de un miembro | `src/api/users.ts` |
 | `PATCH` | `/organizations/me/members/{member_id}/notifications` | Activar o desactivar alertas por usuario | `src/api/members.ts` |
