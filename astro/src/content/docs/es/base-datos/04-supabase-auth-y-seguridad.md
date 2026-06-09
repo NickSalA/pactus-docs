@@ -6,7 +6,7 @@ description: Cómo se integra Supabase Auth con el modelo de usuarios del sistem
 Pactus utiliza **Supabase Auth** como capa de identidad y organiza el acceso alrededor de dos niveles:
 
 - autenticación y sesión con Google OAuth
-- control de acceso del dominio desde `public.users`, `organization_id` y la lógica del backend
+- control de acceso del dominio desde `identity.users`, `organization_id` y la lógica del backend
 
 ## Autenticacion con Supabase Auth
 
@@ -40,19 +40,19 @@ El proyecto separa la identidad autenticada del usuario funcional de la aplicaci
 | Capa | Tabla | Responsabilidad |
 |------|-------|-----------------|
 | Identidad | `auth.users` | Define quien inicia sesion |
-| Negocio | `public.users` | Define a qué organización pertenece y qué rol tiene |
+| Negocio | `identity.users` | Define a qué organización pertenece y qué rol tiene |
 
 La vinculación entre ambas capas se hace mediante este campo:
 
 ```text
-public.users.supabase_user_id -> auth.users.id
+identity.users.supabase_user_id -> auth.users.id
 ```
 
 La relación es lógica y no física. La intención es mantener desacoplado el subsistema de autenticación del modelo de negocio, sin perder trazabilidad entre ambos.
 
-## Rol de `public.users`
+## Rol de `identity.users`
 
-La tabla `public.users` complementa lo que Supabase Auth no resuelve por sí solo. En ella se conserva el contexto funcional del usuario dentro de Pactus.
+La tabla `identity.users` complementa lo que Supabase Auth no resuelve por sí solo. En ella se conserva el contexto funcional del usuario dentro de Pactus.
 
 Los campos más importantes para ese objetivo son:
 
@@ -93,14 +93,41 @@ Este enfoque permite que la aplicación no dependa solo del proveedor de autenti
 En la implementación actual:
 
 - el esquema `auth` queda administrado por Supabase
-- las tablas de negocio viven en `public`
-- la vinculación entre `auth.users` y `public.users` se hace con `supabase_user_id`
+- las tablas de negocio viven en esquemas especializados: `identity`, `contracts`, `catalog`, `templates`, `notifications`, `chatbot`, `audit` y `telemetry`
+- la vinculación entre `auth.users` y `identity.users` se hace con `supabase_user_id`
 - el control de permisos de negocio se resuelve en backend
 - el acceso a archivos usa URLs firmadas temporales generadas por el backend
 
+## Estado de RLS
+
+En la base consultada, las tablas de dominio tienen Row Level Security deshabilitado y no existen policies configuradas para los esquemas de negocio. Esto significa que el aislamiento por organización depende del backend y no de policies en Postgres.
+
+Tablas revisadas con RLS deshabilitado:
+
+- `identity.organizations`
+- `identity.users`
+- `contracts.documents`
+- `contracts.document_folders`
+- `contracts.company_contracts`
+- `contracts.labor_contracts`
+- `contracts.company_contract_services`
+- `catalog.services`
+- `chatbot.conversations`
+- `templates.document_templates`
+- `templates.template_formats`
+- `notifications.notification_rules`
+- `notifications.notification_send_logs`
+- `telemetry.chatbot_token_usage`
+- `audit.user_activity`
+- `audit.chatbot_activity`
+- `audit.contract_activity`
+- `audit.template_activity`
+
+Si el frontend accede directamente a Supabase con llaves `anon` o `authenticated`, esta configuración debe corregirse habilitando RLS y creando policies por tenant y rol. Si todo acceso pasa exclusivamente por el backend con credenciales de servicio, el riesgo operativo se controla en esa capa, pero la base no aplica aislamiento propio.
+
 ## Criterio de Diseño
 
-La decisión de separar `auth.users` de `public.users` responde a una necesidad concreta del proyecto: mantener una autenticación moderna y delegada en Supabase, pero conservar en el dominio propio toda la información que el producto necesita para operar.
+La decisión de separar `auth.users` de `identity.users` responde a una necesidad concreta del proyecto: mantener una autenticación moderna y delegada en Supabase, pero conservar en el dominio propio toda la información que el producto necesita para operar.
 
 Con esa base, Pactus puede:
 
