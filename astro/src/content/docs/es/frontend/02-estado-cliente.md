@@ -7,7 +7,7 @@ Pactus implementa autenticación mediante **Supabase Auth** con Google OAuth com
 
 ## Roles del Sistema
 
-El sistema define cuatro roles de usuario:
+El sistema define cinco roles de usuario:
 
 | Rol | Descripción |
 |-----|-------------|

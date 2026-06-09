@@ -3,7 +3,7 @@ title: Agente LangGraph
 description: Arquitectura multi-agente para chatbot conversacional con control de acceso.
 ---
 
-El chatbot de ContractAI está implementado como un grafo de LangGraph con tres agentes especializados y nodos de terminación.
+El chatbot de Pactus está implementado como un grafo de LangGraph con tres agentes especializados y nodos de terminación.
 
 ## Arquitectura General
 
