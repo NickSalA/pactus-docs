@@ -3,16 +3,16 @@ title: Esquemas de Soporte
 description: Cómo se apoyan los datos del dominio en Supabase Storage y en los esquemas internos de la plataforma.
 ---
 
-Además del esquema `public`, Pactus utiliza capas de soporte de Supabase para resolver autenticación, almacenamiento de archivos e infraestructura interna. Esta sección se limita a esas piezas de soporte directo.
+Además de los esquemas de dominio, Pactus utiliza capas de soporte de Supabase para resolver autenticación, almacenamiento de archivos e infraestructura interna. Esta sección se limita a esas piezas de soporte directo.
 
 ## Almacenamiento de Archivos
 
-El archivo binario de un contrato se mantiene fuera de las tablas de negocio. La aplicación conserva en `public.documents` la referencia al archivo y delega el almacenamiento físico a Supabase Storage.
+El archivo binario de un contrato se mantiene fuera de las tablas de negocio. La aplicación conserva en `contracts.documents` la referencia al archivo y delega el almacenamiento físico a Supabase Storage.
 
 | Pieza | Funcion |
 |-------|---------|
-| `public.documents.file_name` | Nombre visible del archivo |
-| `public.documents.file_path` | Ruta tecnica del archivo |
+| `contracts.documents.file_name` | Nombre visible del archivo |
+| `contracts.documents.file_path` | Ruta tecnica del archivo |
 | `storage.objects` | Persistencia del binario |
 
 Actualmente los archivos documentales se almacenan en el bucket `documents`, con una ruta organizada por organización, tipo documental y documento:
@@ -45,15 +45,17 @@ Su objetivo no es modelar el dominio del producto, sino sostener identidad, sesi
 
 ## Otros Esquemas Internos de Supabase
 
-Además de `public`, `auth` y `storage`, la plataforma incluye otros esquemas internos que forman parte del entorno técnico general.
+Además de los esquemas de dominio, `auth` y `storage`, la plataforma incluye otros esquemas internos que forman parte del entorno técnico general.
 
 | Esquema | Rol |
 |---------|-----|
 | `realtime` | Infraestructura de suscripciones y eventos realtime |
 | `vault` | Manejo de secretos a nivel de base de datos |
 | `extensions` | Extensiones de PostgreSQL habilitadas en el proyecto |
+| `checkpoint` | Persistencia tecnica del checkpointer de LangGraph |
+| `legacy` | Tablas antiguas o auxiliares no usadas como dominio principal |
 
-Estos esquemas no forman parte directa del dominio de negocio, pero sí del entorno técnico sobre el que funciona la aplicación.
+Estos esquemas no forman parte directa del dominio de negocio, pero sí del entorno técnico sobre el que funciona la aplicación. Los esquemas `audit` y `telemetry` no se consideran internos de Supabase: son soporte funcional propio del producto y se documentan dentro del dominio.
 
 ## Límite de Alcance
 
