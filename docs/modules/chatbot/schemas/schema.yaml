@@ -1,7 +1,11 @@
-UsageTokenRecord:
+TokenUsageRead:
   type: object
   properties:
+    id:
+      type: integer
     conversation_id:
+      type: integer
+    message_index:
       type: integer
     input_tokens:
       type: integer
@@ -9,27 +13,20 @@ UsageTokenRecord:
       type: integer
     total_tokens:
       type: integer
-    model:
+    input_cost_usd:
+      type: number
+      format: decimal
+    output_cost_usd:
+      type: number
+      format: decimal
+    total_cost_usd:
+      type: number
+      format: decimal
+    model_used:
       type: string
-    timestamp:
+    created_at:
       type: string
       format: date-time
-
-ConversationUsage:
-  type: object
-  properties:
-    conversation_id:
-      type: integer
-    total_input_tokens:
-      type: integer
-    total_output_tokens:
-      type: integer
-    total_tokens:
-      type: integer
-    records:
-      type: array
-      items:
-        $ref: '#/UsageTokenRecord'
 
 UsageSummary:
   type: object
@@ -40,8 +37,14 @@ UsageSummary:
       type: integer
     total_tokens:
       type: integer
-    total_conversations:
-      type: integer
-    average_tokens_per_conversation:
+    total_input_cost_usd:
       type: number
-      format: float
+      format: decimal
+    total_output_cost_usd:
+      type: number
+      format: decimal
+    total_cost_usd:
+      type: number
+      format: decimal
+    usage_count:
+      type: integer
