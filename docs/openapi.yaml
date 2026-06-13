@@ -51,6 +51,8 @@ tags:
     description: Endpoints para gráficos y métricas del dashboard.
   - name: Sistema
     description: Operaciones básicas de estado del servidor.
+  - name: Auditoría
+    description: Endpoints para consultar registros de actividad auditada del sistema.
 
 paths:
   /:
@@ -173,3 +175,9 @@ paths:
     $ref: 'modules/dashboard/paths/origin-labor.yaml'
   /dashboard/loyalty/company:
     $ref: 'modules/dashboard/paths/loyalty-company.yaml'
+  /audit/users:
+    $ref: 'modules/audit/paths/users.yaml'
+  /audit/chatbot:
+    $ref: 'modules/audit/paths/chatbot.yaml'
+  /audit/templates:
+    $ref: 'modules/audit/paths/templates.yaml'
