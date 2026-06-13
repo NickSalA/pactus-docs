@@ -73,4 +73,8 @@ Flujo de logout:
 |----------|-------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | API Key pública de Supabase |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Client ID de Google OAuth |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Client ID de Google OAuth usado por Google Picker |
+| `NEXT_PUBLIC_GOOGLE_API_KEY` | API key publica del proyecto Google para cargar Picker |
+| `NEXT_PUBLIC_GOOGLE_APP_ID` | Numero de proyecto Google usado como App ID de Picker |
+
+El login con Google no solicita permisos de Drive. El scope `https://www.googleapis.com/auth/drive.file` se solicita solo cuando el usuario abre el flujo de importacion desde Google Picker.

@@ -669,8 +669,9 @@ paths:
     get:
       tags:
         - Integraciones
-      summary: Obtener URL de autorización de Google Drive
+      summary: Obtener URL de autorización de Google Drive (Legacy)
       operationId: getDriveAuthUrl
+      description: Flujo OAuth tradicional con scope `https://www.googleapis.com/auth/drive.file`. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad interna y no se considera consumido por clientes externos.
       responses:
         '200':
           description: URL generada con éxito.
@@ -682,8 +683,9 @@ paths:
     get:
       tags:
         - Integraciones
-      summary: Intercambiar código de Google por tokens
+      summary: Intercambiar código de Google por tokens (Legacy)
       operationId: exchangeDriveCode
+      description: Flujo OAuth tradicional con scope `https://www.googleapis.com/auth/drive.file`. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad interna y no se considera consumido por clientes externos.
       parameters:
         - name: code
           in: query
@@ -742,6 +744,7 @@ paths:
         - Integraciones
       summary: Importar archivos de Google Drive en segundo plano
       operationId: importDriveFiles
+      description: Importa archivos seleccionados manualmente por el usuario desde Google Picker. El token enviado debe tener el scope `https://www.googleapis.com/auth/drive.file`; no se requiere acceso completo de lectura al Drive del usuario.
       requestBody:
         required: true
         content:
@@ -2671,6 +2674,7 @@ components:
         token:
           type: object
           additionalProperties: true
+          description: Token OAuth temporal de Google Drive obtenido con el scope `https://www.googleapis.com/auth/drive.file` para archivos seleccionados mediante Google Picker.
       required:
         - token
     DocumentType:

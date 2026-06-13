@@ -3,7 +3,7 @@ get:
     - Integraciones
   summary: Obtener URL de autorización de Google Drive (Legacy)
   operationId: getDriveAuthUrl
-  description: Flujo OAuth tradicional. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad.
+  description: Flujo OAuth tradicional con scope `https://www.googleapis.com/auth/drive.file`. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad interna y no se considera consumido por clientes externos.
   responses:
     '200':
       description: URL generada con éxito.

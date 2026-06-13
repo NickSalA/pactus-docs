@@ -100,11 +100,11 @@ Pactus permite importar contratos directamente desde Google Drive:
 
 ### Flujo de Importación
 
-1. **Autenticación**: Popup OAuth de Google (Google Identity Services)
-2. **Selector de Archivos**: Google Picker muestra archivos disponibles (incluye Google Workspace)
+1. **Autenticación**: Popup OAuth de Google (Google Identity Services) con permiso limitado `drive.file`
+2. **Selector de Archivos**: Google Picker muestra archivos que el usuario puede seleccionar para compartir con Pactus
 3. **Selección**: Usuario selecciona archivos de Google Drive
 4. **Filtrado**: Carpetas y archivos no soportados se excluyen automáticamente
-5. **Envío al Backend**: Archivos y metadata se envían a `POST /integrations/drive/import`
+5. **Envío al Backend**: IDs de archivos seleccionados, token temporal y metadata se envían a `POST /integrations/drive/import`
 6. **Proceso en Segundo Plano**: El backend descarga, procesa e indexa (exporta Workspace a PDF)
 7. **Seguimiento en Tiempo Real**: Eventos SSE muestran progreso (PENDING → DATABASE → KNOWLEDGE_BASE → COMPLETED)
 

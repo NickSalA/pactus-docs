@@ -213,13 +213,14 @@ La respuesta real del historial conversacional utiliza mensajes con esta estruct
 
 ### Integraciones con Google Drive
 
-El frontend utiliza **Google Picker API** para la selección visual de archivos. El flujo de autenticación es mediante **Google Identity Services (GIS)** con popup OAuth, no redirects tradicionales.
+El frontend utiliza **Google Picker API** para la selección visual de archivos. El flujo de autenticación es mediante **Google Identity Services (GIS)** con popup OAuth y scope `https://www.googleapis.com/auth/drive.file`, no redirects tradicionales.
 
 **Flujo actual:**
 1. Frontend abre Google Picker con `DocsView` y `MULTISELECT_ENABLED`
-2. Usuario selecciona archivos (carpetas excluidas)
-3. Google retorna `access_token` + `expires_in` directamente al frontend
-4. Frontend envía `POST /integrations/drive/import` con el token
+2. Usuario autoriza acceso limitado a archivos seleccionados con `drive.file`
+3. Usuario selecciona archivos (carpetas excluidas)
+4. Google retorna `access_token` + `expires_in` directamente al frontend
+5. Frontend envía `POST /integrations/drive/import` con el token
 
 **Endpoints:**
 
@@ -237,7 +238,7 @@ El frontend utiliza **Google Picker API** para la selección visual de archivos.
   {
     "token": {
       "token": "ya29.a0AfH6...",
-      "scopes": ["https://www.googleapis.com/auth/drive.readonly"]
+      "scopes": ["https://www.googleapis.com/auth/drive.file"]
     },
     "files": [
       {

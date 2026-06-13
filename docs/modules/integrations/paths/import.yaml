@@ -3,6 +3,7 @@ post:
     - Integraciones
   summary: Importar archivos de Google Drive en segundo plano
   operationId: importDriveFiles
+  description: Importa archivos seleccionados manualmente por el usuario desde Google Picker. El token enviado debe tener el scope `https://www.googleapis.com/auth/drive.file`; no se requiere acceso completo de lectura al Drive del usuario.
   requestBody:
     required: true
     content:
