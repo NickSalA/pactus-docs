@@ -3,7 +3,7 @@ title: Pipeline RAG
 description: Retrieval-Augmented Generation para análisis de contratos corporativos.
 ---
 
-El sistema de ContractAI utiliza un pipeline de Retrieval-Augmented Generation (RAG) para responder preguntas sobre contratos corporativos con evidencia textual grounding.
+El sistema de Pactus utiliza un pipeline de Retrieval-Augmented Generation (RAG) para responder preguntas sobre contratos corporativos con evidencia textual grounding.
 
 ## Flujo del Pipeline
 

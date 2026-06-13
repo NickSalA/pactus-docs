@@ -8,7 +8,9 @@ parameters:
 
 patch:
   summary: Actualizar rol de un miembro
+  description: '**DEPRECADO**: Usar `PATCH /user/{user_id}` en su lugar.'
   operationId: updateOrganizationMemberRole
+  deprecated: true
   tags:
     - Organizaciones
   requestBody:

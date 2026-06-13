@@ -11,10 +11,11 @@ El panel se organiza en las siguientes secciones principales:
 
 | Sección | Ruta | Descripción |
 |---------|------|-------------|
-| **Dashboard Admin** | `/admin` | Resumen del sistema y módulos de acceso rápido |
+| **Dashboard Admin** | `/admin/dashboard` | Resumen del sistema y módulos de acceso rápido |
 | **Gestión de Accesos** | `/admin/access` | Usuarios y permisos de la organización |
 | **Configuración de Alertas** | `/admin/alerts` | Reglas de notificación por email |
-| **Gestión Documental** | `/admin/document-management` | Plantillas, carpetas y servicios |
+| **Gestión Documental** | `/admin/document-management` | Plantillas y servicios |
+| **Auditoría** | `/admin/audit` | Registro de eventos de usuarios y chatbot |
 
 ## Dashboard de Administración
 
@@ -36,30 +37,54 @@ El dashboard admin presenta un resumen del estado del sistema:
 |--------|-------------|
 | **Gestión de Usuarios** | Ir a la sección de miembros |
 | **Configuración de Alertas** | Ir a reglas de notificación |
-| **Gestión Documental** | Ir a plantillas, carpetas y servicios |
+| **Gestión Documental** | Ir a plantillas y servicios |
 
 ## Gestión de Accesos
 
 ### Tabla de Miembros
 
-La sección de accesos muestra todos los usuarios de la organización:
+La sección de accesos muestra todos los usuarios de la organización en una tabla paginada:
 
 | Columna | Descripción |
 |---------|-------------|
-| **Usuario** | Nombre y email |
-| **Rol** | ADMIN, MANAGER o WORKER |
+| **Usuario** | Nombre, email e iniciales del avatar |
+| **Rol Asignado** | ADMIN, HR, MANAGER o WORKER (mostrado como badge) |
+| **Email para Alertas** | Correo alternativo para notificaciones |
+| **Recibe Alertas** | Toggle switch para activar/desactivar notificaciones |
 | **Estado** | Activo o inactivo |
-| **Notificaciones** | Preferencia de alertas email |
+| **Acciones** | Botones de editar rol y eliminar miembro |
 
-### Agregar Usuario
+### Agregar Usuario (Modal)
 
-El administrador puede invitar nuevos usuarios:
+El administrador puede invitar nuevos usuarios mediante un modal con formulario:
 
 | Campo | Descripción |
 |-------|-------------|
 | **Email** | Correo electrónico del nuevo usuario |
-| **Rol** | Rol que se asignará (ADMIN, MANAGER, WORKER) |
-| **Nombre** | Nombre completo del usuario |
+| **Rol** | Rol que se asignará (WORKER, HR, MANAGER, ADMIN) |
+
+La validación del formulario usa **Zod** y **React Hook Form**. Al enviar, se hace un `POST /organizations/me/members` con `{ email, role }`.
+
+> **Nota:** El rol `SUPERADMIN` no se gestiona desde esta tabla. Los superadministradores se autentican desde `/super-admin` con credenciales de email y contraseña, y pueden crear organizaciones completas desde esa interfaz.
+
+### Editar Rol (Modal)
+
+Al hacer clic en el icono de editar en la tabla, se abre un modal precargado con:
+
+| Campo | Descripción |
+|-------|-------------|
+| **Email** | Correo del miembro (solo lectura) |
+| **Rol** | Selector de rol (WORKER, HR, MANAGER, ADMIN) |
+
+La actualización se realiza mediante `PATCH /user/{user_id}` con `{ role }`.
+
+### Eliminar Miembro (Modal)
+
+Al hacer clic en el icono de eliminar, se muestra un modal de confirmación con el nombre y email del miembro. Al confirmar, se ejecuta `DELETE /user/{user_id}` (soft delete).
+
+### Toggle de Notificaciones
+
+Cada fila en la tabla tiene un interruptor (toggle switch) que permite activar o desactivar las alertas por email para ese miembro. La acción se envía como `PATCH /organizations/me/members/{member_id}/notifications` con `{ receives_notifications: true/false }`.
 
 ### Estadísticas de Usuarios
 
@@ -117,7 +142,7 @@ El sistema ejecuta un proceso automático diario que:
 
 ## Gestión Documental
 
-La sección de gestión documental contiene tres tabs:
+La sección de gestión documental contiene dos tabs:
 
 ### Tab 1: Plantillas
 
@@ -137,19 +162,11 @@ La sección de gestión documental contiene tres tabs:
 | **PUBLISHED** | Borde verde |
 | **ARCHIVED** | Borde gris |
 
-### Tab 2: Gestor de Carpetas
+### Tab 2: Gestión de Servicios
 
-| Operación | Descripción |
-|-----------|-------------|
-| **Crear Carpeta** | Nueva carpeta organizacional |
-| **Renombrar** | Cambiar nombre de carpeta |
-| **Eliminar** | Eliminar carpeta vacía |
+Este tab contiene dos sub-secciones:
 
-Las carpetas corresponden a los roles y se crean automáticamente según la estructura organizacional.
-
-### Tab 3: Gestión de Servicios
-
-El catálogo de servicios permite mantener un inventario de servicios ofrecidos:
+**Catálogo de Servicios:** CRUD completo para mantener un inventario de servicios ofrecidos:
 
 | Campo | Descripción |
 |-------|-------------|
@@ -165,6 +182,8 @@ El catálogo de servicios permite mantener un inventario de servicios ofrecidos:
 | **Editar** | Modificar datos del servicio |
 | **Eliminar** | Eliminar servicio |
 | **Activar/Desactivar** | Habilitar/inhabilitar sin eliminar |
+
+**Tipos de Documento:** Lista de referencia de los tipos de documento disponibles (solo lectura).
 
 ## Notificaciones por Email
 

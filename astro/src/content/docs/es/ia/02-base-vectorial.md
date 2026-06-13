@@ -3,7 +3,7 @@ title: Base Vectorial
 description: Configuración de Qdrant, estrategia de embeddings y estructura de índices.
 ---
 
-La base vectorial de ContractAI usa Qdrant como vector store para la búsqueda semántica de fragmentos de contratos.
+La base vectorial de Pactus usa Qdrant como vector store para la búsqueda semántica de fragmentos de contratos.
 
 ## Arquitectura de Qdrant
 

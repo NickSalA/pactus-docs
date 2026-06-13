@@ -3,7 +3,7 @@ title: Agente LangGraph
 description: Arquitectura multi-agente para chatbot conversacional con control de acceso.
 ---
 
-El chatbot de ContractAI está implementado como un grafo de LangGraph con tres agentes especializados y nodos de terminación.
+El chatbot de Pactus está implementado como un grafo de LangGraph con tres agentes especializados y nodos de terminación.
 
 ## Arquitectura General
 
@@ -154,7 +154,7 @@ El grafo usa `langgraph.checkpoint.postgres.aio.AsyncPostgresSaver` para persist
 
 **Configuración**:
 - Pool de conexiones PostgreSQL configurable (min_size, max_size)
-- `search_path`: `checkpoint, public`
+- `search_path`: `checkpoint` y los esquemas de dominio que consuma el agente (`identity`, `contracts`, `catalog`, `templates`, `notifications`, `chatbot`)
 - El `thread_id` de conversación se usa como identificador de thread en LangGraph
 
 **Beneficios**:

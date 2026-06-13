@@ -17,7 +17,9 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../schemas/schema.yaml#/ConversationUsage'
+            type: array
+            items:
+              $ref: '../schemas/schema.yaml#/TokenUsageRead'
     '401':
       description: No autenticado.
       content:
