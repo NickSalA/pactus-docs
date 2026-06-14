@@ -176,3 +176,65 @@ TemplateActivityListResponse:
   type: array
   items:
     $ref: '#/TemplateActivityResponse'
+
+ContractActivityAction:
+  type: string
+  enum:
+    - CREATED
+    - GENERATED_FROM_TEMPLATE
+    - IMPORTED_FROM_GOOGLE_DRIVE
+    - UPDATED
+    - DELETED
+
+ContractActivityResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    organization_id:
+      type: integer
+    actor_user_id:
+      type: integer
+    actor_name:
+      type: string
+      nullable: true
+    actor_role:
+      type: string
+    action:
+      $ref: '#/ContractActivityAction'
+    document_id:
+      type: integer
+      nullable: true
+    company_contract_id:
+      type: integer
+      nullable: true
+    labor_contract_id:
+      type: integer
+      nullable: true
+    document_name:
+      type: string
+      nullable: true
+    document_type:
+      type: string
+      nullable: true
+    previous_state:
+      type: string
+      nullable: true
+    state:
+      type: string
+      nullable: true
+    created_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - organization_id
+    - actor_user_id
+    - actor_role
+    - action
+    - created_at
+
+ContractActivityListResponse:
+  type: array
+  items:
+    $ref: '#/ContractActivityResponse'

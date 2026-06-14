@@ -181,3 +181,5 @@ paths:
     $ref: 'modules/audit/paths/chatbot.yaml'
   /audit/templates:
     $ref: 'modules/audit/paths/templates.yaml'
+  /audit/contracts:
+    $ref: 'modules/audit/paths/contracts.yaml'
