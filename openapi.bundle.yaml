@@ -20,8 +20,6 @@ tags:
     description: Operaciones para el usuario autenticado.
   - name: Chatbot
     description: Operaciones para interactuar con el chatbot.
-  - name: Chatbot Usage
-    description: Endpoints para consultar uso de tokens del chatbot.
   - name: Conversaciones
     description: Operaciones para la gestión de conversaciones.
   - name: Documentos
@@ -40,10 +38,10 @@ tags:
     description: Operaciones para la gestión y generación de documentos mediante plantillas.
   - name: Dashboards
     description: Endpoints para gráficos y métricas del dashboard.
-  - name: Auditoría
-    description: Endpoints para consultar actividad auditada de la organización.
   - name: Sistema
     description: Operaciones básicas de estado del servidor.
+  - name: Auditoría
+    description: Endpoints para consultar registros de actividad auditada del sistema.
 paths:
   /:
     get:
@@ -87,6 +85,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /user/{user_id}:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: ID del usuario.
+    patch:
+      summary: Actualizar usuario
+      description: Actualiza los datos de un usuario. Se usa principalmente para cambiar el rol de un miembro.
+      operationId: updateUser
+      tags:
+        - Usuarios
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Usuario actualizado satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Usuario no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Eliminar usuario
+      description: Elimina (soft delete) un usuario de la organización.
+      operationId: deleteUser
+      tags:
+        - Usuarios
+      responses:
+        '204':
+          description: Usuario eliminado satisfactoriamente.
+        '404':
+          description: Usuario no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /chatbot/:
     post:
       summary: Enviar mensaje al chatbot
@@ -115,159 +161,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: Datos de entrada inválidos.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-  /chatbot/usage/conversation/{conversation_id}:
-    get:
-      summary: Obtener uso de tokens por conversación
-      description: Devuelve el historial de uso de tokens para una conversación específica del chatbot.
-      operationId: getConversationUsage
-      tags:
-        - Chatbot
-      parameters:
-        - name: conversation_id
-          in: path
-          required: true
-          schema:
-            type: integer
-          description: ID de la conversación.
-      responses:
-        '200':
-          description: Uso obtenido satisfactoriamente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConversationUsage'
-        '401':
-          description: No autenticado.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Conversación no encontrada.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /chatbot/usage/summary:
-    get:
-      summary: Obtener resumen de uso de tokens
-      description: Devuelve un resumen agregado del uso de tokens del chatbot para el usuario autenticado.
-      operationId: getUsageSummary
-      tags:
-        - Chatbot
-      responses:
-        '200':
-          description: Resumen obtenido satisfactoriamente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UsageSummary'
-        '401':
-          description: No autenticado.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /audit/users:
-    get:
-      summary: Listar auditoría de usuarios
-      description: Lista los eventos auditados de gestión de usuarios para la organización actual. Solo disponible para administradores.
-      operationId: listUserActivity
-      tags:
-        - Auditoría
-      parameters:
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            maximum: 100
-            default: 50
-          description: Cantidad máxima de registros a devolver.
-        - name: offset
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-          description: Cantidad de registros a omitir desde el inicio.
-      responses:
-        '200':
-          description: Actividad de usuarios obtenida satisfactoriamente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserActivityListResponse'
-        '401':
-          description: No autenticado.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '403':
-          description: No autorizado para consultar auditoría.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '422':
-          description: Parámetros de paginación inválidos.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-  /audit/chatbot:
-    get:
-      summary: Listar auditoría de chatbot
-      description: Lista los eventos auditados de uso del chatbot para la organización actual. Solo disponible para administradores.
-      operationId: listChatbotActivity
-      tags:
-        - Auditoría
-      parameters:
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            maximum: 100
-            default: 50
-          description: Cantidad máxima de registros a devolver.
-        - name: offset
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-          description: Cantidad de registros a omitir desde el inicio.
-      responses:
-        '200':
-          description: Actividad de chatbot obtenida satisfactoriamente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatbotActivityListResponse'
-        '401':
-          description: No autenticado.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '403':
-          description: No autorizado para consultar auditoría.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '422':
-          description: Parámetros de paginación inválidos.
           content:
             application/json:
               schema:
@@ -1227,7 +1120,9 @@ paths:
         description: ID del miembro.
     patch:
       summary: Actualizar rol de un miembro
+      description: '**DEPRECADO**: Usar `PATCH /user/{user_id}` en su lugar.'
       operationId: updateOrganizationMemberRole
+      deprecated: true
       tags:
         - Organizaciones
       requestBody:
@@ -1592,24 +1487,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TemplateResponse'
-    post:
-      tags:
-        - Plantillas
-      summary: Crear plantilla
-      operationId: createTemplate
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateTemplateRequest'
-      responses:
-        '201':
-          description: Plantilla creada.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
   /templates/formats:
     get:
       tags:
@@ -2192,6 +2069,206 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /audit/users:
+    get:
+      summary: Listar auditoría de usuarios
+      description: Lista los eventos auditados de gestión de usuarios para la organización actual. Solo disponible para administradores.
+      operationId: listUserActivity
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+      responses:
+        '200':
+          description: Actividad de usuarios obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserActivityListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de paginación inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /audit/chatbot:
+    get:
+      summary: Listar auditoría de chatbot
+      description: Lista los eventos auditados de uso del chatbot para la organización actual. Solo disponible para administradores.
+      operationId: listChatbotActivity
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+      responses:
+        '200':
+          description: Actividad de chatbot obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatbotActivityListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de paginación inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /audit/templates:
+    get:
+      summary: Listar auditoría de plantillas
+      description: Lista los eventos auditados de gestión de plantillas para la organización actual. Solo disponible para administradores.
+      operationId: listTemplateActivity
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+      responses:
+        '200':
+          description: Actividad de plantillas obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateActivityListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de paginación inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /audit/contracts:
+    get:
+      summary: Listar auditoría de contratos
+      description: Lista los eventos auditados de gestión de contratos para la organización actual. Solo disponible para administradores.
+      operationId: listContractActivity
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+      responses:
+        '200':
+          description: Actividad de contratos obtenida satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractActivityListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de paginación inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
 components:
   securitySchemes:
     BearerAuth:
@@ -2272,6 +2349,13 @@ components:
         - type
         - message
         - request_id
+    UserUpdateRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/UserRole'
+      required:
+        - role
     ChatRequest:
       type: object
       required:
@@ -2383,166 +2467,6 @@ components:
                 type: string
               example:
                 - body -> name: Field required
-    UsageTokenRecord:
-      type: object
-      properties:
-        conversation_id:
-          type: integer
-        input_tokens:
-          type: integer
-        output_tokens:
-          type: integer
-        total_tokens:
-          type: integer
-        model:
-          type: string
-        timestamp:
-          type: string
-          format: date-time
-    ConversationUsage:
-      type: object
-      properties:
-        conversation_id:
-          type: integer
-        total_input_tokens:
-          type: integer
-        total_output_tokens:
-          type: integer
-        total_tokens:
-          type: integer
-        records:
-          type: array
-          items:
-            $ref: '#/components/schemas/UsageTokenRecord'
-    UsageSummary:
-      type: object
-      properties:
-        total_input_tokens:
-          type: integer
-        total_output_tokens:
-          type: integer
-        total_tokens:
-          type: integer
-        total_conversations:
-          type: integer
-        average_tokens_per_conversation:
-          type: number
-          format: float
-    UserActivityAction:
-      type: string
-      enum:
-        - CREATED
-        - UPDATED
-        - DELETED
-    UserActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/UserActivityAction'
-        target_user_id:
-          type: integer
-          nullable: true
-        target_user_email:
-          type: string
-          format: email
-          nullable: true
-        target_user_name:
-          type: string
-          nullable: true
-        previous_role:
-          type: string
-          nullable: true
-        role:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    UserActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/UserActivityResponse'
-    ChatbotActivityAction:
-      type: string
-      enum:
-        - CONVERSATION_STARTED
-        - MESSAGE_SENT
-        - RESPONSE_GENERATED
-    ChatbotActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/ChatbotActivityAction'
-        conversation_id:
-          type: integer
-          nullable: true
-        input_tokens:
-          type: integer
-          nullable: true
-        output_tokens:
-          type: integer
-          nullable: true
-        total_tokens:
-          type: integer
-          nullable: true
-        input_cost_usd:
-          type: number
-          format: decimal
-          nullable: true
-        output_cost_usd:
-          type: number
-          format: decimal
-          nullable: true
-        total_cost_usd:
-          type: number
-          format: decimal
-          nullable: true
-        model_used:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    ChatbotActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/ChatbotActivityResponse'
     ConversationList:
       type: object
       properties:
@@ -3481,26 +3405,6 @@ components:
         - content
         - created_at
         - state
-    CreateTemplateRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          nullable: true
-        description:
-          type: string
-          nullable: true
-        document_type:
-          allOf:
-            - $ref: '#/components/schemas/DocumentType'
-          nullable: true
-        format_code:
-          type: string
-        content:
-          $ref: '#/components/schemas/TemplateContent'
-      required:
-        - format_code
-        - content
     TemplateFormatResponse:
       type: object
       properties:
@@ -4023,3 +3927,232 @@ components:
         - tenure_distribution
         - renewal_trend
         - details
+    UserActivityAction:
+      type: string
+      enum:
+        - CREATED
+        - UPDATED
+        - DELETED
+    UserActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/UserActivityAction'
+        target_user_id:
+          type: integer
+          nullable: true
+        target_user_email:
+          type: string
+          format: email
+          nullable: true
+        target_user_name:
+          type: string
+          nullable: true
+        previous_role:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    UserActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserActivityResponse'
+    ChatbotActivityAction:
+      type: string
+      enum:
+        - CONVERSATION_STARTED
+        - MESSAGE_SENT
+        - RESPONSE_GENERATED
+    ChatbotActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/ChatbotActivityAction'
+        conversation_title:
+          type: string
+          nullable: true
+        input_tokens:
+          type: integer
+          nullable: true
+        output_tokens:
+          type: integer
+          nullable: true
+        total_tokens:
+          type: integer
+          nullable: true
+        input_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        output_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        total_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        model_used:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    ChatbotActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/ChatbotActivityResponse'
+    TemplateActivityAction:
+      type: string
+      enum:
+        - CREATED
+        - UPDATED
+        - DELETED
+        - ARCHIVED
+    TemplateActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/TemplateActivityAction'
+        template_id:
+          type: integer
+          nullable: true
+        template_format_id:
+          type: integer
+          nullable: true
+        template_name:
+          type: string
+          nullable: true
+        document_type:
+          type: string
+          nullable: true
+        previous_state:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    TemplateActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/TemplateActivityResponse'
+    ContractActivityAction:
+      type: string
+      enum:
+        - CREATED
+        - GENERATED_FROM_TEMPLATE
+        - IMPORTED_FROM_GOOGLE_DRIVE
+        - UPDATED
+        - DELETED
+    ContractActivityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        actor_name:
+          type: string
+          nullable: true
+        actor_role:
+          type: string
+        action:
+          $ref: '#/components/schemas/ContractActivityAction'
+        document_id:
+          type: integer
+          nullable: true
+        company_contract_id:
+          type: integer
+          nullable: true
+        labor_contract_id:
+          type: integer
+          nullable: true
+        document_name:
+          type: string
+          nullable: true
+        document_type:
+          type: string
+          nullable: true
+        previous_state:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - actor_role
+        - action
+        - created_at
+    ContractActivityListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/ContractActivityResponse'

@@ -90,15 +90,15 @@ ChatbotActivityResponse:
       nullable: true
     input_cost_usd:
       type: number
-      format: decimal
+      format: float
       nullable: true
     output_cost_usd:
       type: number
-      format: decimal
+      format: float
       nullable: true
     total_cost_usd:
       type: number
-      format: decimal
+      format: float
       nullable: true
     model_used:
       type: string
