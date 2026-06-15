@@ -125,27 +125,6 @@ TemplateResponse:
     - created_at
     - state
 
-CreateTemplateRequest:
-  type: object
-  properties:
-    name:
-      type: string
-      nullable: true
-    description:
-      type: string
-      nullable: true
-    document_type:
-      allOf:
-        - $ref: '../../documents/schemas/schema.yaml#/DocumentType'
-      nullable: true
-    format_code:
-      type: string
-    content:
-      $ref: '#/TemplateContent'
-  required:
-    - format_code
-    - content
-
 UpdateTemplateRequest:
   type: object
   minProperties: 1
