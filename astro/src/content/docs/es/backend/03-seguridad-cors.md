@@ -78,24 +78,23 @@ Ejemplos concretos:
 
 ## Estado Actual de CORS
 
-La configuración efectiva de CORS se define hoy en `factory.py` con este criterio:
+La configuración efectiva de CORS se define hoy en `factory.py` tomando los orígenes desde `settings.CORS_ORIGINS`:
 
-- `allow_origins=["*"]`
+- `allow_origins` = `settings.CORS_ORIGINS`
 - `allow_methods=["*"]`
 - `allow_headers=["*"]`
 
-En otras palabras, la política aplicada actualmente es abierta.
+Los orígenes configurados actualmente son:
 
-## Desalineación Actual entre Configuración y Ejecución
+```text
+http://localhost:8000
+http://localhost:3000
+http://localhost:9002
+https://contractia-kappa.vercel.app
+http://127.0.0.1:3000
+```
 
-La clase `Settings` sí define `CORS_ORIGINS` con una lista explícita de orígenes permitidos. Sin embargo, esa lista no es la que se aplica hoy al middleware real de FastAPI.
-
-Esto deja una diferencia importante entre:
-
-- la configuración declarada en `shared/config.py`
-- la configuración efectivamente montada en `factory.py`
-
-Mientras esa diferencia exista, la documentación debe describir el comportamiento real, no el comportamiento deseado.
+La lista se define en la clase `Settings` de `shared/config.py` y puede ajustarse por entorno sin modificar código.
 
 ## Middleware de Trazabilidad
 
