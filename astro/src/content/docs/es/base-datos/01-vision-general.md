@@ -17,8 +17,7 @@ La persistencia del sistema ya no concentra el dominio en `public`. El modelo vi
 | Plantillas | `templates` | Plantillas y formatos documentales | Completo |
 | Notificaciones | `notifications` | Reglas, alertas y logs de envío | Completo |
 | Chatbot | `chatbot` | Conversaciones visibles del producto | Completo |
-| Telemetría | `telemetry` | Uso detallado de tokens del chatbot | Funcional |
-| Auditoría | `audit` | Actividad auditada de usuarios, contratos, plantillas y chatbot | Funcional |
+| Auditoría | `audit` | Actividad auditada de usuarios, chatbot, contratos, plantillas y telemetría de tokens | Completo |
 | Tipos compartidos | `app_types` | Enums reutilizados por varias tablas | Funcional |
 | Identidad Supabase | `auth` | Login, sesiones y proveedor OAuth | Funcional |
 | Archivos | `storage` | Persistencia fisica de documentos | Funcional |
@@ -43,7 +42,6 @@ Las tablas relacionales actualmente relevantes para el producto son las siguient
 | `contracts.document_folders` | Carpetas documentales por rol |
 | `notifications.notification_rules` | Reglas de alerta por organización o contrato |
 | `notifications.notification_send_logs` | Registro diario de correos enviados |
-| `telemetry.chatbot_token_usage` | Medición persistida de tokens y costos por conversación |
 | `audit.user_activity` | Eventos auditados de gestión de usuarios |
 | `audit.chatbot_activity` | Eventos auditados de uso del chatbot |
 | `audit.contract_activity` | Eventos auditados de contratos |
@@ -57,7 +55,7 @@ La tabla legacy `public.empresas` ya no forma parte del modelo vigente. El esque
 
 ### 1. Aislamiento por organización
 
-`identity.organizations` funciona como raíz del dominio. Desde ahí se encadenan usuarios, documentos, servicios, conversaciones, carpetas, plantillas, reglas, logs, telemetría agregable y actividad auditada mediante `organization_id`.
+`identity.organizations` funciona como raíz del dominio. Desde ahí se encadenan usuarios, documentos, servicios, conversaciones, carpetas, plantillas, reglas, logs y actividad auditada mediante `organization_id`.
 
 ### 2. Separación entre identidad y usuario de negocio
 
@@ -85,16 +83,16 @@ Las plantillas viven en `templates.document_templates` y se apoyan en `templates
 
 Esto permite que una organización tenga varias plantillas del mismo tipo documental sin perder el contexto del formato esperado.
 
-### 5. Auditoría y telemetría separadas
+### 5. Auditoría unificada con telemetría embebida
 
 La actividad auditada no se mezcla con las tablas transaccionales. El esquema `audit` registra eventos relevantes para trazabilidad:
 
 - `audit.user_activity` para altas, cambios y bajas de usuarios
-- `audit.chatbot_activity` para conversaciones, mensajes y respuestas generadas
+- `audit.chatbot_activity` para conversaciones, mensajes, respuestas generadas y telemetría de tokens y costos
 - `audit.contract_activity` para creación, actualización, importación y eliminación de contratos
 - `audit.template_activity` para creación, edición, publicación y archivado de plantillas
 
-La medición detallada de tokens vive en `telemetry.chatbot_token_usage` y se relaciona con `chatbot.conversations`. Esto permite consultar uso y costos sin acoplar la conversación visible al detalle operativo de consumo.
+La medición detallada de tokens, costos y modelo usado vive directamente en `audit.chatbot_activity`. Esto permite consultar uso y costos sin acoplar la conversación visible al detalle operativo de consumo, manteniendo toda la telemetría dentro del esquema de auditoría.
 
 ### 6. Uso selectivo de JSONB
 
@@ -119,7 +117,7 @@ El flujo relacional principal de la aplicación puede leerse así:
 7. Las plantillas viven en `templates.document_templates` y se relacionan opcionalmente con `templates.template_formats`.
 8. Las reglas de alerta viven en `notifications.notification_rules` y el historial de envíos en `notifications.notification_send_logs`.
 9. La función `contracts.sync_document_states` recalcula estados documentales a partir de fechas y reglas activas.
-10. Las acciones relevantes quedan registradas en `audit.*` y el consumo del chatbot se persiste en `telemetry.chatbot_token_usage`.
+10. Las acciones relevantes y la telemetría de tokens quedan registradas en `audit.*`.
 
 ## Relación con la API y el Backend
 
@@ -135,7 +133,7 @@ Los ajustes más importantes son estos:
 - el backend también conserva información resumida dentro de `contracts.documents.form_data` para ciertas consultas
 - `templates.document_templates.content` guarda una estructura rica de plantilla, incluyendo `fields`, `operational_fields` y, cuando aplica, `contract_date_mapping`
 - el archivo del contrato no se entrega de forma directa desde Storage; el backend genera URLs firmadas temporales
-- `audit.*` y `telemetry.*` soportan trazabilidad, métricas y reportes, pero no reemplazan las tablas transaccionales
+- `audit.*` soporta trazabilidad, métricas y reportes, pero no reemplaza las tablas transaccionales
 
 ## Alcance de Esta Documentación
 
