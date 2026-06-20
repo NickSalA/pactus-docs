@@ -31,23 +31,15 @@ El backend usa un registro intermedio de secretos mediante:
 
 Esto permite que la aplicación no dependa directamente, en cada acceso, de una implementación concreta de almacenamiento de secretos.
 
-## Proveedor de Secretos Actual
+## Proveedor de Secretos
 
-El proveedor activo configurado en el proyecto es:
+El backend define una interfaz `SecretsProvider` y una implementación `AzureKeyVaultProvider` en `shared/infrastructure/azure_provider.py`, pero **actualmente no está activa**. La inicialización del proveedor (`SecretsRegistry.set_provider()`) nunca se ejecuta, por lo que el registro de secretos no está conectado a ningún vault.
 
-- `AzureKeyVaultProvider`
-
-La inicialización actual apunta a este vault:
-
-```text
-https://contractai.vault.azure.net/
-```
-
-De este modo, el backend delega la resolución de secretos sensibles a Azure Key Vault.
+En su lugar, la clase `Settings` de `shared/config.py` utiliza `pydantic-settings` para leer todas las variables directamente desde el archivo `.env`, sin intermediarios. Los campos requeridos usan `Field(default=...)` y se validan al arrancar la aplicación.
 
 ## Secretos Relevantes del Proyecto
 
-Entre los valores sensibles que hoy se resuelven desde Key Vault o desde el registro de secretos se encuentran:
+Entre los valores sensibles que la aplicación requiere para operar se encuentran:
 
 - `GEMINI-API-KEY`
 - `OPENAI-API-KEY`
@@ -92,15 +84,15 @@ Ejemplos:
 - secretos de base de datos
 - secreto de cron
 
-## Relación entre `.env`, Variables y Vault
+## Resolución de Variables
 
-La clase `Settings` usa `pydantic-settings`, por lo que la app puede leer variables desde `.env`. Sin embargo, varios campos usan `default_factory=lambda: get_secret(...)`, lo que significa que el valor real puede provenir de Key Vault incluso si existe una capa de configuración por entorno.
+La clase `Settings` usa `pydantic-settings`, por lo que la app lee todas las variables directamente desde el archivo `.env`. La resolución sigue este orden:
 
-En términos prácticos, la resolución final depende de:
+1. Valores por defecto definidos en `Settings` (ej: `PROJECT_NAME`, `LOG_LEVEL`, `INDEX_NAME`)
+2. Variables requeridas sin valor por defecto, que deben estar presentes en el entorno o en `.env` (ej: `GEMINI_API_KEY`, `SUPABASE_URL`, `GOOGLE_CLIENT_ID`)
+3. Validación al arranque: si falta alguna variable requerida, `Settings()` lanza un `ValidationError` que se eleva como `RuntimeError`
 
-1. cómo esté configurado `SecretsRegistry`
-2. qué secreto exista en el proveedor activo
-3. qué variables estén presentes en el entorno
+No hay un paso de resolución desde Key Vault en el flujo actual. La implementación de `AzureKeyVaultProvider` y `SecretsRegistry` está disponible para futuras iteraciones, pero no interviene en la configuración en producción.
 
 ## Comportamiento de Arranque
 

@@ -24,10 +24,12 @@ La función `create()` de `factory.py` monta la aplicación FastAPI y registra l
 - usuarios
 - chatbot
 - conversaciones
+- dashboard
 - integraciones
 - organizaciones
 - notificaciones
 - plantillas
+- auditoría
 
 La app también registra:
 
@@ -91,11 +93,13 @@ Aunque `Settings` define `GLOBAL_PREFIX`, la aplicación actual no lo aplica al 
 - `/folders`
 - `/chatbot`
 - `/conversations`
+- `/dashboard`
 - `/integrations`
 - `/organizations`
 - `/notifications`
 - `/templates`
 - `/user`
+- `/audit`
 
 Este detalle es importante porque afecta tanto a OpenAPI como a cualquier consumidor externo de la API.
 
