@@ -30,7 +30,7 @@ El frontend de Pactus está construido con **Next.js 16** usando App Router.
 
 | Ruta                | Descripción                                                  |
 | ------------------- | ------------------------------------------------------------ |
-| `/`                 | Landing page con propuesta de valor, CTA para iniciar sesión |
+| `/`                 | Landing page con 8 secciones (Hero, About, Misión/Visión, Capacidades, IA RAG, CTA final, Contacto) Navbar sticky con smooth-scroll |
 | `/login`            | Autenticación OAuth con Google                               |
 | `/super-admin`      | Portal para gestionar organizaciones                         |
 | `/privacy-policy`   | Política de privacidad                                       |

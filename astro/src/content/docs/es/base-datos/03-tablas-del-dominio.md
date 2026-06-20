@@ -22,7 +22,6 @@ El dominio principal de Pactus se distribuye en esquemas especializados. A conti
 | `contracts.document_folders` | Carpetas documentales por rol | `id` |
 | `notifications.notification_rules` | Reglas de alerta por organización o contrato | `id` |
 | `notifications.notification_send_logs` | Log diario de correos enviados por organizacion | `id` |
-| `telemetry.chatbot_token_usage` | Medición de tokens y costos por conversación | `id` |
 | `audit.user_activity` | Auditoría de gestión de usuarios | `id` |
 | `audit.chatbot_activity` | Auditoría de uso del chatbot | `id` |
 | `audit.contract_activity` | Auditoría de contratos | `id` |
@@ -48,7 +47,7 @@ Los enums de auditoría viven en `audit`:
 |------|---------|
 | `audit.audit_user_action` | `CREATED`, `UPDATED`, `DELETED` |
 | `audit.audit_chatbot_action` | `CONVERSATION_STARTED`, `MESSAGE_SENT`, `RESPONSE_GENERATED` |
-| `audit.audit_contract_action` | `CREATED`, `GENERATED_FROM_TEMPLATE`, `IMPORTED_FROM_GOOGLE_DRIVE`, `UPDATED`, `DELETED` |
+| `audit.audit_contract_action` | `MANUAL_UPLOAD`, `GENERATED_FROM_TEMPLATE`, `IMPORTED_FROM_GOOGLE_DRIVE`, `UPDATED`, `DELETED` |
 | `audit.audit_template_action` | `CREATED`, `UPDATED`, `PUBLISHED`, `ARCHIVED` |
 
 ## `identity.organizations`
@@ -459,32 +458,6 @@ Registra el resultado diario del envío consolidado de correos por organización
 | `emails_sent` | `integer` | Cantidad de correos enviados en esa corrida |
 | `created_at` | `timestamptz` | Fecha de registro |
 
-## `telemetry.chatbot_token_usage`
-
-Registra el consumo detallado de tokens y costos por mensaje de conversación.
-
-**Clave primaria:** `id`
-
-**Claves foráneas:**
-
-- `conversation_id -> chatbot.conversations.id`
-
-| Columna | Tipo | Detalle |
-|---------|------|---------|
-| `id` | `integer` | Identidad del registro de uso |
-| `conversation_id` | `integer` | Conversación asociada |
-| `message_index` | `integer` | Índice del mensaje dentro del hilo |
-| `input_tokens` | `integer` | Tokens de entrada |
-| `output_tokens` | `integer` | Tokens de salida |
-| `total_tokens` | `integer` | Total de tokens del evento |
-| `input_cost_usd` | `numeric` | Costo de entrada en USD |
-| `output_cost_usd` | `numeric` | Costo de salida en USD |
-| `total_cost_usd` | `numeric` | Costo total en USD |
-| `model_used` | `varchar` | Modelo utilizado |
-| `created_at` | `timestamptz` | Fecha de registro |
-
-Esta tabla alimenta endpoints de uso del chatbot y permite análisis de costos sin alterar el historial visible de `chatbot.conversations`.
-
 ## `audit.user_activity`
 
 Registra acciones auditadas de gestión de usuarios dentro de una organización.
@@ -546,6 +519,10 @@ Registra eventos auditados de uso del chatbot y conserva métricas operativas cu
 
 - Los contadores de tokens deben ser no negativos cuando tienen valor.
 - Los costos deben ser no negativos cuando tienen valor.
+
+### Telemetría de tokens
+
+`audit.chatbot_activity` también cumple la función de telemetría del chatbot. Las columnas `input_tokens`, `output_tokens`, `total_tokens`, `input_cost_usd`, `output_cost_usd`, `total_cost_usd` y `model_used` permiten analizar consumo y costos por evento sin alterar el historial visible de `chatbot.conversations`.
 
 ## `audit.contract_activity`
 

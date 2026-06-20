@@ -24,6 +24,7 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/chatbot`
 - `/documents`
 - `/conversations`
+- `/dashboard`
 - `/integrations`
 - `/services`
 - `/folders`
@@ -31,8 +32,29 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/notifications`
 - `/templates`
 - `/user`
+- `/audit`
 
 Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se aplica hoy sobre los routers montados por la aplicación.
+
+### Endpoints Raíz
+
+El backend expone algunos endpoints directamente en la raíz, sin prefijo de módulo:
+
+- `GET /`
+  Endpoint de verificación. Devuelve un mensaje de bienvenida y la versión de la aplicación.
+
+  ```json
+  {
+    "message": "¡Bienvenido a Pactus!",
+    "version": "0.5.0"
+  }
+  ```
+
+- `GET /perf-test-data`
+  Endpoint de prueba de rendimiento sin base de datos ni autenticación. Devuelve datos mock para medir latencia.
+
+- `POST /perf-render-template`
+  Simula el renderizado de una plantilla sustituyendo variables. Acepta un payload JSON con campos como `company`, `client`, `value`, `currency`.
 
 ## Contratos Vigentes
 
@@ -213,13 +235,14 @@ La respuesta real del historial conversacional utiliza mensajes con esta estruct
 
 ### Integraciones con Google Drive
 
-El frontend utiliza **Google Picker API** para la selección visual de archivos. El flujo de autenticación es mediante **Google Identity Services (GIS)** con popup OAuth, no redirects tradicionales.
+El frontend utiliza **Google Picker API** para la selección visual de archivos. El flujo de autenticación es mediante **Google Identity Services (GIS)** con popup OAuth y scope `https://www.googleapis.com/auth/drive.file`, no redirects tradicionales.
 
 **Flujo actual:**
 1. Frontend abre Google Picker con `DocsView` y `MULTISELECT_ENABLED`
-2. Usuario selecciona archivos (carpetas excluidas)
-3. Google retorna `access_token` + `expires_in` directamente al frontend
-4. Frontend envía `POST /integrations/drive/import` con el token
+2. Usuario autoriza acceso limitado a archivos seleccionados con `drive.file`
+3. Usuario selecciona archivos (carpetas excluidas)
+4. Google retorna `access_token` + `expires_in` directamente al frontend
+5. Frontend envía `POST /integrations/drive/import` con el token
 
 **Endpoints:**
 
@@ -237,7 +260,7 @@ El frontend utiliza **Google Picker API** para la selección visual de archivos.
   {
     "token": {
       "token": "ya29.a0AfH6...",
-      "scopes": ["https://www.googleapis.com/auth/drive.readonly"]
+      "scopes": ["https://www.googleapis.com/auth/drive.file"]
     },
     "files": [
       {
@@ -271,6 +294,43 @@ El frontend utiliza **Google Picker API** para la selección visual de archivos.
   - `file_update`: Actualización por archivo (fases: PENDING → DATABASE → KNOWLEDGE_BASE → COMPLETED)
   - `job_complete`: Job finalizado
   - `ping`: Keep-alive
+
+### Dashboard
+
+El módulo de dashboard expone endpoints analíticos para visualizar métricas contractuales. Se divide en vistas para empresa (COMPANY) y laborales (LABOR). Todos requieren autenticación Bearer JWT.
+
+- `GET /dashboard/area_chart/company`
+  Devuelve datos del gráfico de áreas para contratos de empresa.
+
+- `GET /dashboard/area_chart/labor`
+  Devuelve datos del gráfico de áreas para contratos laborales.
+
+- `GET /dashboard/alert_center/company`
+  Devuelve categorías de alertas para contratos de empresa.
+
+- `GET /dashboard/alert_center/labor`
+  Devuelve categorías de alertas para contratos laborales.
+
+- `GET /dashboard/recent_contracts/company`
+  Lista contratos de empresa recientemente actualizados.
+
+- `GET /dashboard/recent_contracts/labor`
+  Lista contratos laborales recientemente actualizados.
+
+- `GET /dashboard/top_companies`
+  Ranking de empresas contratistas. Acepta parámetros `currency` y `sort_by` (VOLUME o VALUE).
+
+- `GET /dashboard/top_services`
+  Ranking de servicios contratados. Acepta parámetros `currency` y `sort_by`.
+
+- `GET /dashboard/retention/labor`
+  Dashboard de retención laboral.
+
+- `GET /dashboard/origin/labor`
+  Distribución de origen de contratos laborales.
+
+- `GET /dashboard/loyalty/company`
+  Dashboard de fidelidad de clientes empresa.
 
 ### Catálogo de Servicios
 
@@ -378,6 +438,22 @@ El módulo de plantillas expone hoy más rutas de las que tenía documentadas or
   Archiva una plantilla.
 
 La respuesta de `generate` no es un objeto simplificado ad hoc. El backend devuelve un documento persistido con el mismo shape base del módulo documental.
+
+### Auditoría
+
+El módulo de auditoría registra la actividad del sistema. Todos los endpoints requieren rol `ADMIN`.
+
+- `GET /audit/contracts`
+  Lista la actividad sobre contratos. Solo accesible por administradores.
+
+- `GET /audit/users`
+  Lista la actividad de usuarios. Solo accesible por administradores.
+
+- `GET /audit/templates`
+  Lista la actividad sobre plantillas. Solo accesible por administradores.
+
+- `GET /audit/chatbot`
+  Lista la actividad del chatbot. Solo accesible por administradores.
 
 ## Reglas de Seguridad Relevantes
 

@@ -22,7 +22,6 @@ La imagen del MER puede actualizarse por separado. La vista textual y las relaci
                         |                                |
                         |                                +----> chatbot.conversations
                         |                                |             |
-                        |                                |             +----> telemetry.chatbot_token_usage
                         |                                |             +----> audit.chatbot_activity
                         |                                |
                         |                                +----> contracts.document_folders
@@ -51,7 +50,6 @@ La imagen del MER puede actualizarse por separado. La vista textual y las relaci
             +----> audit.contract_activity
 
   audit.* referencia identity.organizations e identity.users para preservar tenant y actor.
-  telemetry.chatbot_token_usage referencia chatbot.conversations para medir consumo por hilo.
     </code></pre>
 </div>
 
@@ -189,14 +187,6 @@ Registra acciones sobre plantillas. Sus relaciones son:
 - `template_format_id -> templates.template_formats.id`
 
 Permite auditar creación, edición, publicación y archivado de plantillas.
-
-## Relación de Telemetría
-
-`telemetry.chatbot_token_usage` persiste el uso de tokens por mensaje de conversación. Su relación principal es:
-
-- `conversation_id -> chatbot.conversations.id`
-
-Esta tabla permite calcular consumo y costos por conversación sin alterar el contenido visible del hilo guardado en `chatbot.conversations.content`.
 
 ## Lectura Correcta del Modelo
 

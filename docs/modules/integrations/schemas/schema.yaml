@@ -70,7 +70,7 @@ ImportRequest:
     token:
       type: object
       additionalProperties: true
-      description: Token OAuth de Google Drive. Puede contener cualquier estructura requerida por el flujo de autenticación.
+      description: Token OAuth temporal de Google Drive obtenido con el scope `https://www.googleapis.com/auth/drive.file` para archivos seleccionados mediante Google Picker.
     files:
       type: array
       minItems: 1

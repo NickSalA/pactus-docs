@@ -55,7 +55,7 @@ Además de los esquemas de dominio, `auth` y `storage`, la plataforma incluye ot
 | `checkpoint` | Persistencia tecnica del checkpointer de LangGraph |
 | `legacy` | Tablas antiguas o auxiliares no usadas como dominio principal |
 
-Estos esquemas no forman parte directa del dominio de negocio, pero sí del entorno técnico sobre el que funciona la aplicación. Los esquemas `audit` y `telemetry` no se consideran internos de Supabase: son soporte funcional propio del producto y se documentan dentro del dominio.
+Estos esquemas no forman parte directa del dominio de negocio, pero sí del entorno técnico sobre el que funciona la aplicación. El esquema `audit` no se considera interno de Supabase: es soporte funcional propio del producto y se documenta dentro del dominio.
 
 ## Límite de Alcance
 
