@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/NickSalA/pactus-docs/compare/v1.3.0...v1.4.0) (2026-06-20)
+
+
+### Bug Fixes
+
+* change unexisting decimal format to float on ChatbotActivityResponse ([3c3e5f5](https://github.com/NickSalA/pactus-docs/commit/3c3e5f5d21a3d216de22b8ab1b3b08498a8aeaaf))
+
+
+### Features
+
+* merge remote documentation updates ([3dde2fa](https://github.com/NickSalA/pactus-docs/commit/3dde2fafa8b8543755e547fdf95bd1a29ef6dc4e))
+
 # [1.3.0](https://github.com/NickSalA/pactus-docs/compare/v1.2.0...v1.3.0) (2026-06-09)
 
 
