@@ -93,7 +93,7 @@ Este enfoque permite que la aplicación no dependa solo del proveedor de autenti
 En la implementación actual:
 
 - el esquema `auth` queda administrado por Supabase
-- las tablas de negocio viven en esquemas especializados: `identity`, `contracts`, `catalog`, `templates`, `notifications`, `chatbot`, `audit` y `telemetry`
+- las tablas de negocio viven en esquemas especializados: `identity`, `contracts`, `catalog`, `templates`, `notifications`, `chatbot` y `audit`
 - la vinculación entre `auth.users` y `identity.users` se hace con `supabase_user_id`
 - el control de permisos de negocio se resuelve en backend
 - el acceso a archivos usa URLs firmadas temporales generadas por el backend
@@ -117,7 +117,6 @@ Tablas revisadas con RLS deshabilitado:
 - `templates.template_formats`
 - `notifications.notification_rules`
 - `notifications.notification_send_logs`
-- `telemetry.chatbot_token_usage`
 - `audit.user_activity`
 - `audit.chatbot_activity`
 - `audit.contract_activity`
