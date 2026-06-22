@@ -53,6 +53,7 @@ Además de los esquemas de dominio, `auth` y `storage`, la plataforma incluye ot
 | `vault` | Manejo de secretos a nivel de base de datos |
 | `extensions` | Extensiones de PostgreSQL habilitadas en el proyecto |
 | `checkpoint` | Persistencia tecnica del checkpointer de LangGraph |
+| `billing` | Suscripciones, estados de pago y límites operativos por organización |
 | `legacy` | Tablas antiguas o auxiliares no usadas como dominio principal |
 
 Estos esquemas no forman parte directa del dominio de negocio, pero sí del entorno técnico sobre el que funciona la aplicación. El esquema `audit` no se considera interno de Supabase: es soporte funcional propio del producto y se documenta dentro del dominio.

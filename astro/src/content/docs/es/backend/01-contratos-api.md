@@ -32,6 +32,7 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/notifications`
 - `/templates`
 - `/user`
+- `/billing`
 - `/audit`
 
 Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se aplica hoy sobre los routers montados por la aplicación.
@@ -373,6 +374,67 @@ El módulo de dashboard expone endpoints analíticos para visualizar métricas c
 
 - `PATCH /organizations/me/members/{member_id}/notifications`
   Actualiza si un miembro debe recibir alertas contractuales.
+
+### Facturación (Billing)
+
+El módulo de facturación gestiona suscripciones, pagos y límites operativos por organización.
+
+- `POST /billing/paypal/subscriptions/confirm`
+  Confirma una suscripción aprobada en PayPal. Crea una organización placeholder y registra como ADMIN al correo usado en el checkout. Endpoint público (no requiere JWT).
+
+  Request:
+  ```json
+  {
+    "subscription_id": "I-0A1B2C3D4E5F",
+    "email": "admin@empresa.com"
+  }
+  ```
+
+  Response `201`:
+  ```json
+  {
+    "organization_id": 15,
+    "admin_email": "admin@empresa.com",
+    "paypal_subscription_id": "I-0A1B2C3D4E5F"
+  }
+  ```
+
+- `GET /billing/subscriptions`
+  Devuelve la suscripción actual de la organización del usuario autenticado. Requiere rol ADMIN.
+
+  Response `200`:
+  ```json
+  {
+    "id": 1,
+    "organization_id": 2,
+    "paypal_subscription_id": "I-0A1B2C3D4E5F",
+    "status": "ACTIVE",
+    "plan_tier": "PRO",
+    "current_period_start": "2026-06-01T00:00:00Z",
+    "current_period_end": "2026-07-01T00:00:00Z"
+  }
+  ```
+
+- `POST /billing/subscriptions/cancel`
+  Cancela la suscripción activa de la organización. Requiere rol ADMIN.
+
+- `GET /billing/limits`
+  Devuelve los límites operativos actuales de la organización del usuario autenticado.
+
+  Response `200`:
+  ```json
+  {
+    "max_users": 25,
+    "max_documents": 1000,
+    "max_storage_mb": 2000,
+    "max_file_size_mb": 25,
+    "max_monthly_ai_queries": 2000,
+    "notify_at_percentage": 80
+  }
+  ```
+
+- `PATCH /billing/limits`
+  Actualiza los límites operativos de una organización. Solo accesible por SUPERADMIN.
 
 ### Notificaciones
 

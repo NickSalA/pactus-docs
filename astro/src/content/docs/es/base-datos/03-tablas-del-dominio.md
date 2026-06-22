@@ -24,8 +24,11 @@ El dominio principal de Pactus se distribuye en esquemas especializados. A conti
 | `notifications.notification_send_logs` | Log diario de correos enviados por organizacion | `id` |
 | `audit.user_activity` | Auditoría de gestión de usuarios | `id` |
 | `audit.chatbot_activity` | Auditoría de uso del chatbot | `id` |
+| `audit.ai_token_usage` | Telemetría de tokens y costos de IA | `id` |
 | `audit.contract_activity` | Auditoría de contratos | `id` |
 | `audit.template_activity` | Auditoría de plantillas | `id` |
+| `billing.subscriptions` | Suscripciones y estado de pago por organización | `id` |
+| `billing.organization_limits` | Límites operativos por organización | `id` |
 
 La tabla `public.empresas` ya no forma parte del modelo actual. El esquema `public` no contiene actualmente las tablas principales del dominio.
 
@@ -40,6 +43,9 @@ Los enums reutilizados por las tablas de negocio viven en `app_types`:
 | `app_types.document_state` | `DRAFT`, `PENDING_SIGNATURE`, `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `TERMINATED` |
 | `app_types.document_template_state` | `DRAFT`, `PUBLISHED`, `ARCHIVED` |
 | `app_types.currency_type` | `PEN`, `USD`, `EUR` |
+| `app_types.payment_status` | `PENDING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `EXPIRED` |
+| `app_types.plan_tier` | `FREE`, `BASIC`, `PRO`, `ENTERPRISE` |
+| `app_types.ai_token_source` | `CHATBOT`, `TEMPLATES`, `INTEGRATIONS` |
 
 Los enums de auditoría viven en `audit`:
 
@@ -67,6 +73,8 @@ Es la tabla raíz del dominio. Desde aquí se organiza el aislamiento por tenant
 - `contracts.document_folders.organization_id -> identity.organizations.id`
 - `notifications.notification_send_logs.organization_id -> identity.organizations.id`
 - `audit.*.organization_id -> identity.organizations.id`
+- `billing.subscriptions.organization_id -> identity.organizations.id`
+- `billing.organization_limits.organization_id -> identity.organizations.id`
 
 | Columna | Tipo | Detalle |
 |---------|------|---------|
@@ -88,6 +96,7 @@ Es la tabla raíz del dominio. Desde aquí se organiza el aislamiento por tenant
 | `autorizacion_emitida_por` | `text` | Emisor de la autorizacion |
 | `email` | `varchar` | Correo corporativo |
 | `phone` | `varchar` | Telefono corporativo |
+| `paypal_subscription_id` | `varchar` | Identificador de la suscripción PayPal asociada, si aplica |
 
 ## `identity.users`
 
@@ -144,7 +153,7 @@ Guarda la cabecera del documento y la referencia al archivo asociado. Los contra
 | `start_date` | `date` | Inicio del periodo contractual |
 | `end_date` | `date` | Fin del periodo contractual |
 | `form_data` | `jsonb` | Datos estructurados extraídos o capturados del contrato |
-| `state` | `app_types.document_state` | Estado documental persistido |
+| `state` | `app_types.document_state` | Estado documental persistido; por defecto `ACTIVE` |
 | `file_path` | `text` | Ruta tecnica del archivo en Storage |
 | `file_name` | `text` | Nombre visible del archivo |
 | `folder_id` | `bigint` | Carpeta asignada al documento |
@@ -487,7 +496,7 @@ Registra acciones auditadas de gestión de usuarios dentro de una organización.
 
 ## `audit.chatbot_activity`
 
-Registra eventos auditados de uso del chatbot y conserva métricas operativas cuando aplica.
+Registra eventos auditados de uso del chatbot.
 
 **Clave primaria:** `id`
 
@@ -506,6 +515,29 @@ Registra eventos auditados de uso del chatbot y conserva métricas operativas cu
 | `actor_role` | `varchar` | Rol del actor al momento del evento |
 | `action` | `audit.audit_chatbot_action` | Acción auditada |
 | `conversation_id` | `bigint` | Conversación relacionada |
+| `created_at` | `timestamptz` | Fecha del evento |
+
+### Telemetría de tokens
+
+Las métricas de tokens y costos del chatbot (`input_tokens`, `output_tokens`, `total_tokens`, `input_cost_usd`, `output_cost_usd`, `total_cost_usd`, `model_used`) se almacenan en `audit.ai_token_usage` con `source = CHATBOT`, no en esta tabla.
+
+## `audit.ai_token_usage`
+
+Registra el consumo de tokens y costos asociados a operaciones de IA, segregado por fuente de origen.
+
+**Clave primaria:** `id`
+
+**Claves foráneas:**
+
+- `organization_id -> identity.organizations.id`
+- `actor_user_id -> identity.users.id`
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del registro |
+| `organization_id` | `bigint` | Organización donde ocurrió el consumo |
+| `actor_user_id` | `bigint` | Usuario que realizó la operación |
+| `source` | `app_types.ai_token_source` | Origen del consumo: `CHATBOT`, `TEMPLATES` o `INTEGRATIONS` |
 | `input_tokens` | `integer` | Tokens de entrada |
 | `output_tokens` | `integer` | Tokens de salida |
 | `total_tokens` | `integer` | Total de tokens |
@@ -519,10 +551,6 @@ Registra eventos auditados de uso del chatbot y conserva métricas operativas cu
 
 - Los contadores de tokens deben ser no negativos cuando tienen valor.
 - Los costos deben ser no negativos cuando tienen valor.
-
-### Telemetría de tokens
-
-`audit.chatbot_activity` también cumple la función de telemetría del chatbot. Las columnas `input_tokens`, `output_tokens`, `total_tokens`, `input_cost_usd`, `output_cost_usd`, `total_cost_usd` y `model_used` permiten analizar consumo y costos por evento sin alterar el historial visible de `chatbot.conversations`.
 
 ## `audit.contract_activity`
 
@@ -583,6 +611,76 @@ Registra eventos auditados sobre plantillas y formatos.
 | `previous_state` | `varchar` | Estado previo cuando aplica |
 | `state` | `varchar` | Estado resultante cuando aplica |
 | `created_at` | `timestamptz` | Fecha del evento |
+
+## `billing.subscriptions`
+
+Gestiona las suscripciones de pago por organización. Cada organización puede tener una única suscripción activa. Almacena el identificador de PayPal, el estado de pago, el plan contratado y las fechas del período actual.
+
+**Clave primaria:** `id`
+
+**Único por organización:** existe un único registro por `organization_id`.
+
+**Claves foráneas:**
+
+- `organization_id -> identity.organizations.id`
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad de la suscripción |
+| `organization_id` | `bigint` | Organización suscriptora (único) |
+| `paypal_subscription_id` | `varchar` | Identificador de la suscripción en PayPal (único, nullable) |
+| `status` | `app_types.payment_status` | Estado de pago actual: `PENDING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `EXPIRED` |
+| `plan_tier` | `app_types.plan_tier` | Plan contratado: `FREE`, `BASIC`, `PRO`, `ENTERPRISE` |
+| `current_period_start` | `timestamptz` | Inicio del período de facturación actual |
+| `current_period_end` | `timestamptz` | Fin del período de facturación actual |
+| `created_at` | `timestamptz` | Fecha de creación |
+| `updated_at` | `timestamptz` | Fecha de actualización |
+
+### Semántica de `payment_status`
+
+- `PENDING`: Suscripción creada pero pago aún no confirmado.
+- `ACTIVE`: Pago al día, suscripción vigente.
+- `PAST_DUE`: Pago vencido, período de gracia.
+- `CANCELED`: Suscripción cancelada por el usuario o por PayPal.
+- `EXPIRED`: Suscripción expiró sin renovación.
+
+### Semántica de `plan_tier`
+
+- `FREE`: Plan gratuito con funcionalidades básicas y límites reducidos.
+- `BASIC`: Plan básico con mayores límites operativos.
+- `PRO`: Plan profesional con funcionalidades completas.
+- `ENTERPRISE`: Plan empresarial con límites personalizados.
+
+## `billing.organization_limits`
+
+Define los límites operativos por organización. Cada organización tiene un único registro que determina cuántos recursos puede consumir. Los valores por defecto dependen del `plan_tier` de la suscripción.
+
+**Clave primaria:** `id`
+
+**Único por organización:** existe un único registro por `organization_id`.
+
+**Claves foráneas:**
+
+- `organization_id -> identity.organizations.id`
+
+| Columna | Tipo | Detalle |
+|---------|------|---------|
+| `id` | `bigint` | Identidad del registro |
+| `organization_id` | `bigint` | Organización asociada (único) |
+| `max_users` | `integer` | Máximo de usuarios permitidos |
+| `max_documents` | `integer` | Máximo de documentos permitidos |
+| `max_storage_mb` | `integer` | Límite de almacenamiento en MB |
+| `max_file_size_mb` | `integer` | Tamaño máximo por archivo en MB |
+| `max_monthly_ai_queries` | `integer` | Consultas al agente IA por mes |
+| `notify_at_percentage` | `integer` | Porcentaje de uso que dispara notificaciones de límite |
+| `created_at` | `timestamptz` | Fecha de creación |
+| `updated_at` | `timestamptz` | Fecha de actualización |
+
+### Restricciones relevantes
+
+- `notify_at_percentage` entre 1 y 100.
+- Todos los límites deben ser enteros positivos.
+- Los valores por defecto varían según `plan_tier` en la tabla `billing.subscriptions`.
 
 ## Función SQL asociada al dominio
 
