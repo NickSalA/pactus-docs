@@ -29,6 +29,7 @@ La función `create()` de `factory.py` monta la aplicación FastAPI y registra l
 - organizaciones
 - notificaciones
 - plantillas
+- facturación (billing)
 - auditoría
 
 La app también registra:
@@ -99,6 +100,7 @@ Aunque `Settings` define `GLOBAL_PREFIX`, la aplicación actual no lo aplica al 
 - `/notifications`
 - `/templates`
 - `/user`
+- `/billing`
 - `/audit`
 
 Este detalle es importante porque afecta tanto a OpenAPI como a cualquier consumidor externo de la API.

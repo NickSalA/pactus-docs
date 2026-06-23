@@ -1,0 +1,52 @@
+get:
+  summary: Obtener resumen de consumo de tokens de IA
+  description: Devuelve el consumo de tokens y costos agregados acumulados a nivel de organización o filtrado por usuario y rango de fechas. Solo disponible para administradores.
+  operationId: getAITokenUsageSummary
+  tags:
+    - Auditoría
+  parameters:
+    - name: user_id
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Filtrar por ID del usuario actor.
+    - name: start_date
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Fecha y hora de inicio del filtro.
+    - name: end_date
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Fecha y hora de fin del filtro.
+  responses:
+    '200':
+      description: Resumen de consumo obtenido satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/AITokenUsageSummaryResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado para consultar auditoría de tokens.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+    '422':
+      description: Parámetros de consulta inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'

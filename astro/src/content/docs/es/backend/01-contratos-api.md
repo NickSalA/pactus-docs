@@ -32,6 +32,7 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/notifications`
 - `/templates`
 - `/user`
+- `/billing`
 - `/audit`
 
 Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se aplica hoy sobre los routers montados por la aplicación.
@@ -374,6 +375,67 @@ El módulo de dashboard expone endpoints analíticos para visualizar métricas c
 - `PATCH /organizations/me/members/{member_id}/notifications`
   Actualiza si un miembro debe recibir alertas contractuales.
 
+### Facturación (Billing)
+
+El módulo de facturación gestiona suscripciones, pagos y límites operativos por organización.
+
+- `POST /billing/paypal/subscriptions/confirm`
+  Confirma una suscripción aprobada en PayPal. Crea una organización placeholder y registra como ADMIN al correo usado en el checkout. Endpoint público (no requiere JWT).
+
+  Request:
+  ```json
+  {
+    "subscription_id": "I-0A1B2C3D4E5F",
+    "email": "admin@empresa.com"
+  }
+  ```
+
+  Response `201`:
+  ```json
+  {
+    "organization_id": 15,
+    "admin_email": "admin@empresa.com",
+    "paypal_subscription_id": "I-0A1B2C3D4E5F"
+  }
+  ```
+
+- `GET /billing/subscriptions`
+  Devuelve la suscripción actual de la organización del usuario autenticado. Requiere rol ADMIN.
+
+  Response `200`:
+  ```json
+  {
+    "id": 1,
+    "organization_id": 2,
+    "paypal_subscription_id": "I-0A1B2C3D4E5F",
+    "status": "ACTIVE",
+    "plan_tier": "PRO",
+    "current_period_start": "2026-06-01T00:00:00Z",
+    "current_period_end": "2026-07-01T00:00:00Z"
+  }
+  ```
+
+- `POST /billing/subscriptions/cancel`
+  Cancela la suscripción activa de la organización. Requiere rol ADMIN.
+
+- `GET /billing/limits`
+  Devuelve los límites operativos actuales de la organización del usuario autenticado.
+
+  Response `200`:
+  ```json
+  {
+    "max_users": 25,
+    "max_documents": 1000,
+    "max_storage_mb": 2000,
+    "max_file_size_mb": 25,
+    "max_monthly_ai_queries": 2000,
+    "notify_at_percentage": 80
+  }
+  ```
+
+- `PATCH /billing/limits`
+  Actualiza los límites operativos de una organización. Solo accesible por SUPERADMIN.
+
 ### Notificaciones
 
 - `GET /notifications`
@@ -454,6 +516,43 @@ El módulo de auditoría registra la actividad del sistema. Todos los endpoints 
 
 - `GET /audit/chatbot`
   Lista la actividad del chatbot. Solo accesible por administradores.
+
+- `GET /audit/ai-usage`
+  Lista los registros detallados de consumo y costos de tokens de IA para la organización actual. Permite opcionalmente filtrar por usuario, origen (`CHATBOT`, `TEMPLATES` o `INTEGRATIONS`) y rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  [
+    {
+      "id": 45,
+      "organization_id": 2,
+      "actor_user_id": 19,
+      "source": "CHATBOT",
+      "input_tokens": 124,
+      "output_tokens": 256,
+      "total_tokens": 380,
+      "input_cost_usd": 0.000186,
+      "output_cost_usd": 0.000768,
+      "total_cost_usd": 0.000954,
+      "model_used": "gemini-2.5-flash",
+      "created_at": "2026-06-22T23:55:05Z"
+    }
+  ]
+  ```
+
+- `GET /audit/ai-usage/summary`
+  Devuelve el resumen agregado del consumo de tokens y costos de IA (totales y por tipo de token) acumulado por la organización actual o para un usuario específico, con filtro opcional por rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  {
+    "total_tokens": 15200,
+    "total_cost_usd": 0.0456,
+    "input_tokens": 5200,
+    "output_tokens": 10000
+  }
+  ```
+
 
 ## Reglas de Seguridad Relevantes
 

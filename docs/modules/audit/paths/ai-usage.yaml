@@ -1,0 +1,75 @@
+get:
+  summary: Listar consumo de tokens de IA
+  description: Lista los registros de consumo y costos de tokens de IA para la organización actual. Solo disponible para administradores.
+  operationId: listAITokenUsage
+  tags:
+    - Auditoría
+  parameters:
+    - name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+        default: 50
+      description: Cantidad máxima de registros a devolver.
+    - name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Cantidad de registros a omitir desde el inicio.
+    - name: user_id
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: Filtrar por ID del usuario actor.
+    - name: source
+      in: query
+      required: false
+      schema:
+        $ref: '../schemas/schema.yaml#/AITokenSource'
+      description: Filtrar por origen del consumo (CHATBOT, TEMPLATES, INTEGRATIONS).
+    - name: start_date
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Fecha y hora de inicio del filtro.
+    - name: end_date
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Fecha y hora de fin del filtro.
+  responses:
+    '200':
+      description: Historial de consumo de tokens obtenido satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/AITokenUsageListResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado para consultar auditoría de tokens.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+    '422':
+      description: Parámetros de consulta inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
