@@ -2324,6 +2324,135 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /audit/ai-usage:
+    get:
+      summary: Listar consumo de tokens de IA
+      description: Lista los registros de consumo y costos de tokens de IA para la organización actual. Solo disponible para administradores.
+      operationId: listAITokenUsage
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filtrar por ID del usuario actor.
+        - name: source
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/AITokenSource'
+          description: Filtrar por origen del consumo (CHATBOT, TEMPLATES, INTEGRATIONS).
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de inicio del filtro.
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de fin del filtro.
+      responses:
+        '200':
+          description: Historial de consumo de tokens obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AITokenUsageListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría de tokens.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de consulta inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /audit/ai-usage/summary:
+    get:
+      summary: Obtener resumen de consumo de tokens de IA
+      description: Devuelve el consumo de tokens y costos agregados acumulados a nivel de organización o filtrado por usuario y rango de fechas. Solo disponible para administradores.
+      operationId: getAITokenUsageSummary
+      tags:
+        - Auditoría
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filtrar por ID del usuario actor.
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de inicio del filtro.
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de fin del filtro.
+      responses:
+        '200':
+          description: Resumen de consumo obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AITokenUsageSummaryResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría de tokens.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de consulta inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
 components:
   securitySchemes:
     BearerAuth:
@@ -4248,3 +4377,74 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ContractActivityResponse'
+    AITokenSource:
+      type: string
+      enum:
+        - CHATBOT
+        - TEMPLATES
+        - INTEGRATIONS
+    AITokenUsageResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        source:
+          $ref: '#/components/schemas/AITokenSource'
+        input_tokens:
+          type: integer
+          nullable: true
+        output_tokens:
+          type: integer
+          nullable: true
+        total_tokens:
+          type: integer
+          nullable: true
+        input_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        output_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        total_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        model_used:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - source
+        - created_at
+    AITokenUsageListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/AITokenUsageResponse'
+    AITokenUsageSummaryResponse:
+      type: object
+      properties:
+        total_tokens:
+          type: integer
+        total_cost_usd:
+          type: number
+          format: float
+        input_tokens:
+          type: integer
+        output_tokens:
+          type: integer
+      required:
+        - total_tokens
+        - total_cost_usd
+        - input_tokens
+        - output_tokens
