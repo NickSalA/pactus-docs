@@ -56,6 +56,9 @@ Cada módulo agrupa funciones relacionadas. Todos se exportan desde `src/api/ind
 | `templates` | `src/api/templates.ts` | `queries/hooks/templates/queries` y `mutations` |
 | `notifications` | `src/api/notifications.ts` | `queries/hooks/notifications/queries` y `mutations` |
 | `dashboard` | `src/api/dashboard.ts` | `queries/hooks/dashboard/queries` |
+| `audit` | `src/api/audit.ts` | `queries/hooks/audit/queries` |
+| `billing` | `src/api/billing.ts` | `queries/hooks/billing/mutations` |
+| `integrations` | `src/api/integrations.ts` | `queries/hooks/contracts/mutations` (importación Drive) |
 
 ### Módulo Chat (Conversaciones)
 

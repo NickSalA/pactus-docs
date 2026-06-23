@@ -35,6 +35,7 @@ El frontend de Pactus está construido con **Next.js 16** usando App Router.
 | `/super-admin`      | Portal para gestionar organizaciones                         |
 | `/privacy-policy`   | Política de privacidad                                       |
 | `/terms-of-service` | Términos de servicio                                         |
+| `/pricing`          | Planes de suscripción con PayPal                             |
 | `/auth/callback`    | Callback OAuth                                               |
 
 ### Rutas Protegidas

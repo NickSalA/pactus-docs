@@ -3,7 +3,7 @@ title: "Gestión de Contratos"
 description: "Gestión de contratos: wizard de creación, tabla con filtros, paginación y acciones."
 ---
 
-La página de contratos (`/contracts`) permite gestionar el ciclo de vida completo de los contratos.
+La página de contratos permite gestionar el ciclo de vida completo de los contratos. Su ruta depende del rol del usuario: `/manager/contracts`, `/hr/contracts` o `/worker/contracts`.
 
 ## NewContractModal (Wizard)
 

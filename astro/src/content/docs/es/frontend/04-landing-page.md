@@ -34,6 +34,7 @@ Barra de navegación fija (sticky) con:
   - `#capacidades`
   - `#ia-rag`
   - `#contacto`
+  - `/pricing` (Planes)
 - Botón CTA **"Iniciar sesión"** que redirige a `/login`
 
 ### HeroSection
