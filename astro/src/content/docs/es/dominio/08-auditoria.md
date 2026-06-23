@@ -19,7 +19,7 @@ Cada categoría define sus acciones como un `StrEnum` en `modules/audit/domain/v
 
 | Acción | Disparador |
 |---|---|
-| `CREATED` | Creación manual de un documento |
+| `MANUAL_UPLOAD` | Carga manual de un documento |
 | `GENERATED_FROM_TEMPLATE` | Generación de contrato desde plantilla |
 | `IMPORTED_FROM_GOOGLE_DRIVE` | Importación exitosa desde Google Drive |
 | `UPDATED` | Actualización de un documento existente |
@@ -39,8 +39,8 @@ Cada categoría define sus acciones como un `StrEnum` en `modules/audit/domain/v
 |---|---|
 | `CREATED` | Creación de una nueva plantilla |
 | `UPDATED` | Modificación de una plantilla en borrador |
+| `PUBLISHED` | Publicación de una plantilla |
 | `ARCHIVED` | Archivado de una plantilla |
-| `DELETED` | Eliminación de una plantilla |
 
 ### Chatbot (`AuditChatbotAction`)
 
@@ -158,8 +158,9 @@ La auditoría no es un módulo aislado. Otros módulos del sistema escriben en s
 Módulo Origen                Acción Registrada           Tabla Destino
 ─────────────────────────────────────────────────────────────────────
 Integraciones (Drive)        IMPORTED_FROM_GOOGLE_DRIVE  audit.contract_activity
+Documentos (upload)          MANUAL_UPLOAD               audit.contract_activity
 Documentos (state change)    UPDATED / DELETED           audit.contract_activity
-Plantillas (CRUD)            CREATED / UPDATED / ARCHIVED audit.template_activity
+Plantillas (CRUD)            CREATED / UPDATED / PUBLISHED / ARCHIVED audit.template_activity
 Usuarios (members CRUD)      CREATED / UPDATED / DELETED audit.user_activity
 Chatbot (mensajes)           MESSAGE_SENT / RESPONSE_GENERATED audit.chatbot_activity
 ```

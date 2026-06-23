@@ -32,11 +32,11 @@ payload:
 
 ## Modelo de Embeddings
 
-El sistema utiliza **Voyage AI** para generar embeddings. El modelo específico se configura en el backend mediante variables de entorno.
+El sistema utiliza actualmente **OpenAI (`text-embedding-3-small`)** para generar embeddings. Está planificada la migración a **Voyage AI** para mejorar la relación costo-rendimiento.
 
 ### Características del Embedding
 
-- **Dimensionalidad**: Configurable según el modelo de Voyage AI seleccionado
+- **Dimensionalidad**: 1536 dimensiones (`text-embedding-3-small`)
 - **Métrica de similaridad**: Coseno similarity para búsqueda de cercana semántica
 - **Actualización**: Los embeddings se recalculan cuando el documento se reprocesa
 
@@ -61,7 +61,7 @@ El sistema utiliza **Voyage AI** para generar embeddings. El modelo específico 
 ### Proceso de Indexación
 
 1. El documento se procesa y genera N chunks
-2. Cada chunk se embeddea con Voyage AI
+2. Cada chunk se embeddea con OpenAI (`text-embedding-3-small`)
 3. Los vectores se insertan en Qdrant con sus payloads
 4. Qdrant actualiza el índice de la colección
 
@@ -69,7 +69,7 @@ El sistema utiliza **Voyage AI** para generar embeddings. El modelo específico 
 
 ```python
 # Pseudocódigo del proceso de búsqueda
-query_vector = embed(message)  # Voyage AI
+query_vector = embed(message)  # OpenAI text-embedding-3-small
 results = qdrant.search(
     collection=organization_id,
     vector=query_vector,
@@ -100,7 +100,7 @@ Esto se aplica como filtro en la query de Qdrant antes de recuperar resultados.
 Usuario pregunta
      │
      ▼
-Embedding del query (Voyage AI)
+Embedding del query (OpenAI text-embedding-3-small)
      │
      ▼
 Búsqueda en Qdrant con filtro de rol

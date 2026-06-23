@@ -9,8 +9,8 @@ El backend de **Pactus** está construido sobre **FastAPI** y organizado por mó
 
 La inicialización principal vive en estos archivos:
 
-- `Pactus-Backend/src/pactus_backend/main.py`
-- `Pactus-Backend/src/pactus_backend/factory.py`
+- `Pactus-Backend/src/contractai_backend/main.py`
+- `Pactus-Backend/src/contractai_backend/factory.py`
 
 `main.py` se limita a preparar logging, construir la app y ejecutar Uvicorn. La verdadera composición de la API ocurre en `factory.py`.
 
