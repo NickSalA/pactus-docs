@@ -27,6 +27,7 @@ Estado de autenticación gestionado con Zustand. Almacena la identidad del usuar
 | `accessToken` | `string` | Token de acceso OAuth |
 | `isAuthenticated` | `boolean` | Indica si hay sesión activa |
 | `isHydrating` | `boolean` | Indica si el store está sincronizando con Supabase |
+| `subscriptionActive` | `boolean \| null` | Indica si la suscripción está activa |
 
 Métodos disponibles:
 - `setAccessToken(token)` — Actualiza el token de acceso
