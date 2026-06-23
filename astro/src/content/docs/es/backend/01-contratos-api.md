@@ -517,6 +517,43 @@ El módulo de auditoría registra la actividad del sistema. Todos los endpoints 
 - `GET /audit/chatbot`
   Lista la actividad del chatbot. Solo accesible por administradores.
 
+- `GET /audit/ai-usage`
+  Lista los registros detallados de consumo y costos de tokens de IA para la organización actual. Permite opcionalmente filtrar por usuario, origen (`CHATBOT`, `TEMPLATES` o `INTEGRATIONS`) y rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  [
+    {
+      "id": 45,
+      "organization_id": 2,
+      "actor_user_id": 19,
+      "source": "CHATBOT",
+      "input_tokens": 124,
+      "output_tokens": 256,
+      "total_tokens": 380,
+      "input_cost_usd": 0.000186,
+      "output_cost_usd": 0.000768,
+      "total_cost_usd": 0.000954,
+      "model_used": "gemini-2.5-flash",
+      "created_at": "2026-06-22T23:55:05Z"
+    }
+  ]
+  ```
+
+- `GET /audit/ai-usage/summary`
+  Devuelve el resumen agregado del consumo de tokens y costos de IA (totales y por tipo de token) acumulado por la organización actual o para un usuario específico, con filtro opcional por rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  {
+    "total_tokens": 15200,
+    "total_cost_usd": 0.0456,
+    "input_tokens": 5200,
+    "output_tokens": 10000
+  }
+  ```
+
+
 ## Reglas de Seguridad Relevantes
 
 Aunque OpenAPI define la API a nivel formal, hay tres reglas prácticas que esta documentación debe reflejar siempre:

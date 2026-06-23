@@ -103,14 +103,24 @@ Cada tabla agrega campos específicos según el recurso auditado.
 
 | Campo | Tipo | Referencia |
 |---|---|---|
-| `conversation_id` | `BIGINT` | `chatbot.conversations.id` |
+| `conversation_id` | `BIGINT` | `chatbot.conversations.id` (opcional) |
+
+### `audit.ai_token_usage`
+
+Registra el consumo detallado de tokens y costos asociados a operaciones de IA, segregado por origen (`source`).
+
+| Campo | Tipo | Referencia / Descripción |
+|---|---|---|
+| `organization_id` | `BIGINT` | `identity.organizations.id` |
+| `actor_user_id` | `BIGINT` | `identity.users.id` |
+| `source` | `VARCHAR` | Origen del consumo: CHATBOT, TEMPLATES o INTEGRATIONS |
 | `input_tokens` | `INTEGER` | Tokens de entrada |
 | `output_tokens` | `INTEGER` | Tokens de salida |
-| `total_tokens` | `INTEGER` | Tokens totales |
+| `total_tokens` | `INTEGER` | Total de tokens consumidos |
 | `input_cost_usd` | `NUMERIC` | Costo de entrada en USD |
 | `output_cost_usd` | `NUMERIC` | Costo de salida en USD |
 | `total_cost_usd` | `NUMERIC` | Costo total en USD |
-| `model_used` | `VARCHAR` | Modelo que generó la respuesta |
+| `model_used` | `VARCHAR` | Modelo utilizado (por ejemplo, `gemini-2.5-flash`) |
 
 ## Servicios de Auditoría
 
@@ -121,13 +131,24 @@ services/
 ├── contract_activity_service.py    → ContractActivityService
 ├── chatbot_activity_service.py     → ChatbotActivityService
 ├── template_activity_service.py    → TemplateActivityService
-└── user_activity_service.py        → UserActivityService
+├── user_activity_service.py        → UserActivityService
+└── ai_token_tracking_service.py    → AITokenTrackingService
 ```
 
-Cada servicio expone dos operaciones:
+Cada servicio expone dos operaciones principales (`record()` / `record_usage()` y `list_by_organization()` / `list_usage()`), además de resúmenes agregados en el caso del tracking de tokens:
+
+- **`AITokenTrackingService`**:
+  - `record_usage()` — Registra el consumo de tokens para una invocación de IA.
+  - `list_usage()` — Lista el historial de consumo de tokens para una organización (con soporte para paginación y filtros).
+  - `get_summary()` — Obtiene totales agregados de tokens y costos en USD.
+  - `check_rate_limit()` — Valida límites de cuota diaria del usuario.
+
+
+Para los servicios de actividad estándar (`ContractActivityService`, `ChatbotActivityService`, `TemplateActivityService`, `UserActivityService`), se exponen estas dos operaciones:
 
 - **`record()`** — Crea un registro de auditoría. Recibe el actor, la acción y los datos del recurso afectado.
 - **`list_by_organization()`** — Lista los registros de una organización con paginación (`limit`, `offset`).
+
 
 ## Integración con el Sistema
 

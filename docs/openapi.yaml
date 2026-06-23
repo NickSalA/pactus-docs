@@ -181,3 +181,8 @@ paths:
     $ref: 'modules/audit/paths/templates.yaml'
   /audit/contracts:
     $ref: 'modules/audit/paths/contracts.yaml'
+  /audit/ai-usage:
+    $ref: 'modules/audit/paths/ai-usage.yaml'
+  /audit/ai-usage/summary:
+    $ref: 'modules/audit/paths/ai-usage-summary.yaml'
+
