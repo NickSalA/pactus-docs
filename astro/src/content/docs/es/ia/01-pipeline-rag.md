@@ -5,6 +5,8 @@ description: Retrieval-Augmented Generation para análisis de contratos corporat
 
 El sistema de Pactus utiliza un pipeline de Retrieval-Augmented Generation (RAG) para responder preguntas sobre contratos corporativos con evidencia textual grounding.
 
+Actualmente los embeddings se generan con **OpenAI (`text-embedding-3-small`)**. Está planificada la migración a **Voyage AI** para mejorar la relación costo-rendimiento.
+
 ## Flujo del Pipeline
 
 ```
@@ -22,7 +24,9 @@ Documento PDF
      │
      ▼
 ┌─────────────┐
-│   Voyage AI │  ─── Generación de embeddings vectoriales
+│   OpenAI    │  ─── Generación de embeddings vectoriales
+│ (text-embed-│      (text-embedding-3-small)
+│ ding-3-small)│
 └─────────────┘
      │
      ▼
@@ -37,14 +41,14 @@ El proceso de ingestión transforma documentos PDF en chunks indexados:
 
 1. **Lectura**: LlamaParse extrae el contenido textual del PDF, preservando estructura (headers, listas, tablas).
 2. **Chunking**: El texto se segmenta en chunks de tamaño configurable con overlap entre segmentos para mantener contexto en los límites.
-3. **Embedding**: Cada chunk se convierte en un vector de dimensiones fijas mediante el modelo de Voyage AI.
+3. **Embedding**: Cada chunk se convierte en un vector de dimensiones fijas mediante el modelo `text-embedding-3-small` de OpenAI.
 4. **Indexación**: Los vectores se almacenan en Qdrant junto con metadatos del documento (document_id, file_name, page_number, etc.).
 
 ## Búsqueda Semántica
 
 Cuando el agente necesita información contractual:
 
-1. **Query embedding**: El mensaje del usuario se convierte en vector usando el mismo modelo de Voyage AI.
+1. **Query embedding**: El mensaje del usuario se convierte en vector usando el mismo modelo de OpenAI (`text-embedding-3-small`).
 2. **Top-K retrieval**: Qdrant devuelve los K chunks más similares usando búsqueda vectorial con filtrado por similitud coseno.
 3. **Filtrado por rol**: Los resultados se filtran según los tipos de documento permitidos para el rol del usuario (COMPANY o LABOR).
 4. **Reranking**: Opcionalmente, los resultados pueden reordenarse mediante un modelo de reranking para mejorar relevancia.
@@ -72,7 +76,7 @@ El pipeline implementa safeguards contra respuestas inventadas:
 | Componente | Tecnología | Rol |
 |------------|------------|-----|
 | Parser | LlamaParse | Extracción de PDF a texto estructurado |
-| Embeddings | Voyage AI | Conversión de texto a vectores |
+| Embeddings | OpenAI (`text-embedding-3-small`) | Conversión de texto a vectores |
 | Vector store | Qdrant | Almacenamiento y búsqueda vectorial |
 | LLM | Gemini | Generación de respuestas |
 

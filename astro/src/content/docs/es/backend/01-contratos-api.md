@@ -11,7 +11,7 @@ En la práctica, este contrato evita ambigüedades entre equipos. El frontend no
 
 La fuente de verdad de la API vive en dos capas complementarias:
 
-- el backend real en `Pactus-Backend/src/pactus_backend/modules/*/api/routers*.py`
+- el backend real en `Pactus-Backend/src/contractai_backend/modules/*/api/routers*.py`
 - la especificación OpenAPI del repositorio en `docs/openapi.yaml` y `docs/modules/**/*.yaml`
 - el bundle para visualizadores Swagger/OpenAPI en `openapi.bundle.yaml`
 
@@ -77,6 +77,7 @@ Respuesta típica:
   "role": "ADMIN",
   "receives_notifications": true,
   "is_active": true,
+  "subscription_active": true,
   "created_at": "2026-04-05T10:00:00Z",
   "updated_at": "2026-04-05T10:00:00Z"
 }
@@ -161,13 +162,11 @@ Ejemplo conceptual del campo `document`:
 - `GET /documents/{document_id}/file-url`
   Devuelve una URL firmada temporal para acceder al archivo almacenado en Supabase Storage.
 
-Response típica de documento:
+Response típica de documento (ejemplo para tipo COMPANY; los contratos LABOR incluyen `labor_contract` en lugar de `company_contract`):
 
 ```json
 {
   "id": 33,
-  "name": "Contrato Marco 2026",
-  "client": "Acme Corp",
   "type": "COMPANY",
   "start_date": "2026-01-01",
   "end_date": "2026-12-31",
@@ -179,6 +178,14 @@ Response típica de documento:
   "folder_id": 3,
   "file_path": "orgs/2/company/docs/33/contrato_marco_2026.pdf",
   "file_name": "Contrato Marco 2026.pdf",
+  "company_contract": {
+    "id": 15,
+    "document_id": 33,
+    "ruc": "20600000001",
+    "client": "Acme Corp",
+    "created_at": "2026-04-12T14:20:00Z",
+    "updated_at": "2026-04-12T14:20:00Z"
+  },
   "service_items": [
     {
       "id": 97,
@@ -252,6 +259,10 @@ El frontend utiliza **Google Picker API** para la selección visual de archivos.
 
 - `GET /integrations/drive/callback`
   Intercambia código OAuth por token (flujo legacy, no usado por frontend actual)
+
+- `POST /integrations/drive/download/{file_id}`
+  Descarga un archivo específico de Google Drive usando el token proporcionado.
+  El body incluye el token de acceso en el campo `token`.
 
 - `POST /integrations/drive/import`
   Encola importación en segundo plano. El payload incluye metadata documental reutilizando el modelo de documento en borrador.
@@ -399,42 +410,7 @@ El módulo de facturación gestiona suscripciones, pagos y límites operativos p
   }
   ```
 
-- `GET /billing/subscriptions`
-  Devuelve la suscripción actual de la organización del usuario autenticado. Requiere rol ADMIN.
-
-  Response `200`:
-  ```json
-  {
-    "id": 1,
-    "organization_id": 2,
-    "paypal_subscription_id": "I-0A1B2C3D4E5F",
-    "status": "ACTIVE",
-    "plan_tier": "PRO",
-    "current_period_start": "2026-06-01T00:00:00Z",
-    "current_period_end": "2026-07-01T00:00:00Z"
-  }
-  ```
-
-- `POST /billing/subscriptions/cancel`
-  Cancela la suscripción activa de la organización. Requiere rol ADMIN.
-
-- `GET /billing/limits`
-  Devuelve los límites operativos actuales de la organización del usuario autenticado.
-
-  Response `200`:
-  ```json
-  {
-    "max_users": 25,
-    "max_documents": 1000,
-    "max_storage_mb": 2000,
-    "max_file_size_mb": 25,
-    "max_monthly_ai_queries": 2000,
-    "notify_at_percentage": 80
-  }
-  ```
-
-- `PATCH /billing/limits`
-  Actualiza los límites operativos de una organización. Solo accesible por SUPERADMIN.
+  > Los endpoints `GET /billing/subscriptions`, `POST /billing/subscriptions/cancel`, `GET /billing/limits` y `PATCH /billing/limits` aún no están implementados en el backend. Las tablas `billing.subscriptions` y `billing.organization_limits` existen en la base de datos pero no tienen endpoints API asociados.
 
 ### Notificaciones
 
@@ -471,9 +447,6 @@ El módulo de plantillas expone hoy más rutas de las que tenía documentadas or
 
 - `GET /templates`
   Lista las plantillas disponibles para la organización actual.
-
-- `POST /templates`
-  Crea una plantilla nueva.
 
 - `GET /templates/{template_id}`
   Devuelve el detalle de una plantilla concreta.
