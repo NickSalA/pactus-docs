@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/NickSalA/pactus-docs/compare/v1.4.0...v1.5.0) (2026-06-24)
+
+
+### Bug Fixes
+
+* add AI token usage audit endpoints and update OpenAPI bundling command ([88a09a1](https://github.com/NickSalA/pactus-docs/commit/88a09a1b577ac888382141d61b6b0daca2b4e13c))
+
+
+### Features
+
+* document AI token usage audit endpoints and schemas for tracking consumption and costs ([e6f4b9f](https://github.com/NickSalA/pactus-docs/commit/e6f4b9f0a7bb180a00842236d50111785d29f0e0))
+
 # [1.4.0](https://github.com/NickSalA/pactus-docs/compare/v1.3.0...v1.4.0) (2026-06-20)
 
 
