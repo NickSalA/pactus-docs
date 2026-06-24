@@ -30,6 +30,8 @@ tags:
     description: Carpetas para organizar documentos.
   - name: Integraciones
     description: Operaciones para la integración con servicios de terceros.
+  - name: Facturación
+    description: Operaciones de suscripciones y pagos.
   - name: Organizaciones
     description: Operaciones de membresía de la organización actual.
   - name: Notificaciones
@@ -881,6 +883,58 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Trabajo no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /billing/paypal/subscriptions/confirm:
+    post:
+      summary: Confirmar suscripción PayPal
+      description: |
+        Valida una suscripción aprobada en PayPal usando su subscription_id, crea una organización placeholder y registra como ADMIN al correo usado en el checkout. Este endpoint es público porque se ejecuta antes del inicio de sesión; no acepta organization_id desde el cliente.
+      operationId: confirmPayPalSubscription
+      tags:
+        - Facturación
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPayPalSubscriptionRequest'
+      responses:
+        '201':
+          description: Suscripción confirmada y organización provisionada satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmPayPalSubscriptionResponse'
+        '400':
+          description: La suscripción de PayPal no existe, no contiene los datos esperados o el correo no coincide.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: La suscripción o el correo ya fueron registrados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Payload inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '502':
+          description: PayPal devolvió una respuesta inesperada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PayPal no está configurado en el backend.
           content:
             application/json:
               schema:
@@ -2270,6 +2324,135 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /audit/ai-usage:
+    get:
+      summary: Listar consumo de tokens de IA
+      description: Lista los registros de consumo y costos de tokens de IA para la organización actual. Solo disponible para administradores.
+      operationId: listAITokenUsage
+      tags:
+        - Auditoría
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 50
+          description: Cantidad máxima de registros a devolver.
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Cantidad de registros a omitir desde el inicio.
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filtrar por ID del usuario actor.
+        - name: source
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/AITokenSource'
+          description: Filtrar por origen del consumo (CHATBOT, TEMPLATES, INTEGRATIONS).
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de inicio del filtro.
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de fin del filtro.
+      responses:
+        '200':
+          description: Historial de consumo de tokens obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AITokenUsageListResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría de tokens.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de consulta inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /audit/ai-usage/summary:
+    get:
+      summary: Obtener resumen de consumo de tokens de IA
+      description: Devuelve el consumo de tokens y costos agregados acumulados a nivel de organización o filtrado por usuario y rango de fechas. Solo disponible para administradores.
+      operationId: getAITokenUsageSummary
+      tags:
+        - Auditoría
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filtrar por ID del usuario actor.
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de inicio del filtro.
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fecha y hora de fin del filtro.
+      responses:
+        '200':
+          description: Resumen de consumo obtenido satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AITokenUsageSummaryResponse'
+        '401':
+          description: No autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: No autorizado para consultar auditoría de tokens.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Parámetros de consulta inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
 components:
   securitySchemes:
     BearerAuth:
@@ -2920,7 +3103,6 @@ components:
         token:
           type: object
           additionalProperties: true
-          description: Token OAuth temporal de Google Drive obtenido con el scope `https://www.googleapis.com/auth/drive.file` para archivos seleccionados mediante Google Picker.
       required:
         - token
     DocumentType:
@@ -3012,7 +3194,7 @@ components:
         token:
           type: object
           additionalProperties: true
-          description: Token OAuth de Google Drive. Puede contener cualquier estructura requerida por el flujo de autenticación.
+          description: Token OAuth temporal de Google Drive obtenido con el scope `https://www.googleapis.com/auth/drive.file` para archivos seleccionados mediante Google Picker.
         files:
           type: array
           minItems: 1
@@ -3038,6 +3220,43 @@ components:
         - queued_files
         - index_name
         - job_id
+    ConfirmPayPalSubscriptionRequest:
+      type: object
+      properties:
+        subscription_id:
+          type: string
+          minLength: 6
+          maxLength: 128
+          description: ID de la suscripción aprobada por PayPal.
+          example: I-6Y983831YP445233M
+        email:
+          type: string
+          format: email
+          description: Correo ingresado durante el checkout. Debe coincidir con el custom_id registrado en PayPal.
+          example: admin@empresa.com
+      required:
+        - subscription_id
+        - email
+    ConfirmPayPalSubscriptionResponse:
+      type: object
+      properties:
+        organization_id:
+          type: integer
+          description: ID de la organización placeholder creada o ya provisionada para la suscripción.
+          example: 123
+        admin_email:
+          type: string
+          format: email
+          description: Correo del usuario administrador creado para la organización.
+          example: admin@empresa.com
+        paypal_subscription_id:
+          type: string
+          description: ID de la suscripción PayPal guardada en la organización.
+          example: I-6Y983831YP445233M
+      required:
+        - organization_id
+        - admin_email
+        - paypal_subscription_id
     OrganizationResponse:
       type: object
       properties:
@@ -4158,3 +4377,74 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ContractActivityResponse'
+    AITokenSource:
+      type: string
+      enum:
+        - CHATBOT
+        - TEMPLATES
+        - INTEGRATIONS
+    AITokenUsageResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organization_id:
+          type: integer
+        actor_user_id:
+          type: integer
+        source:
+          $ref: '#/components/schemas/AITokenSource'
+        input_tokens:
+          type: integer
+          nullable: true
+        output_tokens:
+          type: integer
+          nullable: true
+        total_tokens:
+          type: integer
+          nullable: true
+        input_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        output_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        total_cost_usd:
+          type: number
+          format: float
+          nullable: true
+        model_used:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organization_id
+        - actor_user_id
+        - source
+        - created_at
+    AITokenUsageListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/AITokenUsageResponse'
+    AITokenUsageSummaryResponse:
+      type: object
+      properties:
+        total_tokens:
+          type: integer
+        total_cost_usd:
+          type: number
+          format: float
+        input_tokens:
+          type: integer
+        output_tokens:
+          type: integer
+      required:
+        - total_tokens
+        - total_cost_usd
+        - input_tokens
+        - output_tokens

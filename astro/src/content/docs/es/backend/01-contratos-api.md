@@ -11,7 +11,7 @@ En la práctica, este contrato evita ambigüedades entre equipos. El frontend no
 
 La fuente de verdad de la API vive en dos capas complementarias:
 
-- el backend real en `Pactus-Backend/src/pactus_backend/modules/*/api/routers*.py`
+- el backend real en `Pactus-Backend/src/contractai_backend/modules/*/api/routers*.py`
 - la especificación OpenAPI del repositorio en `docs/openapi.yaml` y `docs/modules/**/*.yaml`
 - el bundle para visualizadores Swagger/OpenAPI en `openapi.bundle.yaml`
 
@@ -32,6 +32,7 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/notifications`
 - `/templates`
 - `/user`
+- `/billing`
 - `/audit`
 
 Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se aplica hoy sobre los routers montados por la aplicación.
@@ -76,6 +77,7 @@ Respuesta típica:
   "role": "ADMIN",
   "receives_notifications": true,
   "is_active": true,
+  "subscription_active": true,
   "created_at": "2026-04-05T10:00:00Z",
   "updated_at": "2026-04-05T10:00:00Z"
 }
@@ -160,13 +162,11 @@ Ejemplo conceptual del campo `document`:
 - `GET /documents/{document_id}/file-url`
   Devuelve una URL firmada temporal para acceder al archivo almacenado en Supabase Storage.
 
-Response típica de documento:
+Response típica de documento (ejemplo para tipo COMPANY; los contratos LABOR incluyen `labor_contract` en lugar de `company_contract`):
 
 ```json
 {
   "id": 33,
-  "name": "Contrato Marco 2026",
-  "client": "Acme Corp",
   "type": "COMPANY",
   "start_date": "2026-01-01",
   "end_date": "2026-12-31",
@@ -178,6 +178,14 @@ Response típica de documento:
   "folder_id": 3,
   "file_path": "orgs/2/company/docs/33/contrato_marco_2026.pdf",
   "file_name": "Contrato Marco 2026.pdf",
+  "company_contract": {
+    "id": 15,
+    "document_id": 33,
+    "ruc": "20600000001",
+    "client": "Acme Corp",
+    "created_at": "2026-04-12T14:20:00Z",
+    "updated_at": "2026-04-12T14:20:00Z"
+  },
   "service_items": [
     {
       "id": 97,
@@ -251,6 +259,10 @@ El frontend utiliza **Google Picker API** para la selección visual de archivos.
 
 - `GET /integrations/drive/callback`
   Intercambia código OAuth por token (flujo legacy, no usado por frontend actual)
+
+- `POST /integrations/drive/download/{file_id}`
+  Descarga un archivo específico de Google Drive usando el token proporcionado.
+  El body incluye el token de acceso en el campo `token`.
 
 - `POST /integrations/drive/import`
   Encola importación en segundo plano. El payload incluye metadata documental reutilizando el modelo de documento en borrador.
@@ -374,6 +386,32 @@ El módulo de dashboard expone endpoints analíticos para visualizar métricas c
 - `PATCH /organizations/me/members/{member_id}/notifications`
   Actualiza si un miembro debe recibir alertas contractuales.
 
+### Facturación (Billing)
+
+El módulo de facturación gestiona suscripciones, pagos y límites operativos por organización.
+
+- `POST /billing/paypal/subscriptions/confirm`
+  Confirma una suscripción aprobada en PayPal. Crea una organización placeholder y registra como ADMIN al correo usado en el checkout. Endpoint público (no requiere JWT).
+
+  Request:
+  ```json
+  {
+    "subscription_id": "I-0A1B2C3D4E5F",
+    "email": "admin@empresa.com"
+  }
+  ```
+
+  Response `201`:
+  ```json
+  {
+    "organization_id": 15,
+    "admin_email": "admin@empresa.com",
+    "paypal_subscription_id": "I-0A1B2C3D4E5F"
+  }
+  ```
+
+  > Los endpoints `GET /billing/subscriptions`, `POST /billing/subscriptions/cancel`, `GET /billing/limits` y `PATCH /billing/limits` aún no están implementados en el backend. Las tablas `billing.subscriptions` y `billing.organization_limits` existen en la base de datos pero no tienen endpoints API asociados.
+
 ### Notificaciones
 
 - `GET /notifications`
@@ -409,9 +447,6 @@ El módulo de plantillas expone hoy más rutas de las que tenía documentadas or
 
 - `GET /templates`
   Lista las plantillas disponibles para la organización actual.
-
-- `POST /templates`
-  Crea una plantilla nueva.
 
 - `GET /templates/{template_id}`
   Devuelve el detalle de una plantilla concreta.
@@ -454,6 +489,43 @@ El módulo de auditoría registra la actividad del sistema. Todos los endpoints 
 
 - `GET /audit/chatbot`
   Lista la actividad del chatbot. Solo accesible por administradores.
+
+- `GET /audit/ai-usage`
+  Lista los registros detallados de consumo y costos de tokens de IA para la organización actual. Permite opcionalmente filtrar por usuario, origen (`CHATBOT`, `TEMPLATES` o `INTEGRATIONS`) y rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  [
+    {
+      "id": 45,
+      "organization_id": 2,
+      "actor_user_id": 19,
+      "source": "CHATBOT",
+      "input_tokens": 124,
+      "output_tokens": 256,
+      "total_tokens": 380,
+      "input_cost_usd": 0.000186,
+      "output_cost_usd": 0.000768,
+      "total_cost_usd": 0.000954,
+      "model_used": "gemini-2.5-flash",
+      "created_at": "2026-06-22T23:55:05Z"
+    }
+  ]
+  ```
+
+- `GET /audit/ai-usage/summary`
+  Devuelve el resumen agregado del consumo de tokens y costos de IA (totales y por tipo de token) acumulado por la organización actual o para un usuario específico, con filtro opcional por rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  {
+    "total_tokens": 15200,
+    "total_cost_usd": 0.0456,
+    "input_tokens": 5200,
+    "output_tokens": 10000
+  }
+  ```
+
 
 ## Reglas de Seguridad Relevantes
 

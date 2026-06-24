@@ -238,3 +238,79 @@ ContractActivityListResponse:
   type: array
   items:
     $ref: '#/ContractActivityResponse'
+
+AITokenSource:
+  type: string
+  enum:
+    - CHATBOT
+    - TEMPLATES
+    - INTEGRATIONS
+
+AITokenUsageResponse:
+  type: object
+  properties:
+    id:
+      type: integer
+    organization_id:
+      type: integer
+    actor_user_id:
+      type: integer
+    source:
+      $ref: '#/AITokenSource'
+    input_tokens:
+      type: integer
+      nullable: true
+    output_tokens:
+      type: integer
+      nullable: true
+    total_tokens:
+      type: integer
+      nullable: true
+    input_cost_usd:
+      type: number
+      format: float
+      nullable: true
+    output_cost_usd:
+      type: number
+      format: float
+      nullable: true
+    total_cost_usd:
+      type: number
+      format: float
+      nullable: true
+    model_used:
+      type: string
+      nullable: true
+    created_at:
+      type: string
+      format: date-time
+  required:
+    - id
+    - organization_id
+    - actor_user_id
+    - source
+    - created_at
+
+AITokenUsageListResponse:
+  type: array
+  items:
+    $ref: '#/AITokenUsageResponse'
+
+AITokenUsageSummaryResponse:
+  type: object
+  properties:
+    total_tokens:
+      type: integer
+    total_cost_usd:
+      type: number
+      format: float
+    input_tokens:
+      type: integer
+    output_tokens:
+      type: integer
+  required:
+    - total_tokens
+    - total_cost_usd
+    - input_tokens
+    - output_tokens
+

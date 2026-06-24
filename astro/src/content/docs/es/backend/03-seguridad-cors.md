@@ -12,7 +12,7 @@ La seguridad HTTP del backend de **Pactus** se apoya en dos mecanismos distintos
 
 La dependencia global de seguridad vive en:
 
-- `Pactus-Backend/src/pactus_backend/shared/api/dependencies/security.py`
+- `Pactus-Backend/src/contractai_backend/shared/api/dependencies/security.py`
 
 El flujo es el siguiente:
 

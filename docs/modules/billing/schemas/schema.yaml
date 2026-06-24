@@ -1,0 +1,38 @@
+ConfirmPayPalSubscriptionRequest:
+  type: object
+  properties:
+    subscription_id:
+      type: string
+      minLength: 6
+      maxLength: 128
+      description: ID de la suscripción aprobada por PayPal.
+      example: I-6Y983831YP445233M
+    email:
+      type: string
+      format: email
+      description: Correo ingresado durante el checkout. Debe coincidir con el custom_id registrado en PayPal.
+      example: admin@empresa.com
+  required:
+    - subscription_id
+    - email
+
+ConfirmPayPalSubscriptionResponse:
+  type: object
+  properties:
+    organization_id:
+      type: integer
+      description: ID de la organización placeholder creada o ya provisionada para la suscripción.
+      example: 123
+    admin_email:
+      type: string
+      format: email
+      description: Correo del usuario administrador creado para la organización.
+      example: admin@empresa.com
+    paypal_subscription_id:
+      type: string
+      description: ID de la suscripción PayPal guardada en la organización.
+      example: I-6Y983831YP445233M
+  required:
+    - organization_id
+    - admin_email
+    - paypal_subscription_id

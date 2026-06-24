@@ -9,8 +9,8 @@ El backend de **Pactus** está construido sobre **FastAPI** y organizado por mó
 
 La inicialización principal vive en estos archivos:
 
-- `Pactus-Backend/src/pactus_backend/main.py`
-- `Pactus-Backend/src/pactus_backend/factory.py`
+- `Pactus-Backend/src/contractai_backend/main.py`
+- `Pactus-Backend/src/contractai_backend/factory.py`
 
 `main.py` se limita a preparar logging, construir la app y ejecutar Uvicorn. La verdadera composición de la API ocurre en `factory.py`.
 
@@ -29,6 +29,7 @@ La función `create()` de `factory.py` monta la aplicación FastAPI y registra l
 - organizaciones
 - notificaciones
 - plantillas
+- facturación (billing)
 - auditoría
 
 La app también registra:
@@ -99,6 +100,7 @@ Aunque `Settings` define `GLOBAL_PREFIX`, la aplicación actual no lo aplica al 
 - `/notifications`
 - `/templates`
 - `/user`
+- `/billing`
 - `/audit`
 
 Este detalle es importante porque afecta tanto a OpenAPI como a cualquier consumidor externo de la API.

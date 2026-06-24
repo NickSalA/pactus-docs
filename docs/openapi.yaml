@@ -39,6 +39,8 @@ tags:
     description: Carpetas para organizar documentos.
   - name: Integraciones
     description: Operaciones para la integración con servicios de terceros.
+  - name: Facturación
+    description: Operaciones de suscripciones y pagos.
   - name: Organizaciones
     description: Operaciones de membresía de la organización actual.
   - name: Notificaciones
@@ -109,6 +111,8 @@ paths:
     $ref: 'modules/integrations/paths/import.yaml'
   /integrations/drive/import/{job_id}/events:
     $ref: 'modules/integrations/paths/import-events.yaml'
+  /billing/paypal/subscriptions/confirm:
+    $ref: 'modules/billing/paths/paypal-subscription-confirm.yaml'
   /organizations:
     $ref: 'modules/organizations/paths/collection.yaml'
   /organizations/me:
@@ -177,3 +181,8 @@ paths:
     $ref: 'modules/audit/paths/templates.yaml'
   /audit/contracts:
     $ref: 'modules/audit/paths/contracts.yaml'
+  /audit/ai-usage:
+    $ref: 'modules/audit/paths/ai-usage.yaml'
+  /audit/ai-usage/summary:
+    $ref: 'modules/audit/paths/ai-usage-summary.yaml'
+

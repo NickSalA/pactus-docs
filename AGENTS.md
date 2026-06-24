@@ -12,7 +12,7 @@
 - Start local docs: `npm run dev` from `astro/`.
 - Verify the site build: `npm run build` from `astro/`.
 - Preview a production build: `npm run preview` from `astro/`.
-- Bundle OpenAPI: `npx @redocly/cli bundle docs/openapi.yaml --output dist/openapi-single.yaml` from the repo root.
+- Bundle OpenAPI: `npx @redocly/cli bundle ./docs/openapi.yaml --output openapi.bundle.yaml` from the repo root.
 - There are no configured lint, formatter, typecheck, or test scripts; use `npm run build` as the main executable verification.
 
 ## Editing Notes

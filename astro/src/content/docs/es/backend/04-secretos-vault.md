@@ -9,7 +9,7 @@ El backend de **Pactus** concentra su configuración en la clase `Settings` de `
 
 La configuración del backend vive en:
 
-- `Pactus-Backend/src/pactus_backend/shared/config.py`
+- `Pactus-Backend/src/contractai_backend/shared/config.py`
 
 Esa clase define parámetros para:
 
@@ -41,17 +41,17 @@ En su lugar, la clase `Settings` de `shared/config.py` utiliza `pydantic-setting
 
 Entre los valores sensibles que la aplicación requiere para operar se encuentran:
 
-- `GEMINI-API-KEY`
-- `OPENAI-API-KEY`
-- `AZURE-OPENAI-API-KEY`
-- `QDRANT-API-KEY`
-- `LLAMA-PARSE-API-KEY`
-- `DATABASE-PASSWORD`
-- `DATABASE-USER`
-- `DATABASE-HOST`
-- `SUPABASE-SECRET-KEY`
-- `GOOGLE-CLIENT-SECRET`
-- `CRON-SECRET`
+- `GEMINI_API_KEY`
+- `OPENAI_API_KEY`
+- `AZURE_OPENAI_API_KEY`
+- `QDRANT_API_KEY`
+- `LLAMA_PARSE_API_KEY`
+- `DATABASE_PASSWORD`
+- `DATABASE_USER`
+- `DATABASE_HOST`
+- `SUPABASE_SECRET_KEY`
+- `GOOGLE_CLIENT_SECRET`
+- `CRON_SECRET`
 
 ## Qué Valores Tienen Default y Cuáles No
 
