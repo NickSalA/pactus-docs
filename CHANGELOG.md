@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/NickSalA/pactus-docs/compare/v1.5.0...v1.5.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* add subscription_active field to CurrentUserResponse schema ([063d302](https://github.com/NickSalA/pactus-docs/commit/063d302978bc20f520bb2147c5b91d03189d6e28))
+
 # [1.5.0](https://github.com/NickSalA/pactus-docs/compare/v1.4.0...v1.5.0) (2026-06-24)
 
 
