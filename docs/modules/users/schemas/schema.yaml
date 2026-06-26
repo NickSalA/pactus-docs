@@ -50,7 +50,14 @@ UserResponse:
     - updated_at
 
 CurrentUserResponse:
-  $ref: '#/UserResponse'
+  allOf:
+    - $ref: '#/UserResponse'
+    - type: object
+      properties:
+        subscription_active:
+          type: boolean
+      required:
+        - subscription_active
 
 UserUpdateRequest:
   type: object

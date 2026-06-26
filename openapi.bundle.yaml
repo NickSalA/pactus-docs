@@ -1,18 +1,24 @@
 openapi: 3.0.3
 info:
   title: Pactus
-  description: API para la gestión de contratos, usuarios, plantillas, integraciones y chatbot.
+  description: 'API para la gestión de contratos, usuarios, plantillas, integraciones y chatbot.'
   version: 1.0.0
   license:
     name: Proprietary - All Rights Reserved
-    url: https://github.com/NickSalA/Pactus/blob/main/LICENSE
+    url: 'https://github.com/NickSalA/Pactus/blob/main/LICENSE'
   contact:
     name: NickSalA
-    url: https://github.com/NickSalA/Pactus
+    url: 'https://github.com/NickSalA/Pactus'
     email: contact@example.com
 servers:
-  - url: http://localhost:8000
+  - url: 'http://localhost:8000'
     description: Desarrollo local
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 security:
   - BearerAuth: []
 tags:
@@ -35,7 +41,7 @@ tags:
   - name: Organizaciones
     description: Operaciones de membresía de la organización actual.
   - name: Notificaciones
-    description: Operaciones para alertas, correos y reglas de notificación.
+    description: 'Operaciones para alertas, correos y reglas de notificación.'
   - name: Plantillas
     description: Operaciones para la gestión y generación de documentos mediante plantillas.
   - name: Dashboards
@@ -80,14 +86,43 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                allOf:
+                  - $ref: '#/paths/~1user~1%7Buser_id%7D/patch/responses/200/content/application~1json/schema'
+                  - type: object
+                    properties:
+                      subscription_active:
+                        type: boolean
+                    required:
+                      - subscription_active
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /user/{user_id}:
+                type: object
+                description: Respuesta común de los manejadores de errores del backend.
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  type:
+                    type: string
+                    description: Nombre de la excepción o categoría del error.
+                    example: NotFoundError
+                  message:
+                    type: string
+                    description: Mensaje legible para el consumidor.
+                    example: Recurso no encontrado
+                  request_id:
+                    type: string
+                    description: Identificador de la petición para trazabilidad.
+                    example: req-7f9c2a1b
+                required:
+                  - error
+                  - type
+                  - message
+                  - request_id
+  '/user/{user_id}':
     parameters:
       - name: user_id
         in: path
@@ -106,20 +141,70 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdateRequest'
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum:
+                    - SUPERADMIN
+                    - ADMIN
+                    - HR
+                    - MANAGER
+                    - WORKER
+              required:
+                - role
       responses:
         '200':
           description: Usuario actualizado satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  organization_id:
+                    type: integer
+                  supabase_user_id:
+                    type: string
+                    format: uuid
+                    nullable: true
+                  email:
+                    type: string
+                    format: email
+                  full_name:
+                    type: string
+                    nullable: true
+                  avatar_url:
+                    type: string
+                    nullable: true
+                  role:
+                    $ref: '#/paths/~1user~1%7Buser_id%7D/patch/requestBody/content/application~1json/schema/properties/role'
+                  receives_notifications:
+                    type: boolean
+                  is_active:
+                    type: boolean
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - organization_id
+                  - email
+                  - role
+                  - receives_notifications
+                  - is_active
+                  - created_at
+                  - updated_at
         '404':
           description: Usuario no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     delete:
       summary: Eliminar usuario
       description: Elimina (soft delete) un usuario de la organización.
@@ -134,7 +219,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /chatbot/:
     post:
       summary: Enviar mensaje al chatbot
@@ -147,27 +232,72 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChatRequest'
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: Mensaje del usuario para el chatbot.
+                  example: Resume mis contratos activos.
+                thread_id:
+                  type: integer
+                  nullable: true
+                  description: 'ID de la conversación existente. Si se omite, el backend crea una nueva conversación.'
+                  example: 12
       responses:
         '200':
           description: Respuesta exitosa.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatResponse'
+                type: object
+                required:
+                  - response
+                  - thread_id
+                properties:
+                  response:
+                    type: string
+                    description: Respuesta generada por el chatbot.
+                  thread_id:
+                    type: integer
+                    description: ID de la conversación.
+                    example: 12
+                  chart:
+                    description: |
+                      Datos del gráfico generado por dashboard_chart_tool.
+                      Solo presente cuando el usuario solicita una visualización (top services, top companies, loyalty, retention, origin).
+                      Estructura compatible con recharts (BarChart, LineChart, PieChart).
+                    $ref: '#/paths/~1conversations~1%7Bconversation_id%7D/get/responses/200/content/application~1json/schema/properties/content/items/properties/chart'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Datos de entrada inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
-  /conversations/user/{user_id}:
+                allOf:
+                  - $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+                  - type: object
+                    description: Error de validación producido por FastAPI/Pydantic.
+                    properties:
+                      type:
+                        type: string
+                        example: ValidationError
+                      message:
+                        type: string
+                        example: Los datos enviados en la petición no son válidos.
+                      details:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - body -> name: Field required
+  '/conversations/user/{user_id}':
     parameters:
       - name: user_id
         in: path
@@ -189,32 +319,54 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ConversationList'
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    organization_id:
+                      type: integer
+                    user_id:
+                      type: integer
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                  required:
+                    - id
+                    - title
+                    - organization_id
+                    - user_id
+                    - created_at
+                    - updated_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No tiene permisos para acceder a conversaciones de otro usuario.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '500':
           description: Error interno al listar conversaciones.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '503':
           description: Persistencia de conversaciones no disponible.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /conversations/{conversation_id}:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/conversations/{conversation_id}':
     parameters:
       - name: conversation_id
         in: path
@@ -234,31 +386,133 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConversationRead'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  organization_id:
+                    type: integer
+                  user_id:
+                    type: integer
+                  content:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                          enum:
+                            - user
+                            - bot
+                        content:
+                          type: string
+                        chart:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                                - bar
+                                - line
+                                - pie
+                            layout:
+                              type: string
+                              enum:
+                                - vertical
+                                - horizontal
+                                - centric
+                            title:
+                              type: string
+                            config:
+                              type: object
+                              properties:
+                                categoryKey:
+                                  type: string
+                                series:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      dataKey:
+                                        type: string
+                                      name:
+                                        type: string
+                                      color:
+                                        type: string
+                                    required:
+                                      - dataKey
+                                      - name
+                              required:
+                                - categoryKey
+                                - series
+                            data:
+                              type: array
+                              description: |
+                                Arreglo de objetos con llaves dinámicas en inglés. El contenido dependerá de la consulta:
+                                * Top Servicios por Monto: { "name": string, "value": number }
+                                * Concentración Contratos/Mes: { "month": string, "contracts": number }
+                                * Valor Promedio (Multi-serie): { "month": string, "[serviceName]": number }
+                                * Concentración de Ingresos (Pie): { "name": string, "value": number }
+                                * Concentración de Ingresos (Barras): { "name": string, "percentage": number }
+                              items:
+                                type: object
+                                additionalProperties:
+                                  anyOf:
+                                    - type: string
+                                    - type: number
+                          required:
+                            - type
+                            - layout
+                            - title
+                            - config
+                            - data
+                        timestamp:
+                          type: string
+                          format: date-time
+                      required:
+                        - role
+                        - content
+                        - timestamp
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - title
+                  - organization_id
+                  - user_id
+                  - content
+                  - created_at
+                  - updated_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Conversación no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '500':
           description: Error interno al obtener la conversación.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '503':
           description: Persistencia de conversaciones no disponible.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     patch:
       summary: Actualizar una conversación
       description: Actualiza el título de una conversación del usuario autenticado.
@@ -270,50 +524,58 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ConversationUpdateRequest'
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  pattern: .*\S.*
+                  description: Nuevo título de la conversación. No puede estar vacío y el backend recorta espacios externos.
+              required:
+                - title
       responses:
         '200':
           description: Conversación actualizada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConversationRead'
+                $ref: '#/paths/~1conversations~1%7Bconversation_id%7D/get/responses/200/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Conversación no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '409':
           description: Conflicto al actualizar la conversación.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Datos inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
         '500':
           description: Error interno al actualizar la conversación.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '503':
           description: Persistencia de conversaciones no disponible.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     delete:
       summary: Eliminar una conversación
       description: Elimina una conversación del usuario autenticado.
@@ -328,31 +590,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Conversación no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '409':
           description: Conflicto al eliminar la conversación.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '500':
           description: Error interno al eliminar la conversación.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '503':
           description: Persistencia de conversaciones no disponible.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /documents/:
     post:
       summary: Subir un nuevo documento
@@ -365,32 +627,208 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/DocumentMultipartCreateRequest'
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                document:
+                  type: string
+                  description: JSON serializado con la forma de CreateDocumentDraftRequest.
+                  example: '{"contract_type":"COMPANY","company_contract":{"client":"Acme S.A.C.","ruc":"20600000001"},"form_data":{"value":1200,"currency":"PEN"}}'
+              required:
+                - file
       responses:
         '201':
           description: Documento creado satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  type:
+                    type: string
+                    nullable: true
+                    description: Tipo técnico/origen del documento.
+                  start_date:
+                    type: string
+                    format: date
+                    nullable: true
+                  end_date:
+                    type: string
+                    format: date
+                    nullable: true
+                  form_data:
+                    type: object
+                    additionalProperties: true
+                  state:
+                    allOf:
+                      - type: string
+                        enum:
+                          - DRAFT
+                          - PENDING_SIGNATURE
+                          - ACTIVE
+                          - EXPIRING_SOON
+                          - EXPIRED
+                          - TERMINATED
+                        description: Estado actual del documento.
+                    nullable: true
+                  folder_id:
+                    type: integer
+                    nullable: true
+                  file_path:
+                    type: string
+                    nullable: true
+                  file_name:
+                    type: string
+                    nullable: true
+                  service_items:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          description: Servicio asociado a un contrato de empresa.
+                          properties:
+                            service_id:
+                              type: integer
+                              minimum: 1
+                            description:
+                              type: string
+                              nullable: true
+                            value:
+                              type: number
+                              format: float
+                              minimum: 0
+                            currency:
+                              $ref: '#/paths/~1dashboard~1top_services/get/parameters/0/schema'
+                            start_date:
+                              type: string
+                              format: date
+                            end_date:
+                              type: string
+                              format: date
+                          required:
+                            - service_id
+                            - value
+                            - currency
+                            - start_date
+                            - end_date
+                        - type: object
+                          properties:
+                            id:
+                              type: integer
+                          required:
+                            - id
+                  company_contract:
+                    allOf:
+                      - allOf:
+                          - type: object
+                            description: Datos específicos de contratos de empresa.
+                            properties:
+                              ruc:
+                                type: string
+                                nullable: true
+                                description: RUC de la contraparte empresa.
+                              client:
+                                type: string
+                                nullable: true
+                                description: Nombre de la contraparte empresa.
+                          - type: object
+                            properties:
+                              id:
+                                type: integer
+                              document_id:
+                                type: integer
+                              created_at:
+                                type: string
+                                format: date-time
+                              updated_at:
+                                type: string
+                                format: date-time
+                            required:
+                              - id
+                              - document_id
+                              - created_at
+                              - updated_at
+                    nullable: true
+                  labor_contract:
+                    allOf:
+                      - allOf:
+                          - type: object
+                            description: Datos específicos de contratos laborales.
+                            properties:
+                              worker_name:
+                                type: string
+                                nullable: true
+                              worker_document_number:
+                                type: string
+                                nullable: true
+                              position:
+                                type: string
+                                nullable: true
+                              salary_value:
+                                type: number
+                                format: float
+                                minimum: 0
+                                nullable: true
+                              salary_currency:
+                                allOf:
+                                  - $ref: '#/paths/~1dashboard~1top_services/get/parameters/0/schema'
+                                nullable: true
+                              salary_periodicity:
+                                type: string
+                                nullable: true
+                              contract_modality:
+                                type: string
+                                nullable: true
+                          - type: object
+                            properties:
+                              id:
+                                type: integer
+                              document_id:
+                                type: integer
+                              created_at:
+                                type: string
+                                format: date-time
+                              updated_at:
+                                type: string
+                                format: date-time
+                            required:
+                              - id
+                              - document_id
+                              - created_at
+                              - updated_at
+                    nullable: true
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - created_at
+                  - updated_at
         '400':
           description: Datos del documento inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Error de validación de FastAPI.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
     get:
       summary: Listar documentos
       description: Devuelve los documentos visibles para el usuario autenticado.
@@ -420,14 +858,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentListResponse'
+                type: array
+                items:
+                  $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /documents/{document_id}:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/documents/{document_id}':
     parameters:
       - name: document_id
         in: path
@@ -446,13 +886,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentResponse'
+                $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema'
         '404':
           description: Documento no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     patch:
       summary: Actualizar un documento
       description: Recibe un campo form-data `document` con JSON serializado y opcionalmente un nuevo archivo. Los datos específicos deben enviarse en `company_contract` o `labor_contract` según el `contract_type`.
@@ -464,26 +904,37 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/DocumentMultipartUpdateRequest'
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  nullable: true
+                document:
+                  type: string
+                  description: JSON serializado con campos parciales de UpdateDocumentRequest.
+                  example: '{"contract_type":"LABOR","labor_contract":{"worker_name":"Ana Perez","position":"Analista"}}'
+              required:
+                - document
       responses:
         '200':
           description: Documento actualizado satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentResponse'
+                $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema'
         '400':
           description: Datos inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Documento no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     delete:
       summary: Eliminar un documento
       operationId: deleteDocument
@@ -497,8 +948,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /documents/{document_id}/file-url:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/documents/{document_id}/file-url':
     parameters:
       - name: document_id
         in: path
@@ -518,13 +969,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentFileUrlResponse'
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                required:
+                  - url
         '404':
           description: Documento no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /services/:
     get:
       summary: Listar servicios del catálogo
@@ -545,13 +1002,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceListResponse'
+                type: array
+                items:
+                  $ref: '#/paths/~1services~1/post/responses/201/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     post:
       summary: Crear un servicio del catálogo
       operationId: createService
@@ -562,27 +1021,58 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceCreateRequest'
+              type: object
+              properties:
+                name:
+                  type: string
+                is_active:
+                  type: boolean
+                  default: true
+              required:
+                - name
       responses:
         '201':
           description: Servicio creado satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  is_active:
+                    type: boolean
+                  documents_count:
+                    type: integer
+                    default: 0
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - name
+                  - is_active
+                  - documents_count
+                  - created_at
+                  - updated_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Datos inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
-  /services/{service_id}:
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
+  '/services/{service_id}':
     parameters:
       - name: service_id
         in: path
@@ -600,20 +1090,28 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceUpdateRequest'
+              type: object
+              minProperties: 1
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                is_active:
+                  type: boolean
+                  nullable: true
       responses:
         '200':
           description: Servicio actualizado satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceResponse'
+                $ref: '#/paths/~1services~1/post/responses/201/content/application~1json/schema'
         '404':
           description: Servicio no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     delete:
       summary: Eliminar un servicio del catálogo
       operationId: deleteService
@@ -627,7 +1125,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /folders/:
     get:
       summary: Listar carpetas
@@ -640,13 +1138,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FolderListResponse'
+                type: array
+                items:
+                  $ref: '#/paths/~1folders~1/post/responses/201/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     post:
       summary: Crear una carpeta
       operationId: createFolder
@@ -657,21 +1157,63 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FolderCreateRequest'
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - name
       responses:
         '201':
           description: Carpeta creada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FolderResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  organization_id:
+                    type: integer
+                  name:
+                    type: string
+                  owner_role:
+                    $ref: '#/paths/~1user~1%7Buser_id%7D/patch/requestBody/content/application~1json/schema/properties/role'
+                  created_by:
+                    type: integer
+                  created_by_name:
+                    type: string
+                    nullable: true
+                  created_by_email:
+                    type: string
+                    nullable: true
+                  documents_count:
+                    type: integer
+                    default: 0
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - organization_id
+                  - name
+                  - owner_role
+                  - created_by
+                  - created_by_name
+                  - created_by_email
+                  - documents_count
+                  - created_at
+                  - updated_at
         '422':
           description: Datos inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
-  /folders/{folder_id}:
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
+  '/folders/{folder_id}':
     parameters:
       - name: folder_id
         in: path
@@ -689,20 +1231,25 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FolderUpdateRequest'
+              type: object
+              minProperties: 1
+              properties:
+                name:
+                  type: string
+                  nullable: true
       responses:
         '200':
           description: Carpeta actualizada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FolderResponse'
+                $ref: '#/paths/~1folders~1/post/responses/201/content/application~1json/schema'
         '404':
           description: Carpeta no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     delete:
       summary: Eliminar una carpeta
       operationId: deleteFolder
@@ -716,28 +1263,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /integrations/drive/auth-url:
     get:
       tags:
         - Integraciones
       summary: Obtener URL de autorización de Google Drive (Legacy)
       operationId: getDriveAuthUrl
-      description: Flujo OAuth tradicional con scope `https://www.googleapis.com/auth/drive.file`. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad interna y no se considera consumido por clientes externos.
+      description: 'Flujo OAuth tradicional con scope `https://www.googleapis.com/auth/drive.file`. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad interna y no se considera consumido por clientes externos.'
       responses:
         '200':
           description: URL generada con éxito.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthURLResponse'
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                required:
+                  - url
   /integrations/drive/callback:
     get:
       tags:
         - Integraciones
       summary: Intercambiar código de Google por tokens (Legacy)
       operationId: exchangeDriveCode
-      description: Flujo OAuth tradicional con scope `https://www.googleapis.com/auth/drive.file`. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad interna y no se considera consumido por clientes externos.
+      description: 'Flujo OAuth tradicional con scope `https://www.googleapis.com/auth/drive.file`. El frontend actual usa Google Picker API con Google Identity Services. Este endpoint se mantiene por compatibilidad interna y no se considera consumido por clientes externos.'
       parameters:
         - name: code
           in: query
@@ -750,14 +1303,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenResponse'
+                type: object
+                properties:
+                  token:
+                    type: string
+                  refresh_token:
+                    type: string
+                    nullable: true
+                  token_uri:
+                    type: string
+                  client_id:
+                    type: string
+                  client_secret:
+                    type: string
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - token
+                  - refresh_token
+                  - token_uri
+                  - client_id
+                  - client_secret
+                  - scopes
         '422':
           description: Parámetros inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
-  /integrations/drive/download/{file_id}:
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
+  '/integrations/drive/download/{file_id}':
     parameters:
       - name: file_id
         in: path
@@ -776,7 +1352,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DriveRequest'
+              type: object
+              properties:
+                token:
+                  type: object
+                  additionalProperties: true
+              required:
+                - token
       responses:
         '200':
           description: Archivo descargado.
@@ -790,52 +1372,153 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /integrations/drive/import:
     post:
       tags:
         - Integraciones
       summary: Importar archivos de Google Drive en segundo plano
       operationId: importDriveFiles
-      description: Importa archivos seleccionados manualmente por el usuario desde Google Picker. El token enviado debe tener el scope `https://www.googleapis.com/auth/drive.file`; no se requiere acceso completo de lectura al Drive del usuario.
+      description: 'Importa archivos seleccionados manualmente por el usuario desde Google Picker. El token enviado debe tener el scope `https://www.googleapis.com/auth/drive.file`; no se requiere acceso completo de lectura al Drive del usuario.'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ImportRequest'
+              type: object
+              properties:
+                token:
+                  type: object
+                  additionalProperties: true
+                  description: 'Token OAuth temporal de Google Drive obtenido con el scope `https://www.googleapis.com/auth/drive.file` para archivos seleccionados mediante Google Picker.'
+                files:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    properties:
+                      file_id:
+                        type: string
+                        minLength: 1
+                      document:
+                        description: 'Metadata de creación alineada al endpoint de documentos. Puede incluir `contract_type`, `company_contract` o `labor_contract`.'
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            nullable: true
+                            description: 'Tipo técnico/origen del documento, por ejemplo manual_upload o template.'
+                          contract_type:
+                            allOf:
+                              - $ref: '#/paths/~1templates~1/get/parameters/0/schema'
+                            nullable: true
+                            description: Tipo funcional de contrato usado para permisos y clasificación.
+                          name:
+                            type: string
+                            nullable: true
+                            deprecated: true
+                            description: Campo legacy aceptado durante la transición.
+                          client:
+                            type: string
+                            nullable: true
+                            deprecated: true
+                            description: Campo legacy aceptado durante la transición.
+                          start_date:
+                            type: string
+                            format: date
+                            nullable: true
+                          end_date:
+                            type: string
+                            format: date
+                            nullable: true
+                          form_data:
+                            type: object
+                            additionalProperties: true
+                            default: {}
+                          company_contract:
+                            allOf:
+                              - $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema/properties/company_contract/allOf/0/allOf/0'
+                            nullable: true
+                          labor_contract:
+                            allOf:
+                              - $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema/properties/labor_contract/allOf/0/allOf/0'
+                            nullable: true
+                          state:
+                            allOf:
+                              - $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema/properties/state/allOf/0'
+                            nullable: true
+                          folder_id:
+                            type: integer
+                            minimum: 1
+                            nullable: true
+                          service_items:
+                            type: array
+                            description: Servicios asociados al contrato de empresa. No aplica para contratos laborales.
+                            items:
+                              $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema/properties/service_items/items/allOf/0'
+                            default: []
+                    required:
+                      - file_id
+                    example:
+                      file_id: google-drive-file-id
+                      document:
+                        contract_type: COMPANY
+                        company_contract:
+                          client: Acme S.A.C.
+                          ruc: '20600000001'
+                        form_data:
+                          value: 1200
+                          currency: PEN
+              required:
+                - token
+                - files
       responses:
         '200':
           description: Importación iniciada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImportResponse'
+                type: object
+                properties:
+                  message:
+                    type: string
+                  queued_files:
+                    type: integer
+                  index_name:
+                    type: string
+                  job_id:
+                    type: string
+                    format: uuid
+                required:
+                  - message
+                  - queued_files
+                  - index_name
+                  - job_id
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No tiene permisos para importar este tipo de contrato.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '409':
           description: Ya existe una importación en progreso. Espere a que termine.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Datos inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
-  /integrations/drive/import/{job_id}/events:
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
+  '/integrations/drive/import/{job_id}/events':
     get:
       tags:
         - Integraciones
@@ -874,19 +1557,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No tiene acceso a este trabajo.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Trabajo no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /billing/paypal/subscriptions/confirm:
     post:
       summary: Confirmar suscripción PayPal
@@ -901,44 +1584,77 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ConfirmPayPalSubscriptionRequest'
+              type: object
+              properties:
+                subscription_id:
+                  type: string
+                  minLength: 6
+                  maxLength: 128
+                  description: ID de la suscripción aprobada por PayPal.
+                  example: I-6Y983831YP445233M
+                email:
+                  type: string
+                  format: email
+                  description: Correo ingresado durante el checkout. Debe coincidir con el custom_id registrado en PayPal.
+                  example: admin@empresa.com
+              required:
+                - subscription_id
+                - email
       responses:
         '201':
           description: Suscripción confirmada y organización provisionada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfirmPayPalSubscriptionResponse'
+                type: object
+                properties:
+                  organization_id:
+                    type: integer
+                    description: ID de la organización placeholder creada o ya provisionada para la suscripción.
+                    example: 123
+                  admin_email:
+                    type: string
+                    format: email
+                    description: Correo del usuario administrador creado para la organización.
+                    example: admin@empresa.com
+                  paypal_subscription_id:
+                    type: string
+                    description: ID de la suscripción PayPal guardada en la organización.
+                    example: I-6Y983831YP445233M
+                required:
+                  - organization_id
+                  - admin_email
+                  - paypal_subscription_id
         '400':
-          description: La suscripción de PayPal no existe, no contiene los datos esperados o el correo no coincide.
+          description: 'La suscripción de PayPal no existe, no contiene los datos esperados o el correo no coincide.'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '409':
           description: La suscripción o el correo ya fueron registrados.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Payload inválido.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
         '502':
           description: PayPal devolvió una respuesta inesperada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '503':
           description: PayPal no está configurado en el backend.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /organizations:
     get:
       summary: Listar organizaciones
@@ -991,19 +1707,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationListResponse'
+                type: array
+                items:
+                  $ref: '#/paths/~1organizations/post/responses/201/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado. Solo ADMIN o SUPERADMIN pueden listar organizaciones.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     post:
       summary: Crear una organización con administrador inicial
       description: Crea una nueva organización y registra su primer usuario ADMIN local. Solo accesible por SUPERADMIN.
@@ -1015,32 +1733,105 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationProvisionRequest'
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                admin_email:
+                  type: string
+                  format: email
+              required:
+                - name
+                - admin_email
       responses:
         '201':
           description: Organización creada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  is_active:
+                    type: boolean
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  ruc:
+                    type: string
+                    pattern: '^\d{11}$'
+                    nullable: true
+                  address:
+                    type: string
+                    nullable: true
+                  company_type:
+                    type: string
+                    nullable: true
+                  objeto_social:
+                    type: string
+                    nullable: true
+                  legal_rep_name:
+                    type: string
+                    nullable: true
+                  legal_rep_dni:
+                    type: string
+                    pattern: '^\d{8}$'
+                    nullable: true
+                  jurisdiction:
+                    type: string
+                    nullable: true
+                  city:
+                    type: string
+                    nullable: true
+                  autorizacion_entidad:
+                    type: string
+                    nullable: true
+                  autorizacion_fecha:
+                    type: string
+                    format: date
+                    nullable: true
+                  autorizacion_emitida_por:
+                    type: string
+                    nullable: true
+                  email:
+                    type: string
+                    format: email
+                    nullable: true
+                  phone:
+                    type: string
+                    pattern: '^\d{9}$'
+                    nullable: true
+                required:
+                  - id
+                  - name
+                  - is_active
+                  - created_at
+                  - updated_at
         '400':
-          description: Datos inválidos, organización duplicada o correo de administrador duplicado.
+          description: 'Datos inválidos, organización duplicada o correo de administrador duplicado.'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado. Se requiere rol SUPERADMIN.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /organizations/me:
     get:
       summary: Obtener mi organización
@@ -1054,25 +1845,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                $ref: '#/paths/~1organizations/post/responses/201/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado. Se requiere rol ADMIN.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Organización no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     patch:
       summary: Actualizar mi organización
       description: Actualiza la organización asociada al usuario ADMIN autenticado.
@@ -1084,38 +1875,90 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationUpdateRequest'
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  nullable: true
+                is_active:
+                  type: boolean
+                  nullable: true
+                ruc:
+                  type: string
+                  pattern: '^\d{11}$'
+                  nullable: true
+                address:
+                  type: string
+                  nullable: true
+                company_type:
+                  type: string
+                  nullable: true
+                objeto_social:
+                  type: string
+                  nullable: true
+                legal_rep_name:
+                  type: string
+                  nullable: true
+                legal_rep_dni:
+                  type: string
+                  pattern: '^\d{8}$'
+                  nullable: true
+                jurisdiction:
+                  type: string
+                  nullable: true
+                city:
+                  type: string
+                  nullable: true
+                autorizacion_entidad:
+                  type: string
+                  nullable: true
+                autorizacion_fecha:
+                  type: string
+                  format: date
+                  nullable: true
+                autorizacion_emitida_por:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  format: email
+                  nullable: true
+                phone:
+                  type: string
+                  pattern: '^\d{9}$'
+                  nullable: true
       responses:
         '200':
           description: Organización actualizada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                $ref: '#/paths/~1organizations/post/responses/201/content/application~1json/schema'
         '400':
-          description: Datos inválidos, nombre duplicado o RUC duplicado.
+          description: 'Datos inválidos, nombre duplicado o RUC duplicado.'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado. Se requiere rol ADMIN.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Organización no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /organizations/me/members:
     get:
       summary: Listar miembros de la organización actual
@@ -1128,13 +1971,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationMemberListResponse'
+                type: array
+                items:
+                  $ref: '#/paths/~1user~1%7Buser_id%7D/patch/responses/200/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     post:
       summary: Agregar miembro a la organización actual
       operationId: addOrganizationMember
@@ -1145,27 +1990,36 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationMemberCreateRequest'
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  $ref: '#/paths/~1user~1%7Buser_id%7D/patch/requestBody/content/application~1json/schema/properties/role'
+              required:
+                - email
+                - role
       responses:
         '201':
           description: Miembro creado satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/paths/~1user~1%7Buser_id%7D/patch/responses/200/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para administrar miembros.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /organizations/me/members/{member_id}/role:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/organizations/me/members/{member_id}/role':
     parameters:
       - name: member_id
         in: path
@@ -1185,21 +2039,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationMemberRoleUpdateRequest'
+              type: object
+              properties:
+                role:
+                  $ref: '#/paths/~1user~1%7Buser_id%7D/patch/requestBody/content/application~1json/schema/properties/role'
+              required:
+                - role
       responses:
         '200':
           description: Rol actualizado satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/paths/~1user~1%7Buser_id%7D/patch/responses/200/content/application~1json/schema'
         '404':
           description: Miembro no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /organizations/me/members/{member_id}/notifications:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/organizations/me/members/{member_id}/notifications':
     parameters:
       - name: member_id
         in: path
@@ -1217,21 +2076,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationMemberNotificationsUpdateRequest'
+              type: object
+              properties:
+                receives_notifications:
+                  type: boolean
+              required:
+                - receives_notifications
       responses:
         '200':
           description: Preferencia actualizada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/paths/~1user~1%7Buser_id%7D/patch/responses/200/content/application~1json/schema'
         '404':
           description: Miembro no encontrado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /organizations/{organization_id}:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/organizations/{organization_id}':
     parameters:
       - name: organization_id
         in: path
@@ -1251,25 +2115,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                $ref: '#/paths/~1organizations/post/responses/201/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para acceder a esta organización.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Organización no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     patch:
       summary: Actualizar una organización
       description: Actualiza los datos de una organización. SUPERADMIN puede editar cualquier organización; ADMIN solo puede editar su propia organización.
@@ -1281,41 +2145,41 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationUpdateRequest'
+              $ref: '#/paths/~1organizations~1me/patch/requestBody/content/application~1json/schema'
       responses:
         '200':
           description: Organización actualizada satisfactoriamente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationResponse'
+                $ref: '#/paths/~1organizations/post/responses/201/content/application~1json/schema'
         '400':
           description: Datos inválidos o nombre duplicado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para editar esta organización.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Organización no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     delete:
       summary: Eliminar una organización
-      description: Desactiva una organización mediante soft delete, estableciendo is_active en false. Solo accesible por SUPERADMIN.
+      description: 'Desactiva una organización mediante soft delete, estableciendo is_active en false. Solo accesible por SUPERADMIN.'
       operationId: deleteOrganization
       tags:
         - Organizaciones
@@ -1327,19 +2191,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado. Se requiere rol SUPERADMIN.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Organización no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /notifications/:
     get:
       tags:
@@ -1354,13 +2218,37 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NotificationResponse'
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    document_id:
+                      type: integer
+                    type:
+                      type: string
+                      enum:
+                        - critical
+                        - warning
+                        - info
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    days_remaining:
+                      type: integer
+                  required:
+                    - id
+                    - document_id
+                    - type
+                    - title
+                    - description
+                    - days_remaining
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /notifications/send-email-alerts:
     post:
       tags:
@@ -1374,19 +2262,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendEmailAlertsResponse'
+                type: object
+                properties:
+                  emails_sent:
+                    type: integer
+                required:
+                  - emails_sent
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Solo administradores pueden enviar alertas.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /notifications/cron/send-emails:
     post:
       tags:
@@ -1407,19 +2300,30 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CronSendEmailsResponse'
+                type: object
+                properties:
+                  emails_sent:
+                    type: integer
+                  orgs_processed:
+                    type: integer
+                  orgs_skipped:
+                    type: integer
+                required:
+                  - emails_sent
+                  - orgs_processed
+                  - orgs_skipped
         '401':
           description: Secreto inválido o ausente.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '503':
           description: Cron no configurado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /notifications/rules:
     get:
       tags:
@@ -1434,13 +2338,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NotificationRuleResponse'
+                  $ref: '#/paths/~1notifications~1rules/post/responses/201/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     post:
       tags:
         - Notificaciones
@@ -1451,21 +2355,60 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NotificationRuleCreateRequest'
+              type: object
+              properties:
+                document_id:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+                days_before_due:
+                  type: integer
+                  minimum: 1
+                is_active:
+                  type: boolean
+                  default: true
+              required:
+                - days_before_due
       responses:
         '201':
           description: Regla creada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotificationRuleResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  organization_id:
+                    type: integer
+                  document_id:
+                    type: integer
+                    nullable: true
+                  days_before_due:
+                    type: integer
+                  is_active:
+                    type: boolean
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - organization_id
+                  - document_id
+                  - days_before_due
+                  - is_active
+                  - created_at
+                  - updated_at
         '422':
           description: Datos inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
-  /notifications/rules/{rule_id}:
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
+  '/notifications/rules/{rule_id}':
     parameters:
       - name: rule_id
         in: path
@@ -1483,20 +2426,29 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NotificationRuleUpdateRequest'
+              type: object
+              minProperties: 1
+              properties:
+                days_before_due:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+                is_active:
+                  type: boolean
+                  nullable: true
       responses:
         '200':
           description: Regla actualizada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NotificationRuleResponse'
+                $ref: '#/paths/~1notifications~1rules/post/responses/201/content/application~1json/schema'
         '404':
           description: Regla no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     delete:
       tags:
         - Notificaciones
@@ -1510,7 +2462,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /templates/:
     get:
       tags:
@@ -1522,7 +2474,11 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/DocumentType'
+            type: string
+            enum:
+              - COMPANY
+              - LABOR
+            description: Tipo funcional de contrato usado para permisos y ruteo.
         - name: format_code
           in: query
           required: false
@@ -1532,7 +2488,11 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/TemplateState'
+            type: string
+            enum:
+              - DRAFT
+              - PUBLISHED
+              - ARCHIVED
       responses:
         '200':
           description: Lista de plantillas.
@@ -1541,7 +2501,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TemplateResponse'
+                  $ref: '#/paths/~1templates~1%7Btemplate_id%7D/get/responses/200/content/application~1json/schema'
   /templates/formats:
     get:
       tags:
@@ -1553,7 +2513,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/DocumentType'
+            $ref: '#/paths/~1templates~1/get/parameters/0/schema'
       responses:
         '200':
           description: Formatos obtenidos.
@@ -1562,7 +2522,28 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TemplateFormatResponse'
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    document_type:
+                      $ref: '#/paths/~1templates~1/get/parameters/0/schema'
+                    format_code:
+                      type: string
+                    label:
+                      type: string
+                    default_name:
+                      type: string
+                    default_description:
+                      type: string
+                      nullable: true
+                  required:
+                    - id
+                    - document_type
+                    - format_code
+                    - label
+                    - default_name
+                    - default_description
   /templates/drafts:
     post:
       tags:
@@ -1581,20 +2562,101 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TemplateDraftMultipartRequest'
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  nullable: true
+                request:
+                  type: string
+                  description: JSON serializado con la forma de GenerateTemplateDraftRequest.
+                  example: '{"name": "Mi Contrato", "format_code": "management"}'
+              required:
+                - request
       responses:
         '201':
           description: Borrador generado y persistido.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PersistedTemplateDraftResponse'
+                type: object
+                properties:
+                  template:
+                    $ref: '#/paths/~1templates~1%7Btemplate_id%7D/get/responses/200/content/application~1json/schema'
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                  source:
+                    type: object
+                    additionalProperties: true
+                  usage:
+                    allOf:
+                      - type: object
+                        properties:
+                          input_tokens:
+                            type: integer
+                            default: 0
+                          output_tokens:
+                            type: integer
+                            default: 0
+                          total_tokens:
+                            type: integer
+                            default: 0
+                    nullable: true
+                required:
+                  - template
+                  - warnings
+                  - source
+                  - usage
+                example:
+                  template:
+                    id: 72
+                    organization_id: 2
+                    name: Mi Primer Contrato
+                    description: Contrato de prueba
+                    document_type: COMPANY
+                    template_format_id: 1
+                    format_code: management
+                    format_label: Contrato de Management
+                    content:
+                      body_md: |-
+                        ## CONTRATO DE MANAGEMENT
+
+                        Conste por el presente documento...
+                      fields:
+                        - key: representante_cargo
+                          label: Cargo del representante
+                          type: text
+                          required: true
+                          placeholder: Ej. Gerente General
+                      operational_fields: []
+                      version: '1.0'
+                      contract_date_mapping:
+                        start_date_field: fecha_inicio_contrato
+                        end_date_field: fecha_fin_contrato
+                    created_at: '2026-05-18T01:18:08.619Z'
+                    state: DRAFT
+                  warnings:
+                    - 'Cláusulas de referencia no preservadas: CUARTA, QUINTA, SEXTA...'
+                  source:
+                    mode: file_reference
+                    filename: contrato 003.pdf
+                    generation_mode: adaptive
+                    reference_mode: compact
+                    detected_document_type: COMPANY
+                    clause_count: 10
+                  usage:
+                    input_tokens: 3268
+                    output_tokens: 9284
+                    total_tokens: 12552
         '400':
           description: Payload inválido.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /templates/preview:
     post:
       tags:
@@ -1606,21 +2668,99 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PreviewTemplateRequest'
+              type: object
+              properties:
+                document_type:
+                  allOf:
+                    - $ref: '#/paths/~1templates~1/get/parameters/0/schema'
+                  nullable: true
+                format_code:
+                  type: string
+                content:
+                  type: object
+                  properties:
+                    body_md:
+                      type: string
+                    fields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                          label:
+                            type: string
+                          type:
+                            type: string
+                            default: text
+                          required:
+                            type: boolean
+                            default: false
+                          placeholder:
+                            type: string
+                            nullable: true
+                        required:
+                          - key
+                          - label
+                    operational_fields:
+                      type: array
+                      items:
+                        $ref: '#/paths/~1templates~1preview/post/requestBody/content/application~1json/schema/properties/content/properties/fields/items'
+                      default: []
+                    version:
+                      type: string
+                      nullable: true
+                      default: '1.0'
+                    contract_date_mapping:
+                      allOf:
+                        - type: object
+                          properties:
+                            start_date_field:
+                              type: string
+                            end_date_field:
+                              type: string
+                          required:
+                            - start_date_field
+                            - end_date_field
+                      nullable: true
+                  required:
+                    - body_md
+                    - fields
+                sample_data:
+                  type: object
+                  additionalProperties: true
+                  default: {}
+              required:
+                - format_code
+                - content
       responses:
         '200':
           description: Previsualización generada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PreviewTemplateResponse'
+                type: object
+                properties:
+                  markdown:
+                    type: string
+                  resolved_payload:
+                    type: object
+                    additionalProperties: true
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - markdown
+                  - resolved_payload
+                  - warnings
         '400':
           description: Payload inválido.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /templates/{template_id}:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/templates/{template_id}':
     parameters:
       - name: template_id
         in: path
@@ -1639,13 +2779,54 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemplateResponse'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  organization_id:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+                    nullable: true
+                  document_type:
+                    $ref: '#/paths/~1templates~1/get/parameters/0/schema'
+                  template_format_id:
+                    type: integer
+                    nullable: true
+                  format_code:
+                    type: string
+                    nullable: true
+                  format_label:
+                    type: string
+                    nullable: true
+                  content:
+                    $ref: '#/paths/~1templates~1preview/post/requestBody/content/application~1json/schema/properties/content'
+                  created_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  state:
+                    $ref: '#/paths/~1templates~1/get/parameters/2/schema'
+                required:
+                  - id
+                  - organization_id
+                  - name
+                  - description
+                  - document_type
+                  - template_format_id
+                  - format_code
+                  - format_label
+                  - content
+                  - created_at
+                  - state
         '404':
           description: Plantilla no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
     patch:
       tags:
         - Plantillas
@@ -1656,21 +2837,33 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTemplateRequest'
+              type: object
+              minProperties: 1
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                description:
+                  type: string
+                  nullable: true
+                content:
+                  allOf:
+                    - $ref: '#/paths/~1templates~1preview/post/requestBody/content/application~1json/schema/properties/content'
+                  nullable: true
       responses:
         '200':
           description: Plantilla actualizada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemplateResponse'
+                $ref: '#/paths/~1templates~1%7Btemplate_id%7D/get/responses/200/content/application~1json/schema'
         '404':
           description: Plantilla no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /templates/{template_id}/generate:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/templates/{template_id}/generate':
     parameters:
       - name: template_id
         in: path
@@ -1703,7 +2896,7 @@ paths:
               example:
                 empleador_razon_social: Mi Empresa S.A.
                 empleador_ruc: '20123456789'
-                empleador_domicilio: Av. Principal 123, Lima
+                empleador_domicilio: 'Av. Principal 123, Lima'
                 representante_cargo: Gerente General
                 representante_nombre: Juan Pérez López
                 representante_dni: '12345678'
@@ -1718,7 +2911,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentResponse'
+                $ref: '#/paths/~1documents~1/post/responses/201/content/application~1json/schema'
               example:
                 id: 182
                 type: management
@@ -1738,14 +2931,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '404':
           description: Plantilla no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /templates/{template_id}/publish:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/templates/{template_id}/publish':
     parameters:
       - name: template_id
         in: path
@@ -1764,14 +2957,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemplateResponse'
+                $ref: '#/paths/~1templates~1%7Btemplate_id%7D/get/responses/200/content/application~1json/schema'
         '404':
           description: Plantilla no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /templates/{template_id}/archive:
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
+  '/templates/{template_id}/archive':
     parameters:
       - name: template_id
         in: path
@@ -1790,13 +2983,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemplateResponse'
+                $ref: '#/paths/~1templates~1%7Btemplate_id%7D/get/responses/200/content/application~1json/schema'
         '404':
           description: Plantilla no encontrada.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/area_chart/company:
     get:
       tags:
@@ -1808,7 +3001,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/CurrencyType'
+            $ref: '#/paths/~1dashboard~1top_services/get/parameters/0/schema'
           description: Filtrar puntos del gráfico por una moneda específica.
       responses:
         '200':
@@ -1816,19 +3009,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AreaChartResponse'
+                $ref: '#/paths/~1dashboard~1area_chart~1labor/get/responses/200/content/application~1json/schema'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/area_chart/labor:
     get:
       tags:
@@ -1840,7 +3033,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/CurrencyType'
+            $ref: '#/paths/~1dashboard~1top_services/get/parameters/0/schema'
           description: Filtrar puntos del gráfico por una moneda específica.
       responses:
         '200':
@@ -1848,19 +3041,85 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AreaChartResponse'
+                type: object
+                description: Respuesta para endpoints de gráficos de área.
+                properties:
+                  props:
+                    type: object
+                    description: Propiedades del gráfico retornadas en un solo payload.
+                    properties:
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      y_axis:
+                        type: object
+                        description: Metadatos del eje Y consumidos por el gráfico del frontend.
+                        properties:
+                          format:
+                            type: string
+                            default: currency
+                          labels:
+                            type: array
+                            items:
+                              type: number
+                              format: float
+                        required:
+                          - labels
+                      threshold_date:
+                        type: string
+                        format: date-time
+                      series:
+                        type: array
+                        items:
+                          type: object
+                          description: Una serie de datos del gráfico.
+                          properties:
+                            currency:
+                              type: string
+                            name:
+                              type: string
+                            data:
+                              type: array
+                              items:
+                                type: object
+                                description: Un punto del gráfico para datos históricos o forecast.
+                                properties:
+                                  x:
+                                    type: string
+                                  'y':
+                                    type: number
+                                    format: float
+                                  is_forecast:
+                                    type: boolean
+                                    default: false
+                                required:
+                                  - x
+                                  - 'y'
+                          required:
+                            - currency
+                            - name
+                            - data
+                    required:
+                      - title
+                      - subtitle
+                      - y_axis
+                      - threshold_date
+                      - series
+                required:
+                  - props
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/alert_center/company:
     get:
       tags:
@@ -1875,19 +3134,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AlertCategory'
+                  $ref: '#/paths/~1dashboard~1alert_center~1labor/get/responses/200/content/application~1json/schema/items'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/alert_center/labor:
     get:
       tags:
@@ -1902,19 +3161,63 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AlertCategory'
+                  type: object
+                  description: Categoría de alerta con contador y lista de previsualización.
+                  properties:
+                    label:
+                      type: string
+                    color:
+                      type: object
+                      description: Colores visuales para una categoría de alerta.
+                      properties:
+                        accent:
+                          type: string
+                        bg:
+                          type: string
+                      required:
+                        - accent
+                        - bg
+                    due_to:
+                      type: integer
+                      nullable: true
+                    count:
+                      type: integer
+                    items:
+                      type: array
+                      items:
+                        type: object
+                        description: Contrato mostrado bajo una categoría de alerta.
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                          detail:
+                            type: string
+                            nullable: true
+                          status:
+                            type: string
+                        required:
+                          - id
+                          - name
+                          - status
+                  required:
+                    - label
+                    - color
+                    - count
+                    - items
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/recent_contracts/company:
     get:
       tags:
@@ -1929,19 +3232,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RecentContractResponse'
+                  $ref: '#/paths/~1dashboard~1recent_contracts~1labor/get/responses/200/content/application~1json/schema/items'
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/recent_contracts/labor:
     get:
       tags:
@@ -1956,19 +3259,39 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RecentContractResponse'
+                  type: object
+                  description: Tarjeta de contrato reciente.
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    services:
+                      type: array
+                      items:
+                        type: string
+                    name:
+                      type: string
+                    dates:
+                      type: string
+                  required:
+                    - id
+                    - title
+                    - services
+                    - name
+                    - dates
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/top_companies:
     get:
       tags:
@@ -1980,13 +3303,13 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/CurrencyType'
+            $ref: '#/paths/~1dashboard~1top_services/get/parameters/0/schema'
           description: Filtrar ranking por una moneda específica.
         - name: sort_by
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/TopRankingSortBy'
+            $ref: '#/paths/~1dashboard~1top_services/get/parameters/1/schema'
           description: Criterio de ordenamiento (volume o value).
       responses:
         '200':
@@ -1996,19 +3319,32 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TopCompanyResponse'
+                  type: object
+                  description: Fila del ranking de empresas.
+                  properties:
+                    name:
+                      type: string
+                    contracts:
+                      type: integer
+                    amount:
+                      type: number
+                      format: float
+                  required:
+                    - name
+                    - contracts
+                    - amount
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/top_services:
     get:
       tags:
@@ -2020,13 +3356,21 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/CurrencyType'
+            type: string
+            enum:
+              - PEN
+              - USD
+              - EUR
           description: Filtrar ranking por una moneda específica.
         - name: sort_by
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/TopRankingSortBy'
+            type: string
+            enum:
+              - volume
+              - value
+            description: Criterio de ordenamiento para rankings.
           description: Criterio de ordenamiento (volume o value).
       responses:
         '200':
@@ -2036,19 +3380,32 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TopServiceResponse'
+                  type: object
+                  description: Fila del ranking de servicios.
+                  properties:
+                    name:
+                      type: string
+                    quantity:
+                      type: integer
+                    amount:
+                      type: number
+                      format: float
+                  required:
+                    - name
+                    - quantity
+                    - amount
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/retention/labor:
     get:
       tags:
@@ -2061,19 +3418,94 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RetentionDashboardResponse'
+                type: object
+                properties:
+                  kpis:
+                    type: object
+                    properties:
+                      active_retention_rate:
+                        type: number
+                        format: float
+                      total_unique_workers:
+                        type: integer
+                      avg_contracts_per_worker:
+                        type: number
+                        format: float
+                    required:
+                      - active_retention_rate
+                      - total_unique_workers
+                      - avg_contracts_per_worker
+                  tenure_distribution:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        contracts_count:
+                          type: integer
+                        workers_count:
+                          type: integer
+                      required:
+                        - contracts_count
+                        - workers_count
+                  renewal_trend:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        month:
+                          type: string
+                        renewal_rate:
+                          type: number
+                          format: float
+                        total_expired:
+                          type: integer
+                        total_renewed:
+                          type: integer
+                      required:
+                        - month
+                        - renewal_rate
+                        - total_expired
+                        - total_renewed
+                  details:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        worker_name:
+                          type: string
+                        worker_document_number:
+                          type: string
+                        contracts_count:
+                          type: integer
+                        first_contract_start:
+                          type: string
+                          format: date
+                        latest_contract_end:
+                          type: string
+                          format: date
+                      required:
+                        - worker_name
+                        - worker_document_number
+                        - contracts_count
+                        - first_contract_start
+                        - latest_contract_end
+                required:
+                  - kpis
+                  - tenure_distribution
+                  - renewal_trend
+                  - details
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/origin/labor:
     get:
       tags:
@@ -2086,19 +3518,41 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OriginDashboardResponse'
+                type: object
+                properties:
+                  total_contracts:
+                    type: integer
+                  distribution:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        origin_type:
+                          type: string
+                        count:
+                          type: integer
+                        percentage:
+                          type: number
+                          format: float
+                      required:
+                        - origin_type
+                        - count
+                        - percentage
+                required:
+                  - total_contracts
+                  - distribution
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /dashboard/loyalty/company:
     get:
       tags:
@@ -2111,19 +3565,80 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoyaltyDashboardResponse'
+                type: object
+                properties:
+                  kpis:
+                    type: object
+                    properties:
+                      active_retention_rate:
+                        type: number
+                        format: float
+                      total_unique_clients:
+                        type: integer
+                      avg_contracts_per_client:
+                        type: number
+                        format: float
+                    required:
+                      - active_retention_rate
+                      - total_unique_clients
+                      - avg_contracts_per_client
+                  tenure_distribution:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        contracts_count:
+                          type: integer
+                        clients_count:
+                          type: integer
+                      required:
+                        - contracts_count
+                        - clients_count
+                  renewal_trend:
+                    type: array
+                    items:
+                      $ref: '#/paths/~1dashboard~1retention~1labor/get/responses/200/content/application~1json/schema/properties/renewal_trend/items'
+                  details:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        client_name:
+                          type: string
+                        ruc:
+                          type: string
+                          nullable: true
+                        contracts_count:
+                          type: integer
+                        first_contract_start:
+                          type: string
+                          format: date
+                        latest_contract_end:
+                          type: string
+                          format: date
+                      required:
+                        - client_name
+                        - ruc
+                        - contracts_count
+                        - first_contract_start
+                        - latest_contract_end
+                required:
+                  - kpis
+                  - tenure_distribution
+                  - renewal_trend
+                  - details
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: Sin permisos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
   /audit/users:
     get:
       summary: Listar auditoría de usuarios
@@ -2155,25 +3670,71 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserActivityListResponse'
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    organization_id:
+                      type: integer
+                    actor_user_id:
+                      type: integer
+                    actor_name:
+                      type: string
+                      nullable: true
+                    actor_role:
+                      type: string
+                    action:
+                      type: string
+                      enum:
+                        - CREATED
+                        - UPDATED
+                        - DELETED
+                    target_user_id:
+                      type: integer
+                      nullable: true
+                    target_user_email:
+                      type: string
+                      format: email
+                      nullable: true
+                    target_user_name:
+                      type: string
+                      nullable: true
+                    previous_role:
+                      type: string
+                      nullable: true
+                    role:
+                      type: string
+                      nullable: true
+                    created_at:
+                      type: string
+                      format: date-time
+                  required:
+                    - id
+                    - organization_id
+                    - actor_user_id
+                    - actor_role
+                    - action
+                    - created_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para consultar auditoría.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Parámetros de paginación inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
   /audit/chatbot:
     get:
       summary: Listar auditoría de chatbot
@@ -2205,25 +3766,82 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatbotActivityListResponse'
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    organization_id:
+                      type: integer
+                    actor_user_id:
+                      type: integer
+                    actor_name:
+                      type: string
+                      nullable: true
+                    actor_role:
+                      type: string
+                    action:
+                      type: string
+                      enum:
+                        - CONVERSATION_STARTED
+                        - MESSAGE_SENT
+                        - RESPONSE_GENERATED
+                    conversation_title:
+                      type: string
+                      nullable: true
+                    input_tokens:
+                      type: integer
+                      nullable: true
+                    output_tokens:
+                      type: integer
+                      nullable: true
+                    total_tokens:
+                      type: integer
+                      nullable: true
+                    input_cost_usd:
+                      type: number
+                      format: float
+                      nullable: true
+                    output_cost_usd:
+                      type: number
+                      format: float
+                      nullable: true
+                    total_cost_usd:
+                      type: number
+                      format: float
+                      nullable: true
+                    model_used:
+                      type: string
+                      nullable: true
+                    created_at:
+                      type: string
+                      format: date-time
+                  required:
+                    - id
+                    - organization_id
+                    - actor_user_id
+                    - actor_role
+                    - action
+                    - created_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para consultar auditoría.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Parámetros de paginación inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
   /audit/templates:
     get:
       summary: Listar auditoría de plantillas
@@ -2255,25 +3873,74 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemplateActivityListResponse'
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    organization_id:
+                      type: integer
+                    actor_user_id:
+                      type: integer
+                    actor_name:
+                      type: string
+                      nullable: true
+                    actor_role:
+                      type: string
+                    action:
+                      type: string
+                      enum:
+                        - CREATED
+                        - UPDATED
+                        - DELETED
+                        - ARCHIVED
+                    template_id:
+                      type: integer
+                      nullable: true
+                    template_format_id:
+                      type: integer
+                      nullable: true
+                    template_name:
+                      type: string
+                      nullable: true
+                    document_type:
+                      type: string
+                      nullable: true
+                    previous_state:
+                      type: string
+                      nullable: true
+                    state:
+                      type: string
+                      nullable: true
+                    created_at:
+                      type: string
+                      format: date-time
+                  required:
+                    - id
+                    - organization_id
+                    - actor_user_id
+                    - actor_role
+                    - action
+                    - created_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para consultar auditoría.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Parámetros de paginación inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
   /audit/contracts:
     get:
       summary: Listar auditoría de contratos
@@ -2305,25 +3972,78 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractActivityListResponse'
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    organization_id:
+                      type: integer
+                    actor_user_id:
+                      type: integer
+                    actor_name:
+                      type: string
+                      nullable: true
+                    actor_role:
+                      type: string
+                    action:
+                      type: string
+                      enum:
+                        - CREATED
+                        - GENERATED_FROM_TEMPLATE
+                        - IMPORTED_FROM_GOOGLE_DRIVE
+                        - UPDATED
+                        - DELETED
+                    document_id:
+                      type: integer
+                      nullable: true
+                    company_contract_id:
+                      type: integer
+                      nullable: true
+                    labor_contract_id:
+                      type: integer
+                      nullable: true
+                    document_name:
+                      type: string
+                      nullable: true
+                    document_type:
+                      type: string
+                      nullable: true
+                    previous_state:
+                      type: string
+                      nullable: true
+                    state:
+                      type: string
+                      nullable: true
+                    created_at:
+                      type: string
+                      format: date-time
+                  required:
+                    - id
+                    - organization_id
+                    - actor_user_id
+                    - actor_role
+                    - action
+                    - created_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para consultar auditoría.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Parámetros de paginación inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
   /audit/ai-usage:
     get:
       summary: Listar consumo de tokens de IA
@@ -2359,8 +4079,12 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/AITokenSource'
-          description: Filtrar por origen del consumo (CHATBOT, TEMPLATES, INTEGRATIONS).
+            type: string
+            enum:
+              - CHATBOT
+              - TEMPLATES
+              - INTEGRATIONS
+          description: 'Filtrar por origen del consumo (CHATBOT, TEMPLATES, INTEGRATIONS).'
         - name: start_date
           in: query
           required: false
@@ -2381,25 +4105,69 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AITokenUsageListResponse'
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    organization_id:
+                      type: integer
+                    actor_user_id:
+                      type: integer
+                    source:
+                      $ref: '#/paths/~1audit~1ai-usage/get/parameters/3/schema'
+                    input_tokens:
+                      type: integer
+                      nullable: true
+                    output_tokens:
+                      type: integer
+                      nullable: true
+                    total_tokens:
+                      type: integer
+                      nullable: true
+                    input_cost_usd:
+                      type: number
+                      format: float
+                      nullable: true
+                    output_cost_usd:
+                      type: number
+                      format: float
+                      nullable: true
+                    total_cost_usd:
+                      type: number
+                      format: float
+                      nullable: true
+                    model_used:
+                      type: string
+                      nullable: true
+                    created_at:
+                      type: string
+                      format: date-time
+                  required:
+                    - id
+                    - organization_id
+                    - actor_user_id
+                    - source
+                    - created_at
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para consultar auditoría de tokens.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Parámetros de consulta inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
   /audit/ai-usage/summary:
     get:
       summary: Obtener resumen de consumo de tokens de IA
@@ -2434,2017 +4202,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AITokenUsageSummaryResponse'
+                type: object
+                properties:
+                  total_tokens:
+                    type: integer
+                  total_cost_usd:
+                    type: number
+                    format: float
+                  input_tokens:
+                    type: integer
+                  output_tokens:
+                    type: integer
+                required:
+                  - total_tokens
+                  - total_cost_usd
+                  - input_tokens
+                  - output_tokens
         '401':
           description: No autenticado.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '403':
           description: No autorizado para consultar auditoría de tokens.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/paths/~1user~1me/get/responses/401/content/application~1json/schema'
         '422':
           description: Parámetros de consulta inválidos.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationError'
-components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-  schemas:
-    UserRole:
-      type: string
-      enum:
-        - SUPERADMIN
-        - ADMIN
-        - HR
-        - MANAGER
-        - WORKER
-    UserResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        supabase_user_id:
-          type: string
-          format: uuid
-          nullable: true
-        email:
-          type: string
-          format: email
-        full_name:
-          type: string
-          nullable: true
-        avatar_url:
-          type: string
-          nullable: true
-        role:
-          $ref: '#/components/schemas/UserRole'
-        receives_notifications:
-          type: boolean
-        is_active:
-          type: boolean
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - email
-        - role
-        - receives_notifications
-        - is_active
-        - created_at
-        - updated_at
-    ErrorResponse:
-      type: object
-      description: Respuesta común de los manejadores de errores del backend.
-      properties:
-        error:
-          type: boolean
-          example: true
-        type:
-          type: string
-          description: Nombre de la excepción o categoría del error.
-          example: NotFoundError
-        message:
-          type: string
-          description: Mensaje legible para el consumidor.
-          example: Recurso no encontrado
-        request_id:
-          type: string
-          description: Identificador de la petición para trazabilidad.
-          example: req-7f9c2a1b
-      required:
-        - error
-        - type
-        - message
-        - request_id
-    UserUpdateRequest:
-      type: object
-      properties:
-        role:
-          $ref: '#/components/schemas/UserRole'
-      required:
-        - role
-    ChatRequest:
-      type: object
-      required:
-        - message
-      properties:
-        message:
-          type: string
-          description: Mensaje del usuario para el chatbot.
-          example: Resume mis contratos activos.
-        thread_id:
-          type: integer
-          nullable: true
-          description: ID de la conversación existente. Si se omite, el backend crea una nueva conversación.
-          example: 12
-    ChartData:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - bar
-            - line
-            - pie
-        layout:
-          type: string
-          enum:
-            - vertical
-            - horizontal
-            - centric
-        title:
-          type: string
-        config:
-          type: object
-          properties:
-            categoryKey:
-              type: string
-            series:
-              type: array
-              items:
-                type: object
-                properties:
-                  dataKey:
-                    type: string
-                  name:
-                    type: string
-                  color:
-                    type: string
-                required:
-                  - dataKey
-                  - name
-          required:
-            - categoryKey
-            - series
-        data:
-          type: array
-          description: |
-            Arreglo de objetos con llaves dinámicas en inglés. El contenido dependerá de la consulta:
-            * Top Servicios por Monto: { "name": string, "value": number }
-            * Concentración Contratos/Mes: { "month": string, "contracts": number }
-            * Valor Promedio (Multi-serie): { "month": string, "[serviceName]": number }
-            * Concentración de Ingresos (Pie): { "name": string, "value": number }
-            * Concentración de Ingresos (Barras): { "name": string, "percentage": number }
-          items:
-            type: object
-            additionalProperties:
-              anyOf:
-                - type: string
-                - type: number
-      required:
-        - type
-        - layout
-        - title
-        - config
-        - data
-    ChatResponse:
-      type: object
-      required:
-        - response
-        - thread_id
-      properties:
-        response:
-          type: string
-          description: Respuesta generada por el chatbot.
-        thread_id:
-          type: integer
-          description: ID de la conversación.
-          example: 12
-        chart:
-          description: |
-            Datos del gráfico generado por dashboard_chart_tool.
-            Solo presente cuando el usuario solicita una visualización (top services, top companies, loyalty, retention, origin).
-            Estructura compatible con recharts (BarChart, LineChart, PieChart).
-          $ref: '#/components/schemas/ChartData'
-    ValidationError:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - type: object
-          description: Error de validación producido por FastAPI/Pydantic.
-          properties:
-            type:
-              type: string
-              example: ValidationError
-            message:
-              type: string
-              example: Los datos enviados en la petición no son válidos.
-            details:
-              type: array
-              items:
-                type: string
-              example:
-                - body -> name: Field required
-    ConversationList:
-      type: object
-      properties:
-        id:
-          type: integer
-        title:
-          type: string
-        organization_id:
-          type: integer
-        user_id:
-          type: integer
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - title
-        - organization_id
-        - user_id
-        - created_at
-        - updated_at
-    ConversationMessage:
-      type: object
-      properties:
-        role:
-          type: string
-          enum:
-            - user
-            - bot
-        content:
-          type: string
-        chart:
-          $ref: '#/components/schemas/ChartData'
-        timestamp:
-          type: string
-          format: date-time
-      required:
-        - role
-        - content
-        - timestamp
-    ConversationRead:
-      type: object
-      properties:
-        id:
-          type: integer
-        title:
-          type: string
-        organization_id:
-          type: integer
-        user_id:
-          type: integer
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConversationMessage'
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - title
-        - organization_id
-        - user_id
-        - content
-        - created_at
-        - updated_at
-    ConversationUpdateRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          minLength: 1
-          pattern: .*\S.*
-          description: Nuevo título de la conversación. No puede estar vacío y el backend recorta espacios externos.
-      required:
-        - title
-    DocumentState:
-      type: string
-      enum:
-        - DRAFT
-        - PENDING_SIGNATURE
-        - ACTIVE
-        - EXPIRING_SOON
-        - EXPIRED
-        - TERMINATED
-      description: Estado actual del documento.
-    CurrencyType:
-      type: string
-      enum:
-        - PEN
-        - USD
-        - EUR
-    DocumentServiceItemRequest:
-      type: object
-      description: Servicio asociado a un contrato de empresa.
-      properties:
-        service_id:
-          type: integer
-          minimum: 1
-        description:
-          type: string
-          nullable: true
-        value:
-          type: number
-          format: float
-          minimum: 0
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
-        start_date:
-          type: string
-          format: date
-        end_date:
-          type: string
-          format: date
-      required:
-        - service_id
-        - value
-        - currency
-        - start_date
-        - end_date
-    DocumentServiceItemResponse:
-      allOf:
-        - $ref: '#/components/schemas/DocumentServiceItemRequest'
-        - type: object
-          properties:
-            id:
-              type: integer
-          required:
-            - id
-    CompanyContractRequest:
-      type: object
-      description: Datos específicos de contratos de empresa.
-      properties:
-        ruc:
-          type: string
-          nullable: true
-          description: RUC de la contraparte empresa.
-        client:
-          type: string
-          nullable: true
-          description: Nombre de la contraparte empresa.
-    CompanyContractResponse:
-      allOf:
-        - $ref: '#/components/schemas/CompanyContractRequest'
-        - type: object
-          properties:
-            id:
-              type: integer
-            document_id:
-              type: integer
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
-          required:
-            - id
-            - document_id
-            - created_at
-            - updated_at
-    LaborContractRequest:
-      type: object
-      description: Datos específicos de contratos laborales.
-      properties:
-        worker_name:
-          type: string
-          nullable: true
-        worker_document_number:
-          type: string
-          nullable: true
-        position:
-          type: string
-          nullable: true
-        salary_value:
-          type: number
-          format: float
-          minimum: 0
-          nullable: true
-        salary_currency:
-          allOf:
-            - $ref: '#/components/schemas/CurrencyType'
-          nullable: true
-        salary_periodicity:
-          type: string
-          nullable: true
-        contract_modality:
-          type: string
-          nullable: true
-    LaborContractResponse:
-      allOf:
-        - $ref: '#/components/schemas/LaborContractRequest'
-        - type: object
-          properties:
-            id:
-              type: integer
-            document_id:
-              type: integer
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
-          required:
-            - id
-            - document_id
-            - created_at
-            - updated_at
-    DocumentResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        type:
-          type: string
-          nullable: true
-          description: Tipo técnico/origen del documento.
-        start_date:
-          type: string
-          format: date
-          nullable: true
-        end_date:
-          type: string
-          format: date
-          nullable: true
-        form_data:
-          type: object
-          additionalProperties: true
-        state:
-          allOf:
-            - $ref: '#/components/schemas/DocumentState'
-          nullable: true
-        folder_id:
-          type: integer
-          nullable: true
-        file_path:
-          type: string
-          nullable: true
-        file_name:
-          type: string
-          nullable: true
-        service_items:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentServiceItemResponse'
-        company_contract:
-          allOf:
-            - $ref: '#/components/schemas/CompanyContractResponse'
-          nullable: true
-        labor_contract:
-          allOf:
-            - $ref: '#/components/schemas/LaborContractResponse'
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - created_at
-        - updated_at
-    DocumentListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/DocumentResponse'
-    DocumentMultipartCreateRequest:
-      type: object
-      properties:
-        file:
-          type: string
-          format: binary
-        document:
-          type: string
-          description: JSON serializado con la forma de CreateDocumentDraftRequest.
-          example: '{"contract_type":"COMPANY","company_contract":{"client":"Acme S.A.C.","ruc":"20600000001"},"form_data":{"value":1200,"currency":"PEN"}}'
-      required:
-        - file
-    DocumentMultipartUpdateRequest:
-      type: object
-      properties:
-        file:
-          type: string
-          format: binary
-          nullable: true
-        document:
-          type: string
-          description: JSON serializado con campos parciales de UpdateDocumentRequest.
-          example: '{"contract_type":"LABOR","labor_contract":{"worker_name":"Ana Perez","position":"Analista"}}'
-      required:
-        - document
-    DocumentFileUrlResponse:
-      type: object
-      properties:
-        url:
-          type: string
-          format: uri
-      required:
-        - url
-    ServiceResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        is_active:
-          type: boolean
-        documents_count:
-          type: integer
-          default: 0
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - name
-        - is_active
-        - documents_count
-        - created_at
-        - updated_at
-    ServiceListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/ServiceResponse'
-    ServiceCreateRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        is_active:
-          type: boolean
-          default: true
-      required:
-        - name
-    ServiceUpdateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        name:
-          type: string
-          nullable: true
-        is_active:
-          type: boolean
-          nullable: true
-    FolderResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        name:
-          type: string
-        owner_role:
-          $ref: '#/components/schemas/UserRole'
-        created_by:
-          type: integer
-        created_by_name:
-          type: string
-          nullable: true
-        created_by_email:
-          type: string
-          nullable: true
-        documents_count:
-          type: integer
-          default: 0
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - name
-        - owner_role
-        - created_by
-        - created_by_name
-        - created_by_email
-        - documents_count
-        - created_at
-        - updated_at
-    FolderListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/FolderResponse'
-    FolderCreateRequest:
-      type: object
-      properties:
-        name:
-          type: string
-      required:
-        - name
-    FolderUpdateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        name:
-          type: string
-          nullable: true
-    AuthURLResponse:
-      type: object
-      properties:
-        url:
-          type: string
-          format: uri
-      required:
-        - url
-    TokenResponse:
-      type: object
-      properties:
-        token:
-          type: string
-        refresh_token:
-          type: string
-          nullable: true
-        token_uri:
-          type: string
-        client_id:
-          type: string
-        client_secret:
-          type: string
-        scopes:
-          type: array
-          items:
-            type: string
-      required:
-        - token
-        - refresh_token
-        - token_uri
-        - client_id
-        - client_secret
-        - scopes
-    DriveRequest:
-      type: object
-      properties:
-        token:
-          type: object
-          additionalProperties: true
-      required:
-        - token
-    DocumentType:
-      type: string
-      enum:
-        - COMPANY
-        - LABOR
-      description: Tipo funcional de contrato usado para permisos y ruteo.
-    CreateDocumentDraftRequest:
-      type: object
-      properties:
-        type:
-          type: string
-          nullable: true
-          description: Tipo técnico/origen del documento, por ejemplo manual_upload o template.
-        contract_type:
-          allOf:
-            - $ref: '#/components/schemas/DocumentType'
-          nullable: true
-          description: Tipo funcional de contrato usado para permisos y clasificación.
-        name:
-          type: string
-          nullable: true
-          deprecated: true
-          description: Campo legacy aceptado durante la transición.
-        client:
-          type: string
-          nullable: true
-          deprecated: true
-          description: Campo legacy aceptado durante la transición.
-        start_date:
-          type: string
-          format: date
-          nullable: true
-        end_date:
-          type: string
-          format: date
-          nullable: true
-        form_data:
-          type: object
-          additionalProperties: true
-          default: {}
-        company_contract:
-          allOf:
-            - $ref: '#/components/schemas/CompanyContractRequest'
-          nullable: true
-        labor_contract:
-          allOf:
-            - $ref: '#/components/schemas/LaborContractRequest'
-          nullable: true
-        state:
-          allOf:
-            - $ref: '#/components/schemas/DocumentState'
-          nullable: true
-        folder_id:
-          type: integer
-          minimum: 1
-          nullable: true
-        service_items:
-          type: array
-          description: Servicios asociados al contrato de empresa. No aplica para contratos laborales.
-          items:
-            $ref: '#/components/schemas/DocumentServiceItemRequest'
-          default: []
-    DriveImportFile:
-      type: object
-      properties:
-        file_id:
-          type: string
-          minLength: 1
-        document:
-          $ref: '#/components/schemas/CreateDocumentDraftRequest'
-          description: Metadata de creación alineada al endpoint de documentos. Puede incluir `contract_type`, `company_contract` o `labor_contract`.
-      required:
-        - file_id
-      example:
-        file_id: google-drive-file-id
-        document:
-          contract_type: COMPANY
-          company_contract:
-            client: Acme S.A.C.
-            ruc: '20600000001'
-          form_data:
-            value: 1200
-            currency: PEN
-    ImportRequest:
-      type: object
-      properties:
-        token:
-          type: object
-          additionalProperties: true
-          description: Token OAuth temporal de Google Drive obtenido con el scope `https://www.googleapis.com/auth/drive.file` para archivos seleccionados mediante Google Picker.
-        files:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/DriveImportFile'
-      required:
-        - token
-        - files
-    ImportResponse:
-      type: object
-      properties:
-        message:
-          type: string
-        queued_files:
-          type: integer
-        index_name:
-          type: string
-        job_id:
-          type: string
-          format: uuid
-      required:
-        - message
-        - queued_files
-        - index_name
-        - job_id
-    ConfirmPayPalSubscriptionRequest:
-      type: object
-      properties:
-        subscription_id:
-          type: string
-          minLength: 6
-          maxLength: 128
-          description: ID de la suscripción aprobada por PayPal.
-          example: I-6Y983831YP445233M
-        email:
-          type: string
-          format: email
-          description: Correo ingresado durante el checkout. Debe coincidir con el custom_id registrado en PayPal.
-          example: admin@empresa.com
-      required:
-        - subscription_id
-        - email
-    ConfirmPayPalSubscriptionResponse:
-      type: object
-      properties:
-        organization_id:
-          type: integer
-          description: ID de la organización placeholder creada o ya provisionada para la suscripción.
-          example: 123
-        admin_email:
-          type: string
-          format: email
-          description: Correo del usuario administrador creado para la organización.
-          example: admin@empresa.com
-        paypal_subscription_id:
-          type: string
-          description: ID de la suscripción PayPal guardada en la organización.
-          example: I-6Y983831YP445233M
-      required:
-        - organization_id
-        - admin_email
-        - paypal_subscription_id
-    OrganizationResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        is_active:
-          type: boolean
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        ruc:
-          type: string
-          pattern: ^\d{11}$
-          nullable: true
-        address:
-          type: string
-          nullable: true
-        company_type:
-          type: string
-          nullable: true
-        objeto_social:
-          type: string
-          nullable: true
-        legal_rep_name:
-          type: string
-          nullable: true
-        legal_rep_dni:
-          type: string
-          pattern: ^\d{8}$
-          nullable: true
-        jurisdiction:
-          type: string
-          nullable: true
-        city:
-          type: string
-          nullable: true
-        autorizacion_entidad:
-          type: string
-          nullable: true
-        autorizacion_fecha:
-          type: string
-          format: date
-          nullable: true
-        autorizacion_emitida_por:
-          type: string
-          nullable: true
-        email:
-          type: string
-          format: email
-          nullable: true
-        phone:
-          type: string
-          pattern: ^\d{9}$
-          nullable: true
-      required:
-        - id
-        - name
-        - is_active
-        - created_at
-        - updated_at
-    OrganizationListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/OrganizationResponse'
-    OrganizationProvisionRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          minLength: 1
-        admin_email:
-          type: string
-          format: email
-      required:
-        - name
-        - admin_email
-    OrganizationUpdateRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          minLength: 1
-          nullable: true
-        is_active:
-          type: boolean
-          nullable: true
-        ruc:
-          type: string
-          pattern: ^\d{11}$
-          nullable: true
-        address:
-          type: string
-          nullable: true
-        company_type:
-          type: string
-          nullable: true
-        objeto_social:
-          type: string
-          nullable: true
-        legal_rep_name:
-          type: string
-          nullable: true
-        legal_rep_dni:
-          type: string
-          pattern: ^\d{8}$
-          nullable: true
-        jurisdiction:
-          type: string
-          nullable: true
-        city:
-          type: string
-          nullable: true
-        autorizacion_entidad:
-          type: string
-          nullable: true
-        autorizacion_fecha:
-          type: string
-          format: date
-          nullable: true
-        autorizacion_emitida_por:
-          type: string
-          nullable: true
-        email:
-          type: string
-          format: email
-          nullable: true
-        phone:
-          type: string
-          pattern: ^\d{9}$
-          nullable: true
-    OrganizationMemberListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/UserResponse'
-    OrganizationMemberCreateRequest:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-        role:
-          $ref: '#/components/schemas/UserRole'
-      required:
-        - email
-        - role
-    OrganizationMemberRoleUpdateRequest:
-      type: object
-      properties:
-        role:
-          $ref: '#/components/schemas/UserRole'
-      required:
-        - role
-    OrganizationMemberNotificationsUpdateRequest:
-      type: object
-      properties:
-        receives_notifications:
-          type: boolean
-      required:
-        - receives_notifications
-    NotificationType:
-      type: string
-      enum:
-        - critical
-        - warning
-        - info
-    NotificationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        document_id:
-          type: integer
-        type:
-          $ref: '#/components/schemas/NotificationType'
-        title:
-          type: string
-        description:
-          type: string
-        days_remaining:
-          type: integer
-      required:
-        - id
-        - document_id
-        - type
-        - title
-        - description
-        - days_remaining
-    SendEmailAlertsResponse:
-      type: object
-      properties:
-        emails_sent:
-          type: integer
-      required:
-        - emails_sent
-    CronSendEmailsResponse:
-      type: object
-      properties:
-        emails_sent:
-          type: integer
-        orgs_processed:
-          type: integer
-        orgs_skipped:
-          type: integer
-      required:
-        - emails_sent
-        - orgs_processed
-        - orgs_skipped
-    NotificationRuleResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        document_id:
-          type: integer
-          nullable: true
-        days_before_due:
-          type: integer
-        is_active:
-          type: boolean
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - document_id
-        - days_before_due
-        - is_active
-        - created_at
-        - updated_at
-    NotificationRuleCreateRequest:
-      type: object
-      properties:
-        document_id:
-          type: integer
-          minimum: 1
-          nullable: true
-        days_before_due:
-          type: integer
-          minimum: 1
-        is_active:
-          type: boolean
-          default: true
-      required:
-        - days_before_due
-    NotificationRuleUpdateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        days_before_due:
-          type: integer
-          minimum: 1
-          nullable: true
-        is_active:
-          type: boolean
-          nullable: true
-    TemplateState:
-      type: string
-      enum:
-        - DRAFT
-        - PUBLISHED
-        - ARCHIVED
-    TemplateField:
-      type: object
-      properties:
-        key:
-          type: string
-        label:
-          type: string
-        type:
-          type: string
-          default: text
-        required:
-          type: boolean
-          default: false
-        placeholder:
-          type: string
-          nullable: true
-      required:
-        - key
-        - label
-    TemplateContractDateMapping:
-      type: object
-      properties:
-        start_date_field:
-          type: string
-        end_date_field:
-          type: string
-      required:
-        - start_date_field
-        - end_date_field
-    TemplateContent:
-      type: object
-      properties:
-        body_md:
-          type: string
-        fields:
-          type: array
-          items:
-            $ref: '#/components/schemas/TemplateField'
-        operational_fields:
-          type: array
-          items:
-            $ref: '#/components/schemas/TemplateField'
-          default: []
-        version:
-          type: string
-          nullable: true
-          default: '1.0'
-        contract_date_mapping:
-          allOf:
-            - $ref: '#/components/schemas/TemplateContractDateMapping'
-          nullable: true
-      required:
-        - body_md
-        - fields
-    TemplateResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        name:
-          type: string
-        description:
-          type: string
-          nullable: true
-        document_type:
-          $ref: '#/components/schemas/DocumentType'
-        template_format_id:
-          type: integer
-          nullable: true
-        format_code:
-          type: string
-          nullable: true
-        format_label:
-          type: string
-          nullable: true
-        content:
-          $ref: '#/components/schemas/TemplateContent'
-        created_at:
-          type: string
-          format: date-time
-          nullable: true
-        state:
-          $ref: '#/components/schemas/TemplateState'
-      required:
-        - id
-        - organization_id
-        - name
-        - description
-        - document_type
-        - template_format_id
-        - format_code
-        - format_label
-        - content
-        - created_at
-        - state
-    TemplateFormatResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        document_type:
-          $ref: '#/components/schemas/DocumentType'
-        format_code:
-          type: string
-        label:
-          type: string
-        default_name:
-          type: string
-        default_description:
-          type: string
-          nullable: true
-      required:
-        - id
-        - document_type
-        - format_code
-        - label
-        - default_name
-        - default_description
-    TemplateDraftMultipartRequest:
-      type: object
-      properties:
-        file:
-          type: string
-          format: binary
-          nullable: true
-        request:
-          type: string
-          description: JSON serializado con la forma de GenerateTemplateDraftRequest.
-          example: '{"name": "Mi Contrato", "format_code": "management"}'
-      required:
-        - request
-    TemplateUsage:
-      type: object
-      properties:
-        input_tokens:
-          type: integer
-          default: 0
-        output_tokens:
-          type: integer
-          default: 0
-        total_tokens:
-          type: integer
-          default: 0
-    PersistedTemplateDraftResponse:
-      type: object
-      properties:
-        template:
-          $ref: '#/components/schemas/TemplateResponse'
-        warnings:
-          type: array
-          items:
-            type: string
-        source:
-          type: object
-          additionalProperties: true
-        usage:
-          allOf:
-            - $ref: '#/components/schemas/TemplateUsage'
-          nullable: true
-      required:
-        - template
-        - warnings
-        - source
-        - usage
-      example:
-        template:
-          id: 72
-          organization_id: 2
-          name: Mi Primer Contrato
-          description: Contrato de prueba
-          document_type: COMPANY
-          template_format_id: 1
-          format_code: management
-          format_label: Contrato de Management
-          content:
-            body_md: |-
-              ## CONTRATO DE MANAGEMENT
-
-              Conste por el presente documento...
-            fields:
-              - key: representante_cargo
-                label: Cargo del representante
-                type: text
-                required: true
-                placeholder: Ej. Gerente General
-            operational_fields: []
-            version: '1.0'
-            contract_date_mapping:
-              start_date_field: fecha_inicio_contrato
-              end_date_field: fecha_fin_contrato
-          created_at: '2026-05-18T01:18:08.619Z'
-          state: DRAFT
-        warnings:
-          - 'Cláusulas de referencia no preservadas: CUARTA, QUINTA, SEXTA...'
-        source:
-          mode: file_reference
-          filename: contrato 003.pdf
-          generation_mode: adaptive
-          reference_mode: compact
-          detected_document_type: COMPANY
-          clause_count: 10
-        usage:
-          input_tokens: 3268
-          output_tokens: 9284
-          total_tokens: 12552
-    PreviewTemplateRequest:
-      type: object
-      properties:
-        document_type:
-          allOf:
-            - $ref: '#/components/schemas/DocumentType'
-          nullable: true
-        format_code:
-          type: string
-        content:
-          $ref: '#/components/schemas/TemplateContent'
-        sample_data:
-          type: object
-          additionalProperties: true
-          default: {}
-      required:
-        - format_code
-        - content
-    PreviewTemplateResponse:
-      type: object
-      properties:
-        markdown:
-          type: string
-        resolved_payload:
-          type: object
-          additionalProperties: true
-        warnings:
-          type: array
-          items:
-            type: string
-      required:
-        - markdown
-        - resolved_payload
-        - warnings
-    UpdateTemplateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        name:
-          type: string
-          nullable: true
-        description:
-          type: string
-          nullable: true
-        content:
-          allOf:
-            - $ref: '#/components/schemas/TemplateContent'
-          nullable: true
-    AreaChartYAxis:
-      type: object
-      description: Metadatos del eje Y consumidos por el gráfico del frontend.
-      properties:
-        format:
-          type: string
-          default: currency
-        labels:
-          type: array
-          items:
-            type: number
-            format: float
-      required:
-        - labels
-    AreaChartPoint:
-      type: object
-      description: Un punto del gráfico para datos históricos o forecast.
-      properties:
-        x:
-          type: string
-        'y':
-          type: number
-          format: float
-        is_forecast:
-          type: boolean
-          default: false
-      required:
-        - x
-        - 'y'
-    AreaChartSeries:
-      type: object
-      description: Una serie de datos del gráfico.
-      properties:
-        currency:
-          type: string
-        name:
-          type: string
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/AreaChartPoint'
-      required:
-        - currency
-        - name
-        - data
-    AreaChartProps:
-      type: object
-      description: Propiedades del gráfico retornadas en un solo payload.
-      properties:
-        title:
-          type: string
-        subtitle:
-          type: string
-        y_axis:
-          $ref: '#/components/schemas/AreaChartYAxis'
-        threshold_date:
-          type: string
-          format: date-time
-        series:
-          type: array
-          items:
-            $ref: '#/components/schemas/AreaChartSeries'
-      required:
-        - title
-        - subtitle
-        - y_axis
-        - threshold_date
-        - series
-    AreaChartResponse:
-      type: object
-      description: Respuesta para endpoints de gráficos de área.
-      properties:
-        props:
-          $ref: '#/components/schemas/AreaChartProps'
-      required:
-        - props
-    AlertColor:
-      type: object
-      description: Colores visuales para una categoría de alerta.
-      properties:
-        accent:
-          type: string
-        bg:
-          type: string
-      required:
-        - accent
-        - bg
-    AlertItem:
-      type: object
-      description: Contrato mostrado bajo una categoría de alerta.
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        detail:
-          type: string
-          nullable: true
-        status:
-          type: string
-      required:
-        - id
-        - name
-        - status
-    AlertCategory:
-      type: object
-      description: Categoría de alerta con contador y lista de previsualización.
-      properties:
-        label:
-          type: string
-        color:
-          $ref: '#/components/schemas/AlertColor'
-        due_to:
-          type: integer
-          nullable: true
-        count:
-          type: integer
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/AlertItem'
-      required:
-        - label
-        - color
-        - count
-        - items
-    RecentContractResponse:
-      type: object
-      description: Tarjeta de contrato reciente.
-      properties:
-        id:
-          type: integer
-        title:
-          type: string
-        services:
-          type: array
-          items:
-            type: string
-        name:
-          type: string
-        dates:
-          type: string
-      required:
-        - id
-        - title
-        - services
-        - name
-        - dates
-    TopRankingSortBy:
-      type: string
-      enum:
-        - volume
-        - value
-      description: Criterio de ordenamiento para rankings.
-    TopCompanyResponse:
-      type: object
-      description: Fila del ranking de empresas.
-      properties:
-        name:
-          type: string
-        contracts:
-          type: integer
-        amount:
-          type: number
-          format: float
-      required:
-        - name
-        - contracts
-        - amount
-    TopServiceResponse:
-      type: object
-      description: Fila del ranking de servicios.
-      properties:
-        name:
-          type: string
-        quantity:
-          type: integer
-        amount:
-          type: number
-          format: float
-      required:
-        - name
-        - quantity
-        - amount
-    RetentionKPIs:
-      type: object
-      properties:
-        active_retention_rate:
-          type: number
-          format: float
-        total_unique_workers:
-          type: integer
-        avg_contracts_per_worker:
-          type: number
-          format: float
-      required:
-        - active_retention_rate
-        - total_unique_workers
-        - avg_contracts_per_worker
-    TenureDistributionPoint:
-      type: object
-      properties:
-        contracts_count:
-          type: integer
-        workers_count:
-          type: integer
-      required:
-        - contracts_count
-        - workers_count
-    RenewalTrendPoint:
-      type: object
-      properties:
-        month:
-          type: string
-        renewal_rate:
-          type: number
-          format: float
-        total_expired:
-          type: integer
-        total_renewed:
-          type: integer
-      required:
-        - month
-        - renewal_rate
-        - total_expired
-        - total_renewed
-    RetentionDetail:
-      type: object
-      properties:
-        worker_name:
-          type: string
-        worker_document_number:
-          type: string
-        contracts_count:
-          type: integer
-        first_contract_start:
-          type: string
-          format: date
-        latest_contract_end:
-          type: string
-          format: date
-      required:
-        - worker_name
-        - worker_document_number
-        - contracts_count
-        - first_contract_start
-        - latest_contract_end
-    RetentionDashboardResponse:
-      type: object
-      properties:
-        kpis:
-          $ref: '#/components/schemas/RetentionKPIs'
-        tenure_distribution:
-          type: array
-          items:
-            $ref: '#/components/schemas/TenureDistributionPoint'
-        renewal_trend:
-          type: array
-          items:
-            $ref: '#/components/schemas/RenewalTrendPoint'
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/RetentionDetail'
-      required:
-        - kpis
-        - tenure_distribution
-        - renewal_trend
-        - details
-    OriginDistributionPoint:
-      type: object
-      properties:
-        origin_type:
-          type: string
-        count:
-          type: integer
-        percentage:
-          type: number
-          format: float
-      required:
-        - origin_type
-        - count
-        - percentage
-    OriginDashboardResponse:
-      type: object
-      properties:
-        total_contracts:
-          type: integer
-        distribution:
-          type: array
-          items:
-            $ref: '#/components/schemas/OriginDistributionPoint'
-      required:
-        - total_contracts
-        - distribution
-    LoyaltyKPIs:
-      type: object
-      properties:
-        active_retention_rate:
-          type: number
-          format: float
-        total_unique_clients:
-          type: integer
-        avg_contracts_per_client:
-          type: number
-          format: float
-      required:
-        - active_retention_rate
-        - total_unique_clients
-        - avg_contracts_per_client
-    LoyaltyTenureDistributionPoint:
-      type: object
-      properties:
-        contracts_count:
-          type: integer
-        clients_count:
-          type: integer
-      required:
-        - contracts_count
-        - clients_count
-    LoyaltyDetail:
-      type: object
-      properties:
-        client_name:
-          type: string
-        ruc:
-          type: string
-          nullable: true
-        contracts_count:
-          type: integer
-        first_contract_start:
-          type: string
-          format: date
-        latest_contract_end:
-          type: string
-          format: date
-      required:
-        - client_name
-        - ruc
-        - contracts_count
-        - first_contract_start
-        - latest_contract_end
-    LoyaltyDashboardResponse:
-      type: object
-      properties:
-        kpis:
-          $ref: '#/components/schemas/LoyaltyKPIs'
-        tenure_distribution:
-          type: array
-          items:
-            $ref: '#/components/schemas/LoyaltyTenureDistributionPoint'
-        renewal_trend:
-          type: array
-          items:
-            $ref: '#/components/schemas/RenewalTrendPoint'
-        details:
-          type: array
-          items:
-            $ref: '#/components/schemas/LoyaltyDetail'
-      required:
-        - kpis
-        - tenure_distribution
-        - renewal_trend
-        - details
-    UserActivityAction:
-      type: string
-      enum:
-        - CREATED
-        - UPDATED
-        - DELETED
-    UserActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/UserActivityAction'
-        target_user_id:
-          type: integer
-          nullable: true
-        target_user_email:
-          type: string
-          format: email
-          nullable: true
-        target_user_name:
-          type: string
-          nullable: true
-        previous_role:
-          type: string
-          nullable: true
-        role:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    UserActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/UserActivityResponse'
-    ChatbotActivityAction:
-      type: string
-      enum:
-        - CONVERSATION_STARTED
-        - MESSAGE_SENT
-        - RESPONSE_GENERATED
-    ChatbotActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/ChatbotActivityAction'
-        conversation_title:
-          type: string
-          nullable: true
-        input_tokens:
-          type: integer
-          nullable: true
-        output_tokens:
-          type: integer
-          nullable: true
-        total_tokens:
-          type: integer
-          nullable: true
-        input_cost_usd:
-          type: number
-          format: float
-          nullable: true
-        output_cost_usd:
-          type: number
-          format: float
-          nullable: true
-        total_cost_usd:
-          type: number
-          format: float
-          nullable: true
-        model_used:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    ChatbotActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/ChatbotActivityResponse'
-    TemplateActivityAction:
-      type: string
-      enum:
-        - CREATED
-        - UPDATED
-        - DELETED
-        - ARCHIVED
-    TemplateActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/TemplateActivityAction'
-        template_id:
-          type: integer
-          nullable: true
-        template_format_id:
-          type: integer
-          nullable: true
-        template_name:
-          type: string
-          nullable: true
-        document_type:
-          type: string
-          nullable: true
-        previous_state:
-          type: string
-          nullable: true
-        state:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    TemplateActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/TemplateActivityResponse'
-    ContractActivityAction:
-      type: string
-      enum:
-        - CREATED
-        - GENERATED_FROM_TEMPLATE
-        - IMPORTED_FROM_GOOGLE_DRIVE
-        - UPDATED
-        - DELETED
-    ContractActivityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        actor_name:
-          type: string
-          nullable: true
-        actor_role:
-          type: string
-        action:
-          $ref: '#/components/schemas/ContractActivityAction'
-        document_id:
-          type: integer
-          nullable: true
-        company_contract_id:
-          type: integer
-          nullable: true
-        labor_contract_id:
-          type: integer
-          nullable: true
-        document_name:
-          type: string
-          nullable: true
-        document_type:
-          type: string
-          nullable: true
-        previous_state:
-          type: string
-          nullable: true
-        state:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - actor_role
-        - action
-        - created_at
-    ContractActivityListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/ContractActivityResponse'
-    AITokenSource:
-      type: string
-      enum:
-        - CHATBOT
-        - TEMPLATES
-        - INTEGRATIONS
-    AITokenUsageResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-        organization_id:
-          type: integer
-        actor_user_id:
-          type: integer
-        source:
-          $ref: '#/components/schemas/AITokenSource'
-        input_tokens:
-          type: integer
-          nullable: true
-        output_tokens:
-          type: integer
-          nullable: true
-        total_tokens:
-          type: integer
-          nullable: true
-        input_cost_usd:
-          type: number
-          format: float
-          nullable: true
-        output_cost_usd:
-          type: number
-          format: float
-          nullable: true
-        total_cost_usd:
-          type: number
-          format: float
-          nullable: true
-        model_used:
-          type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - organization_id
-        - actor_user_id
-        - source
-        - created_at
-    AITokenUsageListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/AITokenUsageResponse'
-    AITokenUsageSummaryResponse:
-      type: object
-      properties:
-        total_tokens:
-          type: integer
-        total_cost_usd:
-          type: number
-          format: float
-        input_tokens:
-          type: integer
-        output_tokens:
-          type: integer
-      required:
-        - total_tokens
-        - total_cost_usd
-        - input_tokens
-        - output_tokens
+                $ref: '#/paths/~1chatbot~1/post/responses/422/content/application~1json/schema'
