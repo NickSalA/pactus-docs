@@ -11,7 +11,7 @@ En la práctica, este contrato evita ambigüedades entre equipos. El frontend no
 
 La fuente de verdad de la API vive en dos capas complementarias:
 
-- el backend real en `Pactus-Backend/src/pactus_backend/modules/*/api/routers*.py`
+- el backend real en `Pactus-Backend/src/contractai_backend/modules/*/api/routers*.py`
 - la especificación OpenAPI del repositorio en `docs/openapi.yaml` y `docs/modules/**/*.yaml`
 - el bundle para visualizadores Swagger/OpenAPI en `openapi.bundle.yaml`
 
@@ -24,6 +24,7 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/chatbot`
 - `/documents`
 - `/conversations`
+- `/dashboard`
 - `/integrations`
 - `/services`
 - `/folders`
@@ -31,8 +32,30 @@ La aplicación FastAPI monta actualmente sus rutas directamente en raíz. Es dec
 - `/notifications`
 - `/templates`
 - `/user`
+- `/billing`
+- `/audit`
 
 Aunque la configuración del backend define `GLOBAL_PREFIX`, ese prefijo no se aplica hoy sobre los routers montados por la aplicación.
+
+### Endpoints Raíz
+
+El backend expone algunos endpoints directamente en la raíz, sin prefijo de módulo:
+
+- `GET /`
+  Endpoint de verificación. Devuelve un mensaje de bienvenida y la versión de la aplicación.
+
+  ```json
+  {
+    "message": "¡Bienvenido a Pactus!",
+    "version": "0.5.0"
+  }
+  ```
+
+- `GET /perf-test-data`
+  Endpoint de prueba de rendimiento sin base de datos ni autenticación. Devuelve datos mock para medir latencia.
+
+- `POST /perf-render-template`
+  Simula el renderizado de una plantilla sustituyendo variables. Acepta un payload JSON con campos como `company`, `client`, `value`, `currency`.
 
 ## Contratos Vigentes
 
@@ -54,6 +77,7 @@ Respuesta típica:
   "role": "ADMIN",
   "receives_notifications": true,
   "is_active": true,
+  "subscription_active": true,
   "created_at": "2026-04-05T10:00:00Z",
   "updated_at": "2026-04-05T10:00:00Z"
 }
@@ -138,13 +162,11 @@ Ejemplo conceptual del campo `document`:
 - `GET /documents/{document_id}/file-url`
   Devuelve una URL firmada temporal para acceder al archivo almacenado en Supabase Storage.
 
-Response típica de documento:
+Response típica de documento (ejemplo para tipo COMPANY; los contratos LABOR incluyen `labor_contract` en lugar de `company_contract`):
 
 ```json
 {
   "id": 33,
-  "name": "Contrato Marco 2026",
-  "client": "Acme Corp",
   "type": "COMPANY",
   "start_date": "2026-01-01",
   "end_date": "2026-12-31",
@@ -156,6 +178,14 @@ Response típica de documento:
   "folder_id": 3,
   "file_path": "orgs/2/company/docs/33/contrato_marco_2026.pdf",
   "file_name": "Contrato Marco 2026.pdf",
+  "company_contract": {
+    "id": 15,
+    "document_id": 33,
+    "ruc": "20600000001",
+    "client": "Acme Corp",
+    "created_at": "2026-04-12T14:20:00Z",
+    "updated_at": "2026-04-12T14:20:00Z"
+  },
   "service_items": [
     {
       "id": 97,
@@ -180,6 +210,20 @@ Response típica de documento:
 - `GET /conversations/{conversation_id}`
   Devuelve el detalle de una conversación concreta.
 
+- `PATCH /conversations/{conversation_id}`
+  Actualiza el título de una conversación existente.
+
+  Request JSON:
+
+  ```json
+  {
+    "title": "Nuevo título de la conversación"
+  }
+  ```
+
+- `DELETE /conversations/{conversation_id}`
+  Elimina una conversación existente. Responde con código 204 sin contenido.
+
 La respuesta real del historial conversacional utiliza mensajes con esta estructura:
 
 ```json
@@ -190,7 +234,7 @@ La respuesta real del historial conversacional utiliza mensajes con esta estruct
     "timestamp": "2026-04-10T10:00:00Z"
   },
   {
-    "role": "assistant",
+    "role": "bot",
     "content": "Las cláusulas principales son...",
     "timestamp": "2026-04-10T10:00:02Z"
   }
@@ -199,19 +243,106 @@ La respuesta real del historial conversacional utiliza mensajes con esta estruct
 
 ### Integraciones con Google Drive
 
+El frontend utiliza **Google Picker API** para la selección visual de archivos. El flujo de autenticación es mediante **Google Identity Services (GIS)** con popup OAuth y scope `https://www.googleapis.com/auth/drive.file`, no redirects tradicionales.
+
+**Flujo actual:**
+1. Frontend abre Google Picker con `DocsView` y `MULTISELECT_ENABLED`
+2. Usuario autoriza acceso limitado a archivos seleccionados con `drive.file`
+3. Usuario selecciona archivos (carpetas excluidas)
+4. Google retorna `access_token` + `expires_in` directamente al frontend
+5. Frontend envía `POST /integrations/drive/import` con el token
+
+**Endpoints:**
+
 - `GET /integrations/drive/auth-url`
-  Devuelve la URL de autorización de Google Drive.
+  Genera URL de autorización OAuth (flujo legacy, no usado por frontend actual)
 
 - `GET /integrations/drive/callback`
-  Recibe el `code` OAuth y devuelve el token autenticado.
+  Intercambia código OAuth por token (flujo legacy, no usado por frontend actual)
 
 - `POST /integrations/drive/download/{file_id}`
-  Descarga el binario de un archivo de Drive a partir de un token válido.
+  Descarga un archivo específico de Google Drive usando el token proporcionado.
+  El body incluye el token de acceso en el campo `token`.
 
 - `POST /integrations/drive/import`
-  Encola la importación en segundo plano de uno o varios archivos de Google Drive hacia el pipeline documental del sistema.
+  Encola importación en segundo plano. El payload incluye metadata documental reutilizando el modelo de documento en borrador.
 
-El payload de importación permite adjuntar metadata documental rica, porque cada entrada de `files[]` reutiliza el modelo de documento en borrador del backend.
+  Payload ejemplo:
+  ```json
+  {
+    "token": {
+      "token": "ya29.a0AfH6...",
+      "scopes": ["https://www.googleapis.com/auth/drive.file"]
+    },
+    "files": [
+      {
+        "file_id": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs",
+        "document": {
+          "name": "Contrato 2026",
+          "contract_type": "COMPANY",
+          "company_contract": { "client": "Acme S.A.C.", "ruc": "20600000001" },
+          "form_data": { "value": 1200, "currency": "PEN" }
+        }
+      }
+    ]
+  }
+  ```
+
+  Respuesta:
+  ```json
+  {
+    "message": "La importación ha comenzado en segundo plano.",
+    "queued_files": 1,
+    "index_name": "drive_contracts_index",
+    "job_id": "550e8400-e29b-41d4-a716-446655440000"
+  }
+  ```
+
+- `GET /integrations/drive/import/{job_id}/events`
+  Stream SSE para seguir progreso de importación. Requiere autenticación Bearer.
+
+  Eventos:
+  - `initial_state`: Estado inicial del job
+  - `file_update`: Actualización por archivo (fases: PENDING → DATABASE → KNOWLEDGE_BASE → COMPLETED)
+  - `job_complete`: Job finalizado
+  - `ping`: Keep-alive
+
+### Dashboard
+
+El módulo de dashboard expone endpoints analíticos para visualizar métricas contractuales. Se divide en vistas para empresa (COMPANY) y laborales (LABOR). Todos requieren autenticación Bearer JWT.
+
+- `GET /dashboard/area_chart/company`
+  Devuelve datos del gráfico de áreas para contratos de empresa.
+
+- `GET /dashboard/area_chart/labor`
+  Devuelve datos del gráfico de áreas para contratos laborales.
+
+- `GET /dashboard/alert_center/company`
+  Devuelve categorías de alertas para contratos de empresa.
+
+- `GET /dashboard/alert_center/labor`
+  Devuelve categorías de alertas para contratos laborales.
+
+- `GET /dashboard/recent_contracts/company`
+  Lista contratos de empresa recientemente actualizados.
+
+- `GET /dashboard/recent_contracts/labor`
+  Lista contratos laborales recientemente actualizados.
+
+- `GET /dashboard/top_companies`
+  Ranking de empresas contratistas. Acepta parámetros `currency` y `sort_by` (VOLUME o VALUE).
+
+- `GET /dashboard/top_services`
+  Ranking de servicios contratados. Acepta parámetros `currency` y `sort_by`.
+
+- `GET /dashboard/retention/labor`
+  Dashboard de retención laboral.
+
+- `GET /dashboard/origin/labor`
+  Distribución de origen de contratos laborales.
+
+- `GET /dashboard/loyalty/company`
+  Dashboard de fidelidad de clientes empresa.
 
 ### Catálogo de Servicios
 
@@ -255,6 +386,32 @@ El payload de importación permite adjuntar metadata documental rica, porque cad
 - `PATCH /organizations/me/members/{member_id}/notifications`
   Actualiza si un miembro debe recibir alertas contractuales.
 
+### Facturación (Billing)
+
+El módulo de facturación gestiona suscripciones, pagos y límites operativos por organización.
+
+- `POST /billing/paypal/subscriptions/confirm`
+  Confirma una suscripción aprobada en PayPal. Crea una organización placeholder y registra como ADMIN al correo usado en el checkout. Endpoint público (no requiere JWT).
+
+  Request:
+  ```json
+  {
+    "subscription_id": "I-0A1B2C3D4E5F",
+    "email": "admin@empresa.com"
+  }
+  ```
+
+  Response `201`:
+  ```json
+  {
+    "organization_id": 15,
+    "admin_email": "admin@empresa.com",
+    "paypal_subscription_id": "I-0A1B2C3D4E5F"
+  }
+  ```
+
+  > Los endpoints `GET /billing/subscriptions`, `POST /billing/subscriptions/cancel`, `GET /billing/limits` y `PATCH /billing/limits` aún no están implementados en el backend. Las tablas `billing.subscriptions` y `billing.organization_limits` existen en la base de datos pero no tienen endpoints API asociados.
+
 ### Notificaciones
 
 - `GET /notifications`
@@ -291,9 +448,6 @@ El módulo de plantillas expone hoy más rutas de las que tenía documentadas or
 - `GET /templates`
   Lista las plantillas disponibles para la organización actual.
 
-- `POST /templates`
-  Crea una plantilla nueva.
-
 - `GET /templates/{template_id}`
   Devuelve el detalle de una plantilla concreta.
 
@@ -319,6 +473,59 @@ El módulo de plantillas expone hoy más rutas de las que tenía documentadas or
   Archiva una plantilla.
 
 La respuesta de `generate` no es un objeto simplificado ad hoc. El backend devuelve un documento persistido con el mismo shape base del módulo documental.
+
+### Auditoría
+
+El módulo de auditoría registra la actividad del sistema. Todos los endpoints requieren rol `ADMIN`.
+
+- `GET /audit/contracts`
+  Lista la actividad sobre contratos. Solo accesible por administradores.
+
+- `GET /audit/users`
+  Lista la actividad de usuarios. Solo accesible por administradores.
+
+- `GET /audit/templates`
+  Lista la actividad sobre plantillas. Solo accesible por administradores.
+
+- `GET /audit/chatbot`
+  Lista la actividad del chatbot. Solo accesible por administradores.
+
+- `GET /audit/ai-usage`
+  Lista los registros detallados de consumo y costos de tokens de IA para la organización actual. Permite opcionalmente filtrar por usuario, origen (`CHATBOT`, `TEMPLATES` o `INTEGRATIONS`) y rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  [
+    {
+      "id": 45,
+      "organization_id": 2,
+      "actor_user_id": 19,
+      "source": "CHATBOT",
+      "input_tokens": 124,
+      "output_tokens": 256,
+      "total_tokens": 380,
+      "input_cost_usd": 0.000186,
+      "output_cost_usd": 0.000768,
+      "total_cost_usd": 0.000954,
+      "model_used": "gemini-2.5-flash",
+      "created_at": "2026-06-22T23:55:05Z"
+    }
+  ]
+  ```
+
+- `GET /audit/ai-usage/summary`
+  Devuelve el resumen agregado del consumo de tokens y costos de IA (totales y por tipo de token) acumulado por la organización actual o para un usuario específico, con filtro opcional por rango de fechas. Solo accesible por administradores.
+
+  Response `200`:
+  ```json
+  {
+    "total_tokens": 15200,
+    "total_cost_usd": 0.0456,
+    "input_tokens": 5200,
+    "output_tokens": 10000
+  }
+  ```
+
 
 ## Reglas de Seguridad Relevantes
 

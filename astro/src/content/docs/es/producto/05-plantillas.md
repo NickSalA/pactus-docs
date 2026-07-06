@@ -178,4 +178,4 @@ Antes de generar un contrato, el sistema permite:
 |-----|--------|
 | **ADMIN** | Crear, editar, eliminar, publicar plantillas |
 | **MANAGER** | Ver y usar plantillas COMPANY |
-| **WORKER** | Ver y usar plantillas LABOR |
+| **WORKER** | Ver y usar plantillas COMPANY |

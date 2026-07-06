@@ -11,6 +11,7 @@ post:
     - Integraciones
   summary: Descargar archivo de Google Drive
   operationId: downloadDriveFile
+  description: Descarga un archivo individual por ID. El flujo de importación usa internamente este mecanismo.
   requestBody:
     required: true
     content:

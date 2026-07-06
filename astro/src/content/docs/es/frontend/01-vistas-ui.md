@@ -30,11 +30,12 @@ El frontend de Pactus está construido con **Next.js 16** usando App Router.
 
 | Ruta                | Descripción                                                  |
 | ------------------- | ------------------------------------------------------------ |
-| `/`                 | Landing page con propuesta de valor, CTA para iniciar sesión |
+| `/`                 | Landing page con 8 secciones (Hero, About, Misión/Visión, Capacidades, IA RAG, CTA final, Contacto) Navbar sticky con smooth-scroll |
 | `/login`            | Autenticación OAuth con Google                               |
 | `/super-admin`      | Portal para gestionar organizaciones                         |
 | `/privacy-policy`   | Política de privacidad                                       |
 | `/terms-of-service` | Términos de servicio                                         |
+| `/pricing`          | Planes de suscripción con PayPal                             |
 | `/auth/callback`    | Callback OAuth                                               |
 
 ### Rutas Protegidas
@@ -71,9 +72,11 @@ Requieren autenticación. La navegación y contenido se adapta según el rol del
 
 | Ruta                         | Descripción                                          |
 | ---------------------------- | ---------------------------------------------------- |
+| `/admin/dashboard`           | Panel de administración con resumen del sistema      |
 | `/admin/access`              | Gestión de usuarios y roles                          |
 | `/admin/alerts`              | Configuración de reglas de alertas                   |
 | `/admin/document-management` | Gestión documental (plantillas, carpetas, servicios) |
+| `/admin/audit`               | Registro de auditoría de usuarios y chatbot          |
 
 ## Flujo de Navegación
 

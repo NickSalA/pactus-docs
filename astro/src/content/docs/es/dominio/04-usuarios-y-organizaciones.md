@@ -27,7 +27,7 @@ El perfil actual se obtiene con:
 GET /user/me
 ```
 
-El frontend lo consume desde `src/lib/api/auth.ts`.
+El frontend lo consume desde `src/api/auth.ts`.
 
 ## Organizacion
 
@@ -72,14 +72,15 @@ Los roles reales son:
 
 El frontend define `OrganizationMember` como alias de `User`. Los miembros se administran con:
 
-| Metodo | Ruta | Uso |
-| ------ | ---- | --- |
-| `GET` | `/organizations/me/members` | Listar miembros de la organizacion actual |
-| `POST` | `/organizations/me/members` | Agregar miembro por email y rol |
-| `PATCH` | `/organizations/me/members/{member_id}/role` | Actualizar rol de un miembro |
-| `PATCH` | `/organizations/me/members/{member_id}/notifications` | Activar o desactivar alertas por usuario |
+| Metodo | Ruta | Uso | Cliente frontend |
+| ------ | ---- | --- | ---------------- |
+| `GET` | `/organizations/me/members` | Listar miembros de la organización actual | `src/api/members.ts` |
+| `POST` | `/organizations/me/members` | Agregar miembro por email y rol | `src/api/members.ts` |
+| `PATCH` | `/user/{user_id}` | Actualizar rol de un miembro | `src/api/users.ts` |
+| `PATCH` | `/organizations/me/members/{member_id}/notifications` | Activar o desactivar alertas por usuario | `src/api/members.ts` |
+| `DELETE` | `/user/{user_id}` | Eliminar miembro (soft delete) | `src/api/users.ts` |
 
-El cliente frontend usa estos endpoints desde `src/lib/api/organizations.ts`.
+> **Nota:** El endpoint `PATCH /organizations/me/members/{member_id}/role` está marcado como **deprecado** en el OpenAPI spec. Las operaciones de actualización de rol y eliminación de miembros se manejan a través de los endpoints de usuario (`/user/{user_id}`).
 
 ## Gestion de Organizaciones
 
@@ -126,5 +127,6 @@ Solo ADMIN puede acceder a las rutas `/admin/*`:
 | Gestion de Accesos       | /admin/access              |
 | Configuracion de Alertas | /admin/alerts              |
 | Gestion Documental       | /admin/document-management |
+| Auditoria                | /admin/audit               |
 
 Las funciones de permisos en el frontend (`canAccessAdminConsole`, `canAuthorTemplates`) definen estas reglas en `src/lib/permissions.ts`.

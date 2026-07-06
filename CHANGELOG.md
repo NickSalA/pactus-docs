@@ -1,3 +1,52 @@
+## [1.5.1](https://github.com/NickSalA/pactus-docs/compare/v1.5.0...v1.5.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* add subscription_active field to CurrentUserResponse schema ([063d302](https://github.com/NickSalA/pactus-docs/commit/063d302978bc20f520bb2147c5b91d03189d6e28))
+
+# [1.5.0](https://github.com/NickSalA/pactus-docs/compare/v1.4.0...v1.5.0) (2026-06-24)
+
+
+### Bug Fixes
+
+* add AI token usage audit endpoints and update OpenAPI bundling command ([88a09a1](https://github.com/NickSalA/pactus-docs/commit/88a09a1b577ac888382141d61b6b0daca2b4e13c))
+
+
+### Features
+
+* document AI token usage audit endpoints and schemas for tracking consumption and costs ([e6f4b9f](https://github.com/NickSalA/pactus-docs/commit/e6f4b9f0a7bb180a00842236d50111785d29f0e0))
+
+# [1.4.0](https://github.com/NickSalA/pactus-docs/compare/v1.3.0...v1.4.0) (2026-06-20)
+
+
+### Bug Fixes
+
+* change unexisting decimal format to float on ChatbotActivityResponse ([3c3e5f5](https://github.com/NickSalA/pactus-docs/commit/3c3e5f5d21a3d216de22b8ab1b3b08498a8aeaaf))
+
+
+### Features
+
+* merge remote documentation updates ([3dde2fa](https://github.com/NickSalA/pactus-docs/commit/3dde2fafa8b8543755e547fdf95bd1a29ef6dc4e))
+
+# [1.3.0](https://github.com/NickSalA/pactus-docs/compare/v1.2.0...v1.3.0) (2026-06-09)
+
+
+### Bug Fixes
+
+* add job_id field for job tracking on ImportResponse ([39fe749](https://github.com/NickSalA/pactus-docs/commit/39fe7496b98901f29358cb9056d0d1bc1e184483))
+* openapi.bundle.yaml reinserted and README.md corrected ([767bfd0](https://github.com/NickSalA/pactus-docs/commit/767bfd09bcdb462e30803e2a2d3ba5df8063583a))
+* regenerate openapi.bundle.yaml ([50b810a](https://github.com/NickSalA/pactus-docs/commit/50b810a7af53e4b76cf431166827d90244bc385e))
+
+
+### Features
+
+* add chart field and ChartData Schema for chatbot charts feature ([42d6449](https://github.com/NickSalA/pactus-docs/commit/42d64493a214efcaee66091d55280f9028827f68))
+* add new get endpoint (SSE Event) for job tracking ([6140f2b](https://github.com/NickSalA/pactus-docs/commit/6140f2bef90f43e31b9670fcd8cd1a9a38cec513))
+* added audit endpoint specification for users and chatbot ([cfd280b](https://github.com/NickSalA/pactus-docs/commit/cfd280b6c43422c1b609db6fbbd2d072a9e5a8c6))
+* fix wrong field on ChatbotActivityResponse ([0ca4c26](https://github.com/NickSalA/pactus-docs/commit/0ca4c262fadab9ea63c66d43f8b2e397ec7d913a))
+* Refactor code structure for improved readability and maintainability ([68ee05f](https://github.com/NickSalA/pactus-docs/commit/68ee05f833f784b5cb5f0424c3f60929be8d15de))
+
 # [1.2.0](https://github.com/NickSalA/pactus-docs/compare/v1.1.0...v1.2.0) (2026-05-26)
 
 

@@ -57,8 +57,8 @@ Gráfico de áreas con Recharts para visualizar tendencias temporales.
 | `documentType` | `ApiDocumentType` | COMPANY o LABOR |
 
 **Características:**
-- Línea punteada para datos con `is_forecast: true`
-- Paleta de colores según documentType (emerald para COMPANY, red para LABOR)
+- Nota al pie indicando que los datos proyectados son estimaciones (*)
+- Paleta de colores según documentType (azul para COMPANY, rojo para LABOR)
 - Tooltip con formato de moneda (PEN/USD)
 - Gradient fill bajo la línea
 
@@ -78,7 +78,7 @@ Widget de alertas por estado de vencimiento.
 
 ### DashboardTopCompanies y DashboardTopServices
 
-Gráficos de barras verticales para rankings.
+Gráficos de barras horizontales para rankings.
 
 **Características:**
 - Botones para alternar entre `VOL` (cantidad) y `VALOR` (monto)
@@ -109,3 +109,17 @@ Normaliza las respuestas crudas del API para el formato de UI:
 - Formateo de fechas relativas
 - Mapeo de estados de contratos
 - Asignación de etiquetas por defecto
+
+## Dashboards Estaticos vs Dinamicos
+
+El sistema distingue entre dos tipos de visualizaciones:
+
+| Caracteristica | Dashboards Estaticos | Dashboards Dinamicos (Chatbot) |
+|----------------|---------------------|-------------------------------|
+| **Ubicacion** | Paginas `/manager/dashboard`, `/hr/dashboard` | Ventana del chatbot |
+| **Renderizado** | Widgets predefinidos (AreaChart, AlertCenter, etc.) | `ChartRenderer` con dispatch por tipo |
+| **Tipos** | Solo area chart con datos forecast | `bar`, `line`, `pie` |
+| **Actualizacion** | Manual via `reload()` | En respuesta a consultas |
+| **Datos** | Endpoints dedicados por metricas | Embedidos en `ApiChatResponse.chart` |
+
+Ver [Graficos Dinamicos en Chatbot](./09-graficos-dinamicos.md) para el motor de renderizado en el chatbot.

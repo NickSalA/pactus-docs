@@ -7,10 +7,11 @@ Pactus implementa autenticación mediante **Supabase Auth** con Google OAuth com
 
 ## Roles del Sistema
 
-El sistema define cuatro roles de usuario:
+El sistema define cinco roles de usuario:
 
 | Rol | Descripción |
 |-----|-------------|
+| `SUPERADMIN` | Portal de aprovisionamiento de organizaciones (`/super-admin`) |
 | `ADMIN` | Acceso a la consola de administración |
 | `MANAGER` | Acceso al panel gerencial y métricas comerciales |
 | `HR` | Acceso al panel de gestión de personal |
@@ -26,6 +27,7 @@ Estado de autenticación gestionado con Zustand. Almacena la identidad del usuar
 | `accessToken` | `string` | Token de acceso OAuth |
 | `isAuthenticated` | `boolean` | Indica si hay sesión activa |
 | `isHydrating` | `boolean` | Indica si el store está sincronizando con Supabase |
+| `subscriptionActive` | `boolean \| null` | Indica si la suscripción está activa |
 
 Métodos disponibles:
 - `setAccessToken(token)` — Actualiza el token de acceso
@@ -73,4 +75,8 @@ Flujo de logout:
 |----------|-------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | API Key pública de Supabase |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Client ID de Google OAuth |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Client ID de Google OAuth usado por Google Picker |
+| `NEXT_PUBLIC_GOOGLE_API_KEY` | API key publica del proyecto Google para cargar Picker |
+| `NEXT_PUBLIC_GOOGLE_APP_ID` | Numero de proyecto Google usado como App ID de Picker |
+
+El login con Google no solicita permisos de Drive. El scope `https://www.googleapis.com/auth/drive.file` se solicita solo cuando el usuario abre el flujo de importacion desde Google Picker.

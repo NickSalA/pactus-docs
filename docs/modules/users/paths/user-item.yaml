@@ -1,0 +1,49 @@
+parameters:
+  - name: user_id
+    in: path
+    required: true
+    schema:
+      type: integer
+    description: ID del usuario.
+
+patch:
+  summary: Actualizar usuario
+  description: Actualiza los datos de un usuario. Se usa principalmente para cambiar el rol de un miembro.
+  operationId: updateUser
+  tags:
+    - Usuarios
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/UserUpdateRequest'
+  responses:
+    '200':
+      description: Usuario actualizado satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/UserResponse'
+    '404':
+      description: Usuario no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+
+delete:
+  summary: Eliminar usuario
+  description: Elimina (soft delete) un usuario de la organización.
+  operationId: deleteUser
+  tags:
+    - Usuarios
+  responses:
+    '204':
+      description: Usuario eliminado satisfactoriamente.
+    '404':
+      description: Usuario no encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'

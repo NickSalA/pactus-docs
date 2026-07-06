@@ -14,8 +14,6 @@ Un contrato es el registro funcional de un documento contractual dentro de una o
 | Campo | Uso |
 |-------|-----|
 | `id` | Identificador del contrato. |
-| `name` | Nombre visible del contrato. |
-| `client` | Contraparte, cliente o trabajador asociado. |
 | `type` | Tipo documental: `COMPANY` o `LABOR`. |
 | `start_date` | Fecha de inicio contractual. |
 | `end_date` | Fecha de fin contractual. |
@@ -25,6 +23,8 @@ Un contrato es el registro funcional de un documento contractual dentro de una o
 | `folder_id` | Carpeta opcional donde se organiza el contrato. |
 | `file_path` | Ruta tecnica del archivo almacenado. |
 | `file_name` | Nombre visible del archivo. |
+| `company_contract` | Objeto anidado con datos del cliente corporativo (`client`, `ruc`). |
+| `labor_contract` | Objeto anidado con datos del trabajador (`worker_name`, `position`, etc.). |
 
 ## Tipos de Contrato
 

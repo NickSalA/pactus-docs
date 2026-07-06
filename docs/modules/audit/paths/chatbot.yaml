@@ -1,0 +1,49 @@
+get:
+  summary: Listar auditoría de chatbot
+  description: Lista los eventos auditados de uso del chatbot para la organización actual. Solo disponible para administradores.
+  operationId: listChatbotActivity
+  tags:
+    - Auditoría
+  parameters:
+    - name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+        default: 50
+      description: Cantidad máxima de registros a devolver.
+    - name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Cantidad de registros a omitir desde el inicio.
+  responses:
+    '200':
+      description: Actividad de chatbot obtenida satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ChatbotActivityListResponse'
+    '401':
+      description: No autenticado.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '403':
+      description: No autorizado para consultar auditoría.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ForbiddenError'
+    '422':
+      description: Parámetros de paginación inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'

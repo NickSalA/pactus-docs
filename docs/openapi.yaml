@@ -39,6 +39,8 @@ tags:
     description: Carpetas para organizar documentos.
   - name: Integraciones
     description: Operaciones para la integración con servicios de terceros.
+  - name: Facturación
+    description: Operaciones de suscripciones y pagos.
   - name: Organizaciones
     description: Operaciones de membresía de la organización actual.
   - name: Notificaciones
@@ -49,6 +51,8 @@ tags:
     description: Endpoints para gráficos y métricas del dashboard.
   - name: Sistema
     description: Operaciones básicas de estado del servidor.
+  - name: Auditoría
+    description: Endpoints para consultar registros de actividad auditada del sistema.
 
 paths:
   /:
@@ -75,10 +79,10 @@ paths:
                   - version
   /user/me:
     $ref: 'modules/users/paths/me.yaml'
+  /user/{user_id}:
+    $ref: 'modules/users/paths/user-item.yaml'
   /chatbot/:
     $ref: 'modules/chat/paths.yaml'
-  /conversations:
-    $ref: 'modules/conversations/paths/collection.yaml'
   /conversations/user/{user_id}:
     $ref: 'modules/conversations/paths/user.yaml'
   /conversations/{conversation_id}:
@@ -105,6 +109,10 @@ paths:
     $ref: 'modules/integrations/paths/download.yaml'
   /integrations/drive/import:
     $ref: 'modules/integrations/paths/import.yaml'
+  /integrations/drive/import/{job_id}/events:
+    $ref: 'modules/integrations/paths/import-events.yaml'
+  /billing/paypal/subscriptions/confirm:
+    $ref: 'modules/billing/paths/paypal-subscription-confirm.yaml'
   /organizations:
     $ref: 'modules/organizations/paths/collection.yaml'
   /organizations/me:
@@ -165,3 +173,16 @@ paths:
     $ref: 'modules/dashboard/paths/origin-labor.yaml'
   /dashboard/loyalty/company:
     $ref: 'modules/dashboard/paths/loyalty-company.yaml'
+  /audit/users:
+    $ref: 'modules/audit/paths/users.yaml'
+  /audit/chatbot:
+    $ref: 'modules/audit/paths/chatbot.yaml'
+  /audit/templates:
+    $ref: 'modules/audit/paths/templates.yaml'
+  /audit/contracts:
+    $ref: 'modules/audit/paths/contracts.yaml'
+  /audit/ai-usage:
+    $ref: 'modules/audit/paths/ai-usage.yaml'
+  /audit/ai-usage/summary:
+    $ref: 'modules/audit/paths/ai-usage-summary.yaml'
+

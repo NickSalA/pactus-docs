@@ -50,7 +50,7 @@ Si no hay reglas activas, el backend usa dias por defecto:
 
 El servicio de notificaciones:
 
-1. Sincroniza estados de contratos con `public.sync_document_states`.
+1. Sincroniza estados de contratos con `contracts.sync_document_states`.
 2. Obtiene contratos vigentes o por vencer de la organizacion.
 3. Aplica reglas especificas por contrato si existen.
 4. Si no existen, aplica reglas por defecto de organizacion.

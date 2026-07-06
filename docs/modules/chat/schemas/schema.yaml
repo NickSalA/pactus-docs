@@ -26,3 +26,9 @@ ChatResponse:
       type: integer
       description: ID de la conversación.
       example: 12
+    chart:
+      description: |
+        Datos del gráfico generado por dashboard_chart_tool.
+        Solo presente cuando el usuario solicita una visualización (top services, top companies, loyalty, retention, origin).
+        Estructura compatible con recharts (BarChart, LineChart, PieChart).
+      $ref: '../../conversations/schemas/schema.yaml#/ChartData'

@@ -68,3 +68,6 @@ ServiceUnavailableError:
 
 GatewayTimeoutError:
   $ref: '#/ErrorResponse'
+
+ConflictError:
+  $ref: '#/ErrorResponse'

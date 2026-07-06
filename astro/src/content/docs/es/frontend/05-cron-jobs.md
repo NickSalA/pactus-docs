@@ -39,8 +39,9 @@ Pactus utiliza **Vercel Cron** para ejecutar tareas programadas. Estos endpoints
 
 **Backend:** `GET {baseUrl}/` (raíz del API, no `/api/`)
 
-**Manejo de errores:**
-- Si ocurre error o timeout, retorna `{ ok: true, warmed: false }` — no es crítico
+**Respuesta:**
+- En éxito: `{ ok: true, status: <http_status> }`
+- Si ocurre error o timeout: `{ ok: true, warmed: false }` — no es crítico
 
 ## Configuración
 

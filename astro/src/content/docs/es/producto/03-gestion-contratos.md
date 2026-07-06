@@ -11,8 +11,8 @@ Pactus soporta dos tipos fundamentales de contratos:
 
 | Tipo | Código | Descripción | Roles con Acceso |
 |------|--------|-------------|------------------|
-| **Laboral** | LABOR | Contratos de trabajo individuales | ADMIN, WORKER |
-| **Empresarial** | COMPANY | Contratos entre empresas | ADMIN, MANAGER |
+| **Laboral** | LABOR | Contratos de trabajo individuales | ADMIN, HR (lectura y escritura) |
+| **Empresarial** | COMPANY | Contratos entre empresas | ADMIN, MANAGER (lectura y escritura), WORKER (solo lectura) |
 
 ## Estados del Contrato
 
@@ -23,7 +23,7 @@ Cada contrato atraviesa diferentes estados a lo largo de su ciclo de vida:
 | **DRAFT** | Borrador, en proceso de creación |
 | **PENDING_SIGNATURE** | Pendiente de firma |
 | **ACTIVE** | Contrato vigente |
-| **EXPIRING** | Próximo a vencer (30 días antes del fin) |
+| **EXPIRING_SOON** | Próximo a vencer (30 días antes del fin) |
 | **EXPIRED** | Contrato cuya fecha de fin ya pasó |
 | **CANCELLED** | Contrato cancelado |
 | **SUSPENDED** | Contrato suspendido temporalmente |
@@ -46,41 +46,34 @@ Los contratos se organizan en carpetas que corresponden a los roles de los usuar
 | **Renombrar carpeta** | Cambiar el nombre de una carpeta existente |
 | **Eliminar carpeta** | Eliminar carpeta vacía |
 
-## Formulario de Contrato (Wizard)
+## Wizard de Creación (NewContractModal)
 
-El formulario de creación y edición de contratos se organiza en 4 pasos:
+El wizard de creación de contratos con plantilla tiene 2 flujos posibles:
 
-### Paso 1: Datos Generales
+### Flujo A: Generar con Plantilla (5 pasos)
+
+| Paso | Etapa | Descripción |
+|------|-------|-------------|
+| 1 | `select-action` | Elegir entre "Subir PDF existente" o "Generar con plantilla" |
+| 2 | `select-template` | Seleccionar tipo de documento (LABOR/COMPANY) y plantilla publicada |
+| 3 | `services` | Seleccionar servicios asociados (solo para COMPANY) |
+| 4 | `folder` | Seleccionar carpeta de almacenamiento destino |
+| 5 | `fill-template` | Completar campos dinámicos de la plantilla + previsualización en vivo |
+
+### Flujo B: Subir PDF (ContractForm)
+
+Al elegir "Subir contrato existente", se abre un formulario independiente con los siguientes campos:
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
 | **Nombre** | texto | Título o nombre del contrato |
 | **Cliente** | texto | Nombre del cliente o trabajador |
 | **Tipo de Documento** | select | LABOR o COMPANY |
+| **Archivo PDF** | file | Archivo del contrato |
 | **Fecha de Inicio** | fecha | Fecha de inicio del contrato |
 | **Fecha de Fin** | fecha | Fecha de fin del contrato (opcional) |
-
-### Paso 2: Documento
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| **Archivo PDF** | file | Archivo del contrato (opcional) |
-| **URL del documento** | texto | URL del archivo en Supabase Storage |
-
-### Paso 3: Servicios
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
 | **Servicios** | lista | Items de servicio con descripción, valor y moneda |
-| **Moneda** | select | PEN, USD, EUR |
-| **Validación** | automática | Verifica alineación de monedas y períodos |
-
-### Paso 4: Resumen
-
-| Sección | Descripción |
-|---------|-------------|
-| **Resumen de Campos** | Vista consolidada de todos los datos ingresados |
-| **Edición inline** | Posibilidad de volver a cualquier paso |
+| **Carpeta** | select | Carpeta de almacenamiento destino |
 
 ## Extracción Inteligente con IA
 
@@ -100,10 +93,13 @@ Pactus permite importar contratos directamente desde Google Drive:
 
 ### Flujo de Importación
 
-1. **Autorización OAuth2**: Conectar con la cuenta de Google Drive
-2. **Selector de Archivos**: Listar y seleccionar archivos PDF
-3. **Importación en Segundo Plano**: Los archivos se descargan y procesan automáticamente
-4. **Notificación**: El usuario recibe confirmación cuando la importación termina
+1. **Autenticación**: Popup OAuth de Google (Google Identity Services) con permiso limitado `drive.file`
+2. **Selector de Archivos**: Google Picker muestra archivos que el usuario puede seleccionar para compartir con Pactus
+3. **Selección**: Usuario selecciona archivos de Google Drive
+4. **Filtrado**: Carpetas y archivos no soportados se excluyen automáticamente
+5. **Envío al Backend**: IDs de archivos seleccionados, token temporal y metadata se envían a `POST /integrations/drive/import`
+6. **Proceso en Segundo Plano**: El backend descarga, procesa e indexa (exporta Workspace a PDF)
+7. **Seguimiento en Tiempo Real**: Eventos SSE muestran progreso (PENDING → DATABASE → KNOWLEDGE_BASE → COMPLETED)
 
 ### Estados de Importación
 

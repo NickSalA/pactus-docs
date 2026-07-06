@@ -28,22 +28,3 @@ get:
             type: array
             items:
               $ref: '../schemas/schema.yaml#/TemplateResponse'
-
-post:
-  tags:
-    - Plantillas
-  summary: Crear plantilla
-  operationId: createTemplate
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: '../schemas/schema.yaml#/CreateTemplateRequest'
-  responses:
-    '201':
-      description: Plantilla creada.
-      content:
-        application/json:
-          schema:
-            $ref: '../schemas/schema.yaml#/TemplateResponse'

@@ -1,0 +1,53 @@
+post:
+  summary: Confirmar suscripción PayPal
+  description: >
+    Valida una suscripción aprobada en PayPal usando su subscription_id, crea una organización placeholder
+    y registra como ADMIN al correo usado en el checkout. Este endpoint es público porque se ejecuta antes
+    del inicio de sesión; no acepta organization_id desde el cliente.
+  operationId: confirmPayPalSubscription
+  tags:
+    - Facturación
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/schema.yaml#/ConfirmPayPalSubscriptionRequest'
+  responses:
+    '201':
+      description: Suscripción confirmada y organización provisionada satisfactoriamente.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/schema.yaml#/ConfirmPayPalSubscriptionResponse'
+    '400':
+      description: La suscripción de PayPal no existe, no contiene los datos esperados o el correo no coincide.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ErrorResponse'
+    '409':
+      description: La suscripción o el correo ya fueron registrados.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ConflictError'
+    '422':
+      description: Payload inválido.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ValidationError'
+    '502':
+      description: PayPal devolvió una respuesta inesperada.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/BadGatewayError'
+    '503':
+      description: PayPal no está configurado en el backend.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/errors.yaml#/ServiceUnavailableError'
