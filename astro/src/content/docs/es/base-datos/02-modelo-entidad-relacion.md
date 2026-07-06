@@ -163,7 +163,7 @@ Registra eventos de uso del chatbot. Sus relaciones son:
 - `actor_user_id -> identity.users.id`
 - `conversation_id -> chatbot.conversations.id`
 
-Además conserva tokens, costos y modelo usado cuando el evento corresponde a generación de respuesta.
+No incluye métricas de tokens ni costos; esas se almacenan en `audit.ai_token_usage` con `conversation_id` cuando corresponde.
 
 ### `audit.contract_activity`
 
@@ -188,6 +188,15 @@ Registra acciones sobre plantillas. Sus relaciones son:
 
 Permite auditar creación, edición, publicación y archivado de plantillas.
 
+### `audit.ai_token_usage`
+
+Registra el consumo de tokens y costos de IA. Sus relaciones son:
+
+- `organization_id -> identity.organizations.id`
+- `actor_user_id -> identity.users.id`
+
+No tiene foreign key física a `chatbot.conversations`; la asociación se resuelve por `created_at` y `actor_user_id` cuando el `source` es `CHATBOT`.
+
 ## Lectura Correcta del Modelo
 
 Para interpretar bien la base de datos conviene separar estos niveles:
@@ -197,8 +206,7 @@ Para interpretar bien la base de datos conviene separar estos niveles:
 | Identidad Supabase | `auth.*` | Login, sesiones y proveedor OAuth |
 | Identidad funcional | `identity.*` | Organizaciones y usuarios de negocio |
 | Dominio contractual | `contracts.*`, `catalog.*`, `templates.*`, `notifications.*`, `chatbot.*` | Contratos, servicios, plantillas, alertas y conversaciones |
-| Auditoría | `audit.*` | Trazabilidad de acciones del sistema |
-| Telemetría | `telemetry.*` | Medición de tokens y costos del chatbot |
+| Auditoría | `audit.*` | Trazabilidad de acciones del sistema y telemetría de tokens y costos de IA |
 | Archivos | `storage.*` | Binarios documentales y metadatos de objetos |
 
 Esta documentación mantiene el MER enfocado en el dominio transaccional del producto y en sus relaciones directas con Auth, Storage, auditoría y telemetría.
