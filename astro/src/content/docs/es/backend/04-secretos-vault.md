@@ -9,7 +9,7 @@ El backend de **Pactus** concentra su configuración en la clase `Settings` de `
 
 La configuración del backend vive en:
 
-- `Pactus-Backend/src/contractai_backend/shared/config.py`
+- `Pactus-Backend/src/pactus_backend/shared/config.py`
 
 Esa clase define parámetros para:
 
@@ -33,9 +33,15 @@ Esto permite que la aplicación no dependa directamente, en cada acceso, de una 
 
 ## Proveedor de Secretos
 
-El backend define una interfaz `SecretsProvider` y una implementación `AzureKeyVaultProvider` en `shared/infrastructure/azure_provider.py`, pero **actualmente no está activa**. La inicialización del proveedor (`SecretsRegistry.set_provider()`) nunca se ejecuta, por lo que el registro de secretos no está conectado a ningún vault.
+El backend define una interfaz `SecretsProvider` y una implementación `AzureKeyVaultProvider` en `shared/infrastructure/azure_provider.py`. **En entornos de producción** (`DEBUG=False` y fuera de testing), el proveedor se inicializa automáticamente al construirse la instancia `Settings`:
 
-En su lugar, la clase `Settings` de `shared/config.py` utiliza `pydantic-settings` para leer todas las variables directamente desde el archivo `.env`, sin intermediarios. Los campos requeridos usan `Field(default=...)` y se validan al arrancar la aplicación.
+```python
+SecretsRegistry.set_provider(
+    AzureKeyVaultProvider(vault_url="https://contractai.vault.azure.net/")
+)
+```
+
+En desarrollo local (`DEBUG=True`), la clase `Settings` utiliza `pydantic-settings` para leer todas las variables directamente desde el archivo `.env`, sin intermediarios. Los campos requeridos usan `Field(default=...)` y se validan al arrancar la aplicación.
 
 ## Secretos Relevantes del Proyecto
 
@@ -43,7 +49,7 @@ Entre los valores sensibles que la aplicación requiere para operar se encuentra
 
 - `GEMINI_API_KEY`
 - `OPENAI_API_KEY`
-- `AZURE_OPENAI_API_KEY`
+
 - `QDRANT_API_KEY`
 - `LLAMA_PARSE_API_KEY`
 - `DATABASE_PASSWORD`
@@ -92,7 +98,7 @@ La clase `Settings` usa `pydantic-settings`, por lo que la app lee todas las var
 2. Variables requeridas sin valor por defecto, que deben estar presentes en el entorno o en `.env` (ej: `GEMINI_API_KEY`, `SUPABASE_URL`, `GOOGLE_CLIENT_ID`)
 3. Validación al arranque: si falta alguna variable requerida, `Settings()` lanza un `ValidationError` que se eleva como `RuntimeError`
 
-No hay un paso de resolución desde Key Vault en el flujo actual. La implementación de `AzureKeyVaultProvider` y `SecretsRegistry` está disponible para futuras iteraciones, pero no interviene en la configuración en producción.
+En producción, el proveedor de Key Vault resuelve los secretos que no están disponibles en el entorno local. En desarrollo, la resolución se apoya completamente en `.env`.
 
 ## Comportamiento de Arranque
 

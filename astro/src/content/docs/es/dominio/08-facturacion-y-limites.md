@@ -87,19 +87,32 @@ La integración con PayPal permite confirmar suscripciones aprobadas desde el ch
 
 El `paypal_subscription_id` se almacena tanto en `identity.organizations` como en `billing.subscriptions` para facilitar la consulta desde distintos puntos del sistema.
 
-## Casos de Uso
+## Guard de Suscripción Activa
+
+La mayoría de los routers del backend aplican la dependencia `require_active_subscription`, que verifica que la organización del usuario tenga una suscripción activa antes de procesar cualquier request. Si la suscripción no está activa, el endpoint retorna un error.
+
+Los únicos routers excluidos de este guard son:
+
+- **Autenticación** (`/login`) — necesario antes del registro.
+- **Usuarios** (`/user`) — necesario para que el usuario pueda ver su perfil.
+- **Facturación** (`/billing`) — necesario para completar el flujo de pago.
+
+## Estado Actual de la Implementación
+
+Actualmente el backend expone únicamente el endpoint `POST /billing/paypal/subscriptions/confirm` para confirmar suscripciones aprobadas en PayPal. Los siguientes endpoints **aún no están implementados**:
+
+| Caso de Uso | Endpoint Esperado | Estado |
+|---|---|---|
+| Consultar suscripción de mi organización | `GET /billing/subscriptions` | No implementado |
+| Cancelar suscripción | `POST /billing/subscriptions/cancel` | No implementado |
+| Ver límites operativos | `GET /billing/limits` | No implementado |
+| Actualizar límites (SUPERADMIN) | `PATCH /billing/limits` | No implementado |
+
+Las tablas `billing.subscriptions` y `billing.organization_limits` están definidas en el esquema conceptual, pero los endpoints para consultarlas y modificarlas están pendientes de implementación. La funcionalidad de facturación se encuentra en desarrollo activo.
 
 ### Consultar el estado de suscripción de mi organización
 
-El administrador puede consultar la suscripción actual de su organización para conocer el plan, estado de pago y fechas del período.
-
-### Ver límites actuales y uso
-
-El administrador puede consultar los límites operativos de su organización junto con el consumo actual para planificar upgrades.
-
-### Actualizar límites (SUPERADMIN)
-
-Un SUPERADMIN puede actualizar los límites de una organización de forma manual, sin depender del plan contratado, para casos especiales o empresariales.
+El estado de suscripción se puede consultar de forma indirecta a través del campo `subscription_active` que devuelve `GET /user/me`. Mientras no exista un endpoint dedicado, este campo es la única fuente de información sobre el estado de la suscripción.
 
 ### Notificación por límite próximo
 
