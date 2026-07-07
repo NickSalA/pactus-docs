@@ -47,7 +47,7 @@ Estado del sidebar colapsado/expandido, persistido en localStorage.
 
 Métodos disponibles:
 - `toggleSidebar()` — Alterna entre colapsado/expandido
-- `setCollapsed(boolean)` — Establece el estado explicitamente
+- `setCollapsed(boolean)` — Establece el estado explícitamente
 
 ## ContractImport Store
 
