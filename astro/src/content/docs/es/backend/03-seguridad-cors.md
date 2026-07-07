@@ -98,7 +98,7 @@ La lista se define en la clase `Settings` de `shared/config.py` y puede ajustars
 
 ## Guard de Suscripción Activa
 
-Además de la autenticación JWT y la autorización por rol, la mayoría de los routers aplican el dependencia `require_active_subscription` que verifica que la organización del usuario tenga una suscripción activa. Los routers protegidos son:
+Además de la autenticación JWT y la autorización por rol, la mayoría de los routers aplican la dependencia `require_active_subscription` que verifica que la organización del usuario tenga una suscripción activa. Los routers protegidos son:
 
 - documentos
 - servicios
