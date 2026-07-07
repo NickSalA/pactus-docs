@@ -20,8 +20,19 @@ const axiosInstance = axios.create({
 ```
 
 **Interceptores:**
-- **Request:** Adjunta token Bearer del `accessToken` almacenado en localStorage
-- **Response:** Parsea errores y retorna solo `response.data`
+- **Request:** Adjunta token Bearer obtenido de `token-store.ts` (memoria + localStorage)
+- **Response:** Maneja 403 (desactiva suscripción), parsa errores y retorna solo `response.data`
+
+### Token Store
+
+El módulo `src/api/token-store.ts` gestiona el token de acceso de forma centralizada:
+
+| Función | Descripción |
+|---------|-------------|
+| `getAccessToken()` | Obtiene token desde memoria o localStorage |
+| `setApiAccessToken(token)` | Almacena token en memoria y localStorage |
+| `logout()` | Elimina token de ambos almacenes |
+| `onApiSessionChange(callback)` | Suscripción a cambios de sesión |
 
 ### Funciones Exportadas
 
@@ -59,6 +70,7 @@ Cada módulo agrupa funciones relacionadas. Todos se exportan desde `src/api/ind
 | `audit` | `src/api/audit.ts` | `queries/hooks/audit/queries` |
 | `billing` | `src/api/billing.ts` | `queries/hooks/billing/mutations` |
 | `integrations` | `src/api/integrations.ts` | `queries/hooks/contracts/mutations` (importación Drive) |
+| `integrations/events` | Eventos SSE desde backend | `queries/hooks/contracts/importEvents` (streaming SSE) |
 
 ### Módulo Chat (Conversaciones)
 
@@ -102,16 +114,29 @@ El módulo `chat` gestiona el historial de conversaciones con el agente IA. Ubic
 
 ## Patrón de Uso
 
-Todas las llamadas a API usan **TanStack Query** a través de la capa de queries en `queries/hooks/`. Esta capa provee cache, loading states y error handling automáticos.
+Todas las llamadas a API usan **TanStack Query** a través de la capa de hooks en `queries/hooks/`. Esta capa provee cache, loading states y error handling automáticos. Cada dominio expone hooks de query (lectura) y hooks de mutation (escritura).
 
 ```typescript
-import { getDocuments } from '@/queries/hooks/contracts/queries';
+import { useDocuments } from '@/queries/hooks/contracts/queries';
+import { useCreateDocument } from '@/queries/hooks/contracts/mutations';
 
-const { data, isLoading, error } = useQuery({
-  queryKey: ['documents'],
-  queryFn: () => getDocuments(),
-});
+function ContractsPage() {
+  const { data, isLoading, error } = useDocuments();
+  const { mutate: create } = useCreateDocument();
+  // ...
+}
 ```
+
+### Stream de Eventos SSE para Importación
+
+La importación desde Google Drive usa **Server-Sent Events (SSE)** para tracking en tiempo real:
+
+| Recurso | Descripción |
+|---------|-------------|
+| `streamGoogleDriveImportEvents(jobId)` | Abre conexión SSE y emite eventos de progreso |
+| `applyImportEvent(event)` (store) | Procesa eventos y actualiza el estado de importación |
+
+El `ContractImportFloatingWidget` se suscribe a estos eventos para mostrar el progreso al usuario.
 
 La documentación de endpoints está en la especificación OpenAPI del backend.
 

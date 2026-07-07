@@ -7,19 +7,32 @@ La página de contratos permite gestionar el ciclo de vida completo de los contr
 
 ## NewContractModal (Wizard)
 
-Modal de creación de contratos con flujo de 5 pasos:
+Modal de creación de contratos con flujo de 5 pasos y una ruta alternativa:
 
 | Step | Flow | Descripción |
 |------|------|-------------|
-| 1 | `select-action` | Elegir entre Upload PDF o Usar Plantilla |
+| 1 | `select-action` | Elegir entre Crear desde Plantilla o Subir Archivo |
 | 2 | `select-template` | Seleccionar tipo de documento y plantilla |
 | 3 | `services` | Seleccionar servicios asociados |
 | 4 | `folder` | Seleccionar carpeta de almacenamiento |
 | 5 | `fill-template` | Llenar campos dinámicos + preview en vivo |
 
+**Ruta alternativa:** Si el usuario elige "Subir Archivo" en `select-action`, el flujo cambia a `upload` y renderiza `ContractForm` directamente (carga dinámica con `next/dynamic`), omitiendo los pasos de plantilla.
+
+Cada paso del wizard tiene su propio componente en `features/contracts/components/modals/steps/`:
+
+| Componente | Paso |
+|------------|------|
+| `SelectActionStep` | `select-action` |
+| `SelectTemplateStep` | `select-template` |
+| `ServicesStep` | `services` |
+| `FolderStep` | `folder` |
+| `FillTemplateStep` | `fill-template` |
+| `ContractSummaryPanel` | Panel lateral de resumen y previsualización |
+
 ### useContractGeneration
 
-Hook que gestiona el estado completo del wizard. Proporciona:
+Hook en `features/contracts/hooks/` que gestiona el estado completo del wizard. Proporciona:
 - `currentWizardStep` - paso actual del wizard
 - `flow` - flujo activo (`select-action` | `select-template` | `services` | `folder` | `fill-template` | `upload`)
 - `fieldValues` - valores de campos del formulario
@@ -61,6 +74,20 @@ Hook que gestiona filtros, búsqueda y paginación:
 
 Tabs para filtrar contratos por carpeta. Ubicado en `features/contracts/components/ui/ContractsFolderTabs.tsx`.
 
+## Importación desde Google Drive
+
+La página de contratos integra importación directa desde Google Drive mediante los siguientes componentes:
+
+| Componente | Descripción |
+|------------|-------------|
+| `ContractsImportButton` | Botón "Importar contratos" con icono CloudUpload |
+| `ContractsImportMenu` | Menú dropdown "Importar" con opción "Google Drive" |
+| `ContractsImportDriveSelection` | Selector de archivos desde Google Picker |
+| `ContractsImportReviewModal` | Modal de revisión previa a importar |
+| `ContractImportFloatingWidget` | Widget flotante de progreso (en layout principal) |
+
+El flujo de importación usa **Google Picker API** para seleccionar archivos y **Server-Sent Events (SSE)** para tracking en tiempo real del procesamiento.
+
 ## Acciones
 
 ### ContractsActionsBar
@@ -89,10 +116,11 @@ Barra de acciones masivas cuando se seleccionan múltiples contratos.
 
 | Modal | Props | Descripción |
 |-------|-------|-------------|
-| `NewContractModal` | `open`, `onClose`, `onSubmit`, `availableFolders`, `defaultFolderId` | Wizard de creación |
+| `NewContractModal` | `open`, `onClose`, `onSubmit`, `availableFolders`, `defaultFolderId` | Wizard de creación (5 pasos + upload) |
 | `ContractFormModal` | `open`, `onClose`, `contract` | Formulario de edición |
 | `ContractPreviewModal` | `open`, `onClose`, `documentId` | Preview PDF |
 | `ContractDeleteModal` | `open`, `onClose`, `onConfirm` | Confirmación de eliminación |
+| `ContractsImportReviewModal` | `open`, `onClose`, `files`, `onConfirm` | Revisión previa a importación Drive |
 
 ## Integración con API
 
