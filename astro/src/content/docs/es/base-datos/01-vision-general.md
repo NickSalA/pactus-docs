@@ -46,6 +46,7 @@ Las tablas relacionales actualmente relevantes para el producto son las siguient
 | `audit.chatbot_activity` | Eventos auditados de uso del chatbot |
 | `audit.contract_activity` | Eventos auditados de contratos |
 | `audit.template_activity` | Eventos auditados de plantillas |
+| `audit.ai_token_usage` | Telemetría de tokens y costos de IA |
 
 La tabla legacy `public.empresas` ya no forma parte del modelo vigente. El esquema `public` no contiene actualmente las tablas de negocio principales.
 
@@ -83,16 +84,16 @@ Las plantillas viven en `templates.document_templates` y se apoyan en `templates
 
 Esto permite que una organización tenga varias plantillas del mismo tipo documental sin perder el contexto del formato esperado.
 
-### 5. Auditoría unificada con telemetría embebida
+### 5. Auditoría unificada con telemetría separada
 
 La actividad auditada no se mezcla con las tablas transaccionales. El esquema `audit` registra eventos relevantes para trazabilidad:
 
 - `audit.user_activity` para altas, cambios y bajas de usuarios
-- `audit.chatbot_activity` para conversaciones, mensajes, respuestas generadas y telemetría de tokens y costos
+- `audit.chatbot_activity` para conversaciones, mensajes y respuestas generadas
 - `audit.contract_activity` para creación, actualización, importación y eliminación de contratos
 - `audit.template_activity` para creación, edición, publicación y archivado de plantillas
 
-La medición detallada de tokens, costos y modelo usado vive directamente en `audit.chatbot_activity`. Esto permite consultar uso y costos sin acoplar la conversación visible al detalle operativo de consumo, manteniendo toda la telemetría dentro del esquema de auditoría.
+La medición detallada de tokens, costos y modelo usado no vive en `audit.chatbot_activity`, sino en una tabla separada `audit.ai_token_usage`. Esto permite consultar uso y costos sin acoplar la conversación visible al detalle operativo de consumo, manteniendo toda la telemetría dentro del esquema de auditoría. El campo `source` (`CHATBOT`, `TEMPLATES`, `INTEGRATIONS`) permite segregar el origen del consumo.
 
 ### 6. Uso selectivo de JSONB
 

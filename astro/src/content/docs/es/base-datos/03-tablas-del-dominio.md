@@ -27,8 +27,6 @@ El dominio principal de Pactus se distribuye en esquemas especializados. A conti
 | `audit.ai_token_usage` | Telemetría de tokens y costos de IA | `id` |
 | `audit.contract_activity` | Auditoría de contratos | `id` |
 | `audit.template_activity` | Auditoría de plantillas | `id` |
-| `billing.subscriptions` | Suscripciones y estado de pago por organización | `id` |
-| `billing.organization_limits` | Límites operativos por organización | `id` |
 
 La tabla `public.empresas` ya no forma parte del modelo actual. El esquema `public` no contiene actualmente las tablas principales del dominio.
 
@@ -43,9 +41,6 @@ Los enums reutilizados por las tablas de negocio viven en `app_types`:
 | `app_types.document_state` | `DRAFT`, `PENDING_SIGNATURE`, `ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `TERMINATED` |
 | `app_types.document_template_state` | `DRAFT`, `PUBLISHED`, `ARCHIVED` |
 | `app_types.currency_type` | `PEN`, `USD`, `EUR` |
-| `app_types.payment_status` | `PENDING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `EXPIRED` |
-| `app_types.plan_tier` | `FREE`, `BASIC`, `PRO`, `ENTERPRISE` |
-| `app_types.ai_token_source` | `CHATBOT`, `TEMPLATES`, `INTEGRATIONS` |
 
 Los enums de auditoría viven en `audit`:
 
@@ -55,6 +50,7 @@ Los enums de auditoría viven en `audit`:
 | `audit.audit_chatbot_action` | `CONVERSATION_STARTED`, `MESSAGE_SENT`, `RESPONSE_GENERATED` |
 | `audit.audit_contract_action` | `MANUAL_UPLOAD`, `GENERATED_FROM_TEMPLATE`, `IMPORTED_FROM_GOOGLE_DRIVE`, `UPDATED`, `DELETED` |
 | `audit.audit_template_action` | `CREATED`, `UPDATED`, `PUBLISHED`, `ARCHIVED` |
+| `audit.ai_token_source` | `CHATBOT`, `TEMPLATES`, `INTEGRATIONS` |
 
 ## `identity.organizations`
 
@@ -611,76 +607,6 @@ Registra eventos auditados sobre plantillas y formatos.
 | `previous_state` | `varchar` | Estado previo cuando aplica |
 | `state` | `varchar` | Estado resultante cuando aplica |
 | `created_at` | `timestamptz` | Fecha del evento |
-
-## `billing.subscriptions`
-
-Gestiona las suscripciones de pago por organización. Cada organización puede tener una única suscripción activa. Almacena el identificador de PayPal, el estado de pago, el plan contratado y las fechas del período actual.
-
-**Clave primaria:** `id`
-
-**Único por organización:** existe un único registro por `organization_id`.
-
-**Claves foráneas:**
-
-- `organization_id -> identity.organizations.id`
-
-| Columna | Tipo | Detalle |
-|---------|------|---------|
-| `id` | `bigint` | Identidad de la suscripción |
-| `organization_id` | `bigint` | Organización suscriptora (único) |
-| `paypal_subscription_id` | `varchar` | Identificador de la suscripción en PayPal (único, nullable) |
-| `status` | `app_types.payment_status` | Estado de pago actual: `PENDING`, `ACTIVE`, `PAST_DUE`, `CANCELED`, `EXPIRED` |
-| `plan_tier` | `app_types.plan_tier` | Plan contratado: `FREE`, `BASIC`, `PRO`, `ENTERPRISE` |
-| `current_period_start` | `timestamptz` | Inicio del período de facturación actual |
-| `current_period_end` | `timestamptz` | Fin del período de facturación actual |
-| `created_at` | `timestamptz` | Fecha de creación |
-| `updated_at` | `timestamptz` | Fecha de actualización |
-
-### Semántica de `payment_status`
-
-- `PENDING`: Suscripción creada pero pago aún no confirmado.
-- `ACTIVE`: Pago al día, suscripción vigente.
-- `PAST_DUE`: Pago vencido, período de gracia.
-- `CANCELED`: Suscripción cancelada por el usuario o por PayPal.
-- `EXPIRED`: Suscripción expiró sin renovación.
-
-### Semántica de `plan_tier`
-
-- `FREE`: Plan gratuito con funcionalidades básicas y límites reducidos.
-- `BASIC`: Plan básico con mayores límites operativos.
-- `PRO`: Plan profesional con funcionalidades completas.
-- `ENTERPRISE`: Plan empresarial con límites personalizados.
-
-## `billing.organization_limits`
-
-Define los límites operativos por organización. Cada organización tiene un único registro que determina cuántos recursos puede consumir. Los valores por defecto dependen del `plan_tier` de la suscripción.
-
-**Clave primaria:** `id`
-
-**Único por organización:** existe un único registro por `organization_id`.
-
-**Claves foráneas:**
-
-- `organization_id -> identity.organizations.id`
-
-| Columna | Tipo | Detalle |
-|---------|------|---------|
-| `id` | `bigint` | Identidad del registro |
-| `organization_id` | `bigint` | Organización asociada (único) |
-| `max_users` | `integer` | Máximo de usuarios permitidos |
-| `max_documents` | `integer` | Máximo de documentos permitidos |
-| `max_storage_mb` | `integer` | Límite de almacenamiento en MB |
-| `max_file_size_mb` | `integer` | Tamaño máximo por archivo en MB |
-| `max_monthly_ai_queries` | `integer` | Consultas al agente IA por mes |
-| `notify_at_percentage` | `integer` | Porcentaje de uso que dispara notificaciones de límite |
-| `created_at` | `timestamptz` | Fecha de creación |
-| `updated_at` | `timestamptz` | Fecha de actualización |
-
-### Restricciones relevantes
-
-- `notify_at_percentage` entre 1 y 100.
-- Todos los límites deben ser enteros positivos.
-- Los valores por defecto varían según `plan_tier` en la tabla `billing.subscriptions`.
 
 ## Función SQL asociada al dominio
 

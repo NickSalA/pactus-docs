@@ -121,6 +121,7 @@ Tablas revisadas con RLS deshabilitado:
 - `audit.chatbot_activity`
 - `audit.contract_activity`
 - `audit.template_activity`
+- `audit.ai_token_usage`
 
 Si el frontend accede directamente a Supabase con llaves `anon` o `authenticated`, esta configuración debe corregirse habilitando RLS y creando policies por tenant y rol. Si todo acceso pasa exclusivamente por el backend con credenciales de servicio, el riesgo operativo se controla en esa capa, pero la base no aplica aislamiento propio.
 

@@ -410,7 +410,7 @@ El módulo de facturación gestiona suscripciones, pagos y límites operativos p
   }
   ```
 
-  > Los endpoints `GET /billing/subscriptions`, `POST /billing/subscriptions/cancel`, `GET /billing/limits` y `PATCH /billing/limits` aún no están implementados en el backend. Las tablas `billing.subscriptions` y `billing.organization_limits` existen en la base de datos pero no tienen endpoints API asociados.
+  > Los endpoints `GET /billing/subscriptions`, `POST /billing/subscriptions/cancel`, `GET /billing/limits` y `PATCH /billing/limits` aún no están implementados en el backend. Las tablas `billing.subscriptions` y `billing.organization_limits` no existen aún en la base de datos; la funcionalidad de facturación está en implementación.
 
 ### Notificaciones
 
