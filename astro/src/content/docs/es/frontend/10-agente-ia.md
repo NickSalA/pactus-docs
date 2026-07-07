@@ -12,8 +12,17 @@ Ubicado en `features/aiAgent/components/page/AIAgentPageContent.tsx`. Compuesto 
 | Componente | Descripción |
 |------------|-------------|
 | `ChatHistorySidebar` | Sidebar con historial de conversaciones |
-| `ChatContainer` | Área de mensajes con el agente IA |
-| `ChatInput` | Campo de entrada para nuevos mensajes |
+| `ChatMessageList` | Lista de mensajes del agente IA |
+| `ChatComposer` | Área de entrada para nuevos mensajes |
+| `ChatEmptyState` | Estado vacío cuando no hay mensajes |
+
+### Componentes de Mensaje
+
+| Componente | Descripción |
+|------------|-------------|
+| `MarkdownRenderer` | Renderiza respuestas del agente en formato Markdown |
+| `RobotIcon` | Icono del agente IA en los mensajes del bot |
+| `ChartRenderer` | Renderiza gráficos dinámicos embebidos en respuestas |
 
 ## ChatHistorySidebar
 
