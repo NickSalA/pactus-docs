@@ -29,7 +29,7 @@ El proyecto se organiza en capas concéntricas que se replican dentro de cada m�
 /
 ├── pyproject.toml
 ├── src/
-│   └── contractai_backend/
+│   └── pactus_backend/
 │       ├── core/                 # Componentes transversales del sistema
 │       │   ├── domain/           # Entidades base y excepciones core
 │       │   ├── application/      # Lógica transversal

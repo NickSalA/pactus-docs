@@ -83,6 +83,8 @@ El backend filtra formatos segun rol y tipo documental. `HR` trabaja con `LABOR`
 | Paso | Endpoint | Resultado |
 |------|----------|-----------|
 | Listar formatos | `GET /templates/formats` | Formatos disponibles para el rol. |
+| Listar plantillas | `GET /templates/` | Plantillas de la organización actual. |
+| Obtener plantilla | `GET /templates/{template_id}` | Detalle de una plantilla concreta. |
 | Crear borrador con IA | `POST /templates/drafts` | `PersistedTemplateDraftResponse`. |
 | Crear manualmente | `POST /templates/` | Plantilla en `DRAFT`. |
 | Previsualizar | `POST /templates/preview` | Markdown renderizado y warnings. |
@@ -90,6 +92,8 @@ El backend filtra formatos segun rol y tipo documental. `HR` trabaja con `LABOR`
 | Publicar | `POST /templates/{template_id}/publish` | Cambia a `PUBLISHED`. |
 | Archivar | `POST /templates/{template_id}/archive` | Cambia a `ARCHIVED`. |
 | Generar contrato | `POST /templates/{template_id}/generate` | Crea un `Document`. |
+
+> **Nota:** No existe un endpoint `POST /templates/` para creación manual directa. La creación manual se realiza a través de `PATCH /templates/{template_id}` sobre un borrador generado con `POST /templates/drafts`.
 
 ## Generacion de Contrato
 
