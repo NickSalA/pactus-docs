@@ -11,7 +11,7 @@ En la práctica, este contrato evita ambigüedades entre equipos. El frontend no
 
 La fuente de verdad de la API vive en dos capas complementarias:
 
-- el backend real en `Pactus-Backend/src/contractai_backend/modules/*/api/routers*.py`
+- el backend real en `Pactus-Backend/src/pactus_backend/modules/*/api/routers*.py`
 - la especificación OpenAPI del repositorio en `docs/openapi.yaml` y `docs/modules/**/*.yaml`
 - el bundle para visualizadores Swagger/OpenAPI en `openapi.bundle.yaml`
 
@@ -47,15 +47,11 @@ El backend expone algunos endpoints directamente en la raíz, sin prefijo de mó
   ```json
   {
     "message": "¡Bienvenido a Pactus!",
-    "version": "0.5.0"
+    "version": "0.7.0"
   }
   ```
 
-- `GET /perf-test-data`
-  Endpoint de prueba de rendimiento sin base de datos ni autenticación. Devuelve datos mock para medir latencia.
 
-- `POST /perf-render-template`
-  Simula el renderizado de una plantilla sustituyendo variables. Acepta un payload JSON con campos como `company`, `client`, `value`, `currency`.
 
 ## Contratos Vigentes
 
@@ -85,6 +81,14 @@ Respuesta típica:
 
 El router `/login` existe en la aplicación, pero actualmente no expone endpoints propios documentables.
 
+### Gestión de Usuarios
+
+- `PATCH /user/{user_id}`
+  Actualiza el rol de un usuario. Requiere permisos de administrador.
+
+- `DELETE /user/{user_id}`
+  Elimina (soft delete) un usuario. Requiere permisos de administrador.
+
 ### Chatbot
 
 - `POST /chatbot`
@@ -104,9 +108,24 @@ Response `200`:
 ```json
 {
   "response": "La cláusula establece una prórroga automática de 12 meses.",
-  "thread_id": 12
+  "thread_id": 12,
+  "chart": {
+    "type": "bar",
+    "layout": "vertical",
+    "title": "Distribución por tipo",
+    "config": {
+      "categoryKey": "categoria",
+      "series": [{ "name": "Cantidad", "key": "cantidad" }]
+    },
+    "data": [
+      { "categoria": "Tipo A", "cantidad": 10 },
+      { "categoria": "Tipo B", "cantidad": 25 }
+    ]
+  }
 }
 ```
+
+El campo `chart` es opcional (`null` si el chatbot no genera gráfico en esa respuesta).
 
 ### Documentos
 
@@ -386,6 +405,31 @@ El módulo de dashboard expone endpoints analíticos para visualizar métricas c
 - `PATCH /organizations/me/members/{member_id}/notifications`
   Actualiza si un miembro debe recibir alertas contractuales.
 
+### Organizaciones
+
+Además de los miembros, el backend expone endpoints de administración directa de organizaciones:
+
+- `GET /organizations`
+  Lista organizaciones. Accesible por SUPERADMIN (todas) y ADMIN (solo la suya).
+
+- `POST /organizations`
+  Crea una nueva organización con su administrador inicial. Solo SUPERADMIN.
+
+- `GET /organizations/me`
+  Obtiene los datos de la organización del usuario autenticado. Requiere rol ADMIN.
+
+- `PATCH /organizations/me`
+  Actualiza los datos de la organización del usuario autenticado. Requiere rol ADMIN.
+
+- `GET /organizations/{organization_id}`
+  Obtiene una organización por ID. SUPERADMIN puede acceder a cualquier organización; ADMIN solo a la suya.
+
+- `PATCH /organizations/{organization_id}`
+  Actualiza una organización por ID. Mismas reglas de acceso que `GET`.
+
+- `DELETE /organizations/{organization_id}`
+  Elimina (soft delete) una organización. Solo SUPERADMIN.
+
 ### Facturación (Billing)
 
 El módulo de facturación gestiona suscripciones, pagos y límites operativos por organización.
@@ -410,7 +454,7 @@ El módulo de facturación gestiona suscripciones, pagos y límites operativos p
   }
   ```
 
-  > Los endpoints `GET /billing/subscriptions`, `POST /billing/subscriptions/cancel`, `GET /billing/limits` y `PATCH /billing/limits` aún no están implementados en el backend. Las tablas `billing.subscriptions` y `billing.organization_limits` existen en la base de datos pero no tienen endpoints API asociados.
+  > Los endpoints `GET /billing/subscriptions`, `POST /billing/subscriptions/cancel`, `GET /billing/limits` y `PATCH /billing/limits` aún no están implementados en el backend. Las tablas `billing.subscriptions` y `billing.organization_limits` no existen aún en la base de datos; la funcionalidad de facturación está en implementación.
 
 ### Notificaciones
 
@@ -529,11 +573,13 @@ El módulo de auditoría registra la actividad del sistema. Todos los endpoints 
 
 ## Reglas de Seguridad Relevantes
 
-Aunque OpenAPI define la API a nivel formal, hay tres reglas prácticas que esta documentación debe reflejar siempre:
+Aunque OpenAPI define la API a nivel formal, hay reglas prácticas que esta documentación debe reflejar siempre:
 
 1. La mayoría de endpoints usa autenticación Bearer JWT validada contra Supabase.
 2. `GET /integrations/drive/auth-url` y `GET /integrations/drive/callback` son públicos.
 3. `POST /notifications/cron/send-emails` se protege con `X-Cron-Secret`, no con JWT.
+4. **Guard de suscripción activa**: Los routers de documentos, servicios, carpetas, chatbot, conversaciones, dashboard, integraciones, organizaciones, auditoría, notificaciones y plantillas requieren que la organización del usuario tenga una suscripción activa. Los únicos routers excluidos son `/login`, `/user` y `/billing`.
+5. **ClientValidationMiddleware**: Valida las cabeceras `Origin` o `X-App-Secret` antes de procesar la request. Está registrado globalmente en la factory de la aplicación.
 
 ## Regla de Gobierno
 

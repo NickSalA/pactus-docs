@@ -9,11 +9,12 @@ El frontend de Pactus está construido con **Next.js 16** usando App Router.
 
 | Tecnología               | Propósito                             |
 | ------------------------ | ------------------------------------- |
-| Next.js                  | Framework principal con App Router    |
-| React                    | Librería UI con hooks                 |
+| Next.js 16               | Framework principal con App Router    |
+| React 19                 | Librería UI con hooks                 |
 | TypeScript               | Tipado estático                       |
-| Tailwind CSS             | Framework de utilidades CSS           |
-| Zustand                  | Gestión de estado global              |
+| Tailwind CSS v4          | Framework de utilidades CSS           |
+| shadcn/ui                | Biblioteca de componentes (estilo radix-nova) |
+| Zustand 5                | Gestión de estado global              |
 | Recharts                 | Visualización de datos y analítica    |
 | Supabase                 | Cliente de autenticación OAuth        |
 | Lucide React             | Iconografía                           |
@@ -23,6 +24,7 @@ El frontend de Pactus está construido con **Next.js 16** usando App Router.
 | Motion                   | Animaciones declarativas              |
 | Axios                    | Cliente HTTP                          |
 | Class Variance Authority | Variantes de componentes estilizados  |
+| pnpm                     | Gestor de paquetes (v11.4.0)          |
 
 ## Páginas de la Aplicación
 
@@ -77,6 +79,18 @@ Requieren autenticación. La navegación y contenido se adapta según el rol del
 | `/admin/alerts`              | Configuración de reglas de alertas                   |
 | `/admin/document-management` | Gestión documental (plantillas, carpetas, servicios) |
 | `/admin/audit`               | Registro de auditoría de usuarios y chatbot          |
+
+## Layout Jerárquico
+
+La aplicación organiza sus layouts de forma anidada:
+
+| Layout | Descripción |
+|--------|-------------|
+| `Root Layout` | `<QueryProvider>` → `<AuthBootstrap>` → children |
+| `Main Layout` (protegido) | `<PaywallGuard>` → Sidebar + children + `ContractImportFloatingWidget` |
+| `Admin Sub-layout` | `<AdminOrganizationOnboardingGate>` → children |
+
+El `ContractImportFloatingWidget` es un widget flotante que muestra el progreso de importación de archivos desde Google Drive. El `AdminOrganizationOnboardingGate` verifica que la organización tenga los datos de onboarding completos antes de acceder a rutas de administración.
 
 ## Flujo de Navegación
 

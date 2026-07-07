@@ -20,6 +20,7 @@ El tipo `User` del frontend contiene:
 | `role`                   | Rol funcional.                           |
 | `receives_notifications` | Indica si recibe alertas de vencimiento. |
 | `is_active`              | Estado del usuario.                      |
+| `subscription_active`    | Indica si la organización tiene una suscripción activa (calculado dinámicamente, no persistido en la tabla `users`). |
 
 El perfil actual se obtiene con:
 

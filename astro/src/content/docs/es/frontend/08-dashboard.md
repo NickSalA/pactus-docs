@@ -24,7 +24,7 @@ const {
 } = useDashboardManagerPage();
 ```
 
-**Widgets:** AreaChart, AlertCenter, RecentDocuments, TopCompanies, TopServices
+**Widgets:** AreaChart, AlertCenter, RecentDocuments, TopCompanies, TopServices, DashboardWelcome
 
 ### HR Dashboard (`/hr/dashboard`)
 
@@ -41,7 +41,7 @@ const {
 } = useDashboardHRPage();
 ```
 
-**Widgets:** AreaChart, AlertCenter, RecentDocuments
+**Widgets:** AreaChart, AlertCenter, RecentDocuments, DashboardWelcome
 
 ## Widgets
 

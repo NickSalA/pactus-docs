@@ -12,7 +12,7 @@ La seguridad HTTP del backend de **Pactus** se apoya en dos mecanismos distintos
 
 La dependencia global de seguridad vive en:
 
-- `Pactus-Backend/src/contractai_backend/shared/api/dependencies/security.py`
+- `Pactus-Backend/src/pactus_backend/shared/api/dependencies/security.py`
 
 El flujo es el siguiente:
 
@@ -90,15 +90,40 @@ Los orígenes configurados actualmente son:
 http://localhost:8000
 http://localhost:3000
 http://localhost:9002
-https://contractia-kappa.vercel.app
+https://pactus-frontend.vercel.app
 http://127.0.0.1:3000
 ```
 
 La lista se define en la clase `Settings` de `shared/config.py` y puede ajustarse por entorno sin modificar código.
 
+## Guard de Suscripción Activa
+
+Además de la autenticación JWT y la autorización por rol, la mayoría de los routers aplican la dependencia `require_active_subscription` que verifica que la organización del usuario tenga una suscripción activa. Los routers protegidos son:
+
+- documentos
+- servicios
+- carpetas
+- chatbot
+- conversaciones
+- dashboard
+- integraciones
+- organizaciones
+- auditoría
+- notificaciones
+- plantillas
+
+Quedan excluidos los routers de autenticación (`/login`), usuarios (`/user`) y facturación (`/billing`), que forman parte del flujo de registro y no requieren suscripción vigente.
+
 ## Middleware de Trazabilidad
 
-Además de CORS y autenticación, la app añade `LoguruMiddleware`, que:
+Además de CORS, autenticación y el guard de suscripción, la app registra los siguientes middlewares:
+
+- `ProxyHeadersMiddleware` — Reenvío de cabeceras proxy.
+- `CORSMiddleware` — Configuración de orígenes permitidos.
+- `LoguruMiddleware` — Trazabilidad y medición de requests.
+- `ClientValidationMiddleware` — Validación de cabeceras `Origin` o `X-App-Secret` antes de procesar la request.
+
+### LoguruMiddleware
 
 - genera o reutiliza `X-Request-ID`
 - incorpora contexto estructurado al log
